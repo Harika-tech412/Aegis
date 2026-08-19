@@ -33,8 +33,15 @@ def test_ocr_extracts_name_from_real_card(sample_card):
 
 
 def test_ocr_handles_unreadable_input():
+    """No signal beats a fabricated one."""
     fields = extract_id_fields(b"not an image at all")
-    assert fields == {"name": None, "dob": None, "id_number": None, "raw_text": ""}
+    assert fields == {
+        "name": None,
+        "dob": None,
+        "id_number": None,
+        "raw_text": "",
+        "extraction_method": "failed",
+    }
 
 
 def _apply_payload(name: str, device: str) -> dict:
@@ -125,3 +132,78 @@ def test_ring_device_endpoint_is_public(client):
     body = response.json()
     assert body["known_ring_size"] >= 4
     assert body["known_fraud_fraction"] >= 0.75
+
+
+# ---------------------------------------------------------------------------
+# Generalized (real-world layout) extraction
+#
+# The fixture below is GENERATED LOCALLY with Pillow and contains entirely
+# fabricated data in a PAN-card-like arrangement. No real person's document
+# or PII is used, stored, or committed anywhere in these tests.
+# ---------------------------------------------------------------------------
+
+FAKE_PAN = {
+    "name": "TESTUSER SPECIMEN",
+    "father": "SPECIMEN GUARDIAN",
+    "number": "ABCDE1234F",
+    "dob_printed": "15/08/1990",
+    "dob_iso": "1990-08-15",
+}
+
+
+def _fake_pan_card() -> bytes:
+    """Render a fake PAN-style card: English labels, value on the next line."""
+    from io import BytesIO
+
+    from PIL import Image, ImageDraw, ImageFont
+
+    def font(size: int, bold: bool = False):
+        path = (
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+            if bold
+            else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+        )
+        try:
+            return ImageFont.truetype(path, size)
+        except OSError:
+            return ImageFont.load_default(size=size)
+
+    image = Image.new("RGB", (860, 540), "white")
+    draw = ImageDraw.Draw(image)
+    draw.text((30, 24), "INCOME TAX DEPARTMENT", font=font(26, True), fill="black")
+    draw.text((30, 60), "GOVT. OF INDIA", font=font(22), fill="black")
+
+    y = 130
+    for label, value in [
+        ("Permanent Account Number", FAKE_PAN["number"]),
+        ("Name", FAKE_PAN["name"]),
+        ("Father's Name", FAKE_PAN["father"]),
+        ("Date of Birth", FAKE_PAN["dob_printed"]),
+    ]:
+        draw.text((30, y), label, font=font(22), fill="black")
+        draw.text((30, y + 34), value, font=font(30, True), fill="black")
+        y += 95
+
+    buffer = BytesIO()
+    image.save(buffer, "PNG")
+    return buffer.getvalue()
+
+
+def test_synthetic_card_still_uses_template_path(sample_card):
+    """The demo path must stay on strategy 1 and stay exactly correct."""
+    fields = extract_id_fields(sample_card["path"].read_bytes())
+    assert fields["extraction_method"] == "synthetic_template"
+    assert names_match(fields["name"], sample_card["printed_name"])
+
+
+def test_generalized_layout_reads_pan_style_card():
+    """A real-world-style layout is read by strategy 2, with a normalised DOB."""
+    fields = extract_id_fields(_fake_pan_card())
+
+    assert fields["extraction_method"] == "generalized_layout", fields["raw_text"]
+    assert names_match(fields["name"], FAKE_PAN["name"]), fields["name"]
+    # The applicant's name wins, not the father's name printed just below it.
+    assert not names_match(fields["name"], FAKE_PAN["father"])
+    # DD/MM/YYYY on the card is normalised to the ISO form used everywhere else.
+    assert fields["dob"] == FAKE_PAN["dob_iso"]
+    assert fields["id_number"] == FAKE_PAN["number"]

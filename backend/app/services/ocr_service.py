@@ -1,13 +1,26 @@
 """Real OCR extraction from uploaded ID document images (Tesseract).
 
-The synthetic Aegis ID cards print labeled fields (NAME / DOB / ID NUMBER) as
-a small gray label line followed by the value line, with a light-gray
-diagonal SYNTHETIC watermark over everything. Preprocessing thresholds the
-image so the light watermark drops to white while the black field text
-survives — Tesseract then reads the fields reliably.
+Two extraction strategies, tried in order:
 
-Arbitrary real-world documents will mostly extract nothing (all None), which
-is the correct, honest failure mode: no signal rather than a fabricated one.
+1. **synthetic_template** — the Aegis demo cards print labeled fields
+   (NAME / DOB / ID NUMBER) as a small gray label line above the value, with
+   a light diagonal SYNTHETIC watermark. This is the controlled path that
+   powers the demo scenarios and must stay exactly reliable.
+
+2. **generalized_layout** — a best-effort reader for real-world ID layouts
+   (Indian PAN/Aadhaar-style): label-anchored search over OCR *lines*,
+   tolerant of "Label: value" and "Label\\nvalue" arrangements, multiple date
+   formats, and PAN-style document numbers.
+
+A synthetic card never reaches strategy 2, so the demo path cannot be
+perturbed by generalization work. If neither strategy finds a field it stays
+None and `extraction_method` reports "failed" — an honest no-signal answer is
+the goal; a confident wrong answer is not.
+
+Known limitation, accepted deliberately: Tesseract here carries English
+training data only, so Devanagari text is not read (its garbled output is
+filtered out rather than guessed at), and exotic or heavily photographed
+layouts may still return "failed".
 """
 
 from __future__ import annotations
@@ -17,30 +30,116 @@ import re
 from io import BytesIO
 
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageOps
 
 logger = logging.getLogger("aegis.ocr")
 
-# Values live on the line after their label on the synthetic cards.
+# --- synthetic template patterns -------------------------------------------
 _DATE_RE = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
 _ID_NUMBER_RE = re.compile(r"\b(SYN-[0-9A-F]{4}-[0-9A-F]{4})\b", re.IGNORECASE)
+_SYN_FUZZY_RE = re.compile(r"\bSYN[-_ ]?([0-9A-Z]{4})[-_ ]?([0-9A-Z]{4})\b", re.I)
 _NAME_VALUE_RE = re.compile(r"^[A-Za-z][A-Za-z .'-]{2,40}$")
+_SYNTHETIC_LABELS = {"NAME", "DOB", "ID NUMBER", "ISSUE DATE"}
 
 # Lines that are card furniture, never field values.
 _NOISE = {"SYNTHETIC", "PHOTO", "ISSUE DATE", "NAME", "DOB", "ID NUMBER"}
 
+# --- generalized (real-world) patterns --------------------------------------
+_DATE_ISO_RE = re.compile(r"\b(\d{4})[-/](\d{1,2})[-/](\d{1,2})\b")
+_DATE_DMY_RE = re.compile(r"\b(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})\b")
+_DOB_LABEL_RE = re.compile(r"(date\s*of\s*birth|\bd\.?\s?o\.?\s?b\b|जन्म)", re.I)
+_NAME_LABEL_RE = re.compile(r"(?i)\bname\b")
+_RELATION_RE = re.compile(r"(?i)\b(father|mother|husband|guardian|spouse)\b")
+_PAN_RE = re.compile(r"\b([A-Z]{5}[0-9]{4}[A-Z])\b")
+_ACCOUNT_LABEL_RE = re.compile(
+    r"(permanent\s*account\s*number|account\s*number|card\s*number|\bpan\b)", re.I
+)
+_GENERIC_ID_RE = re.compile(r"\b([A-Z0-9]{10,16})\b")
+
+# Words that appear on ID cards but are never part of a person's name.
+_NAME_STOPWORDS = {
+    "INCOME", "TAX", "DEPARTMENT", "GOVT", "GOVERNMENT", "OF", "INDIA",
+    "PERMANENT", "ACCOUNT", "NUMBER", "DATE", "BIRTH", "FATHER", "MOTHER",
+    "NAME", "SIGNATURE", "CARD", "MALE", "FEMALE", "DOB", "ADDRESS",
+    "AUTHORITY", "IDENTITY", "SYNTHETIC", "DEMO", "ONLY", "DATA", "PHOTO",
+}
+
+
+# ---------------------------------------------------------------------------
+# Image handling
+# ---------------------------------------------------------------------------
+
 
 def _preprocess(image: Image.Image) -> Image.Image:
-    """Upscale + grayscale + hard threshold.
+    """Upscale + grayscale + hard threshold — tuned for the synthetic cards.
 
-    The cards are 400x250 with 9-13px text — too small for reliable OCR at
-    native resolution. 3x LANCZOS upscaling fixes that. The threshold (140,
+    The cards are 400x250 with 9-13px text, too small for reliable OCR at
+    native resolution; 3x LANCZOS upscaling fixes that. The threshold (140,
     empirical) drops the light watermark to white while black text survives.
     """
     upscaled = image.convert("L").resize(
         (image.width * 3, image.height * 3), Image.LANCZOS
     )
     return upscaled.point(lambda p: 0 if p < 140 else 255)
+
+
+def _preprocess_gentle(image: Image.Image) -> Image.Image:
+    """Autocontrast only — for photographed documents.
+
+    A hard global threshold destroys real photos with uneven lighting, so the
+    second-pass render keeps the greyscale gradient and lets Tesseract do its
+    own local binarisation.
+    """
+    gray = image.convert("L")
+    scale = 2 if max(gray.size) < 1200 else 1
+    if scale > 1:
+        gray = gray.resize((gray.width * scale, gray.height * scale), Image.LANCZOS)
+    return ImageOps.autocontrast(gray, cutoff=2)
+
+
+def _ocr_lines(image: Image.Image, config: str = "--psm 6") -> tuple[list[str], str]:
+    """OCR in line-by-line mode; returns (lines, raw_text).
+
+    image_to_data gives per-word boxes with block/paragraph/line indices, so
+    words are regrouped into real lines rather than split on whatever
+    newlines the text renderer happened to emit.
+    """
+    data = pytesseract.image_to_data(
+        image, config=config, output_type=pytesseract.Output.DICT
+    )
+    grouped: dict[tuple[int, int, int], list[str]] = {}
+    for i, word in enumerate(data["text"]):
+        text = (word or "").strip()
+        if not text:
+            continue
+        try:
+            confidence = float(data["conf"][i])
+        except (TypeError, ValueError):
+            confidence = -1.0
+        if confidence < 0:  # -1 marks layout artifacts, not recognised text
+            continue
+        key = (data["block_num"][i], data["par_num"][i], data["line_num"][i])
+        grouped.setdefault(key, []).append(text)
+
+    lines = [" ".join(words) for _, words in sorted(grouped.items())]
+    return lines, "\n".join(lines)
+
+
+def _english_lines(lines: list[str]) -> list[str]:
+    """Drop lines that are mostly non-ASCII (e.g. Devanagari OCR garble)."""
+    keep = []
+    for line in lines:
+        if not line:
+            continue
+        ascii_ratio = sum(1 for c in line if ord(c) < 128) / len(line)
+        if ascii_ratio >= 0.8:
+            keep.append(line)
+    return keep
+
+
+# ---------------------------------------------------------------------------
+# Strategy 1: synthetic template (the demo path — behaviour frozen)
+# ---------------------------------------------------------------------------
 
 
 def _value_after_label(lines: list[str], label: str) -> str | None:
@@ -53,17 +152,20 @@ def _value_after_label(lines: list[str], label: str) -> str | None:
     return None
 
 
-def extract_id_fields(image_bytes: bytes) -> dict:
-    """Extract {name, dob, id_number, raw_text} from an ID image via OCR."""
-    try:
-        image = Image.open(BytesIO(image_bytes))
-        raw_text = pytesseract.image_to_string(_preprocess(image), config="--psm 6")
-    except Exception as exc:  # noqa: BLE001 - unreadable file, missing binary, etc.
-        logger.warning("OCR failed: %s", exc)
-        return {"name": None, "dob": None, "id_number": None, "raw_text": ""}
+def _is_synthetic_card(raw_text: str, lines: list[str]) -> bool:
+    """Is this one of our generated demo cards?
 
-    lines = [ln.strip() for ln in raw_text.splitlines() if ln.strip()]
+    Keyed on the SYN-XXXX-XXXX document number (survives OCR on every card
+    tested) or on two or more of the exact synthetic label lines. The header
+    and watermark text do not survive thresholding, so they are not used.
+    """
+    if _SYN_FUZZY_RE.search(raw_text):
+        return True
+    upper = {line.strip().upper() for line in lines}
+    return len(upper & _SYNTHETIC_LABELS) >= 2
 
+
+def _extract_synthetic(lines: list[str], raw_text: str) -> dict:
     # -- name: label line first; structural fallback second (the name value is
     # the first multi-word ALL-CAPS line — small gray labels often garble).
     name = _value_after_label(lines, "NAME")
@@ -93,10 +195,164 @@ def extract_id_fields(image_bytes: bytes) -> dict:
     if id_match:
         id_number = id_match.group(1).upper()
     else:
-        fuzzy = re.search(r"\bSYN[-_ ]?([0-9A-Z]{4})[-_ ]?([0-9A-Z]{4})\b", raw_text, re.I)
-        id_number = f"SYN-{fuzzy.group(1).upper()}-{fuzzy.group(2).upper()}" if fuzzy else None
+        fuzzy = _SYN_FUZZY_RE.search(raw_text)
+        id_number = (
+            f"SYN-{fuzzy.group(1).upper()}-{fuzzy.group(2).upper()}" if fuzzy else None
+        )
 
-    return {"name": name, "dob": dob, "id_number": id_number, "raw_text": raw_text}
+    return {"name": name, "dob": dob, "id_number": id_number}
+
+
+# ---------------------------------------------------------------------------
+# Strategy 2: generalized real-world layouts
+# ---------------------------------------------------------------------------
+
+
+def _plausible_name(value: str | None) -> str | None:
+    """Accept only strings that actually look like a person's name."""
+    text = " ".join((value or "").replace("|", " ").split())
+    if not (4 <= len(text) <= 60):
+        return None
+    if not re.fullmatch(r"[A-Za-z][A-Za-z .'-]+", text):
+        return None
+    words = [w for w in re.split(r"[ .]+", text) if w]
+    if len(words) < 2:  # 2+ words
+        return None
+    if any(w.upper() in _NAME_STOPWORDS for w in words):
+        return None
+    # title-case or all-caps, every word
+    if not all(w.isupper() or w[:1].isupper() for w in words):
+        return None
+    if sum(c.isalpha() for c in text) / len(text) < 0.8:  # mostly alphabetic
+        return None
+    return text
+
+
+def _normalize_date(text: str) -> str | None:
+    """Parse DD/MM/YYYY, DD-MM-YYYY or YYYY-MM-DD; return YYYY-MM-DD."""
+    iso = _DATE_ISO_RE.search(text)
+    if iso:
+        year, month, day = int(iso.group(1)), int(iso.group(2)), int(iso.group(3))
+    else:
+        dmy = _DATE_DMY_RE.search(text)
+        if not dmy:
+            return None
+        first, second, year = int(dmy.group(1)), int(dmy.group(2)), int(dmy.group(3))
+        # Indian cards use DD/MM/YYYY; only read it the other way round when
+        # day-first is impossible (e.g. 12/25/1990).
+        day, month = (first, second) if second <= 12 else (second, first)
+    if not (1 <= month <= 12 and 1 <= day <= 31 and 1900 <= year <= 2100):
+        return None
+    return f"{year:04d}-{month:02d}-{day:02d}"
+
+
+def _generalized_name(lines: list[str]) -> str | None:
+    for i, line in enumerate(lines):
+        if not _NAME_LABEL_RE.search(line) or _RELATION_RE.search(line):
+            continue
+        # "Name: VALUE" / "नाम / Name VALUE" — value on the same line
+        tail = _NAME_LABEL_RE.split(line, maxsplit=1)
+        if len(tail) > 1:
+            candidate = _plausible_name(tail[-1].strip(" :-/|"))
+            if candidate:
+                return candidate
+        # "Name" then VALUE on the following line
+        for following in lines[i + 1 : i + 3]:
+            if _RELATION_RE.search(following):
+                break  # we've walked into the father's-name block
+            candidate = _plausible_name(following)
+            if candidate:
+                return candidate
+    return None
+
+
+def _generalized_dob(lines: list[str]) -> str | None:
+    for i, line in enumerate(lines):
+        if not _DOB_LABEL_RE.search(line):
+            continue
+        found = _normalize_date(line)
+        if found:
+            return found
+        for following in lines[i + 1 : i + 3]:
+            found = _normalize_date(following)
+            if found:
+                return found
+    return None
+
+
+def _generalized_id_number(lines: list[str], raw_text: str) -> str | None:
+    pan = _PAN_RE.search(raw_text.upper())
+    if pan:
+        return pan.group(1)
+    for i, line in enumerate(lines):
+        if not _ACCOUNT_LABEL_RE.search(line):
+            continue
+        for candidate_line in [line, *lines[i + 1 : i + 3]]:
+            for match in _GENERIC_ID_RE.finditer(candidate_line.upper()):
+                token = match.group(1)
+                if any(c.isdigit() for c in token):  # excludes plain words
+                    return token
+    return None
+
+
+def _extract_generalized(lines: list[str], raw_text: str) -> dict:
+    english = _english_lines(lines)
+    return {
+        "name": _generalized_name(english),
+        "dob": _generalized_dob(english),
+        "id_number": _generalized_id_number(english, "\n".join(english) or raw_text),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+_EMPTY = {"name": None, "dob": None, "id_number": None}
+
+
+def extract_id_fields(image_bytes: bytes) -> dict:
+    """Extract identity fields from an ID image.
+
+    Returns {name, dob, id_number, raw_text, extraction_method} where
+    extraction_method is "synthetic_template", "generalized_layout" or
+    "failed". Any field the reader could not establish is None.
+    """
+    try:
+        image = Image.open(BytesIO(image_bytes))
+        lines, raw_text = _ocr_lines(_preprocess(image))
+    except Exception as exc:  # noqa: BLE001 - unreadable file, missing binary, etc.
+        logger.warning("OCR failed: %s", exc)
+        return {**_EMPTY, "raw_text": "", "extraction_method": "failed"}
+
+    # ---- Strategy 1: our own demo cards never leave this branch -------------
+    if _is_synthetic_card(raw_text, lines):
+        fields = _extract_synthetic(lines, raw_text)
+        if any(fields.values()):
+            return {**fields, "raw_text": raw_text, "extraction_method": "synthetic_template"}
+
+    # ---- Strategy 2: real-world layouts -------------------------------------
+    fields = _extract_generalized(lines, raw_text)
+
+    # Photographed documents lose too much under the hard threshold; retry the
+    # read on a gentler render before giving up.
+    if not any(fields.values()):
+        try:
+            retry_lines, retry_raw = _ocr_lines(_preprocess_gentle(image), config="--psm 4")
+            retry_fields = _extract_generalized(retry_lines, retry_raw)
+            if any(retry_fields.values()):
+                fields, raw_text = retry_fields, retry_raw
+        except Exception as exc:  # noqa: BLE001
+            logger.info("gentle-pass OCR retry failed: %s", exc)
+
+    if any(fields.values()):
+        return {**fields, "raw_text": raw_text, "extraction_method": "generalized_layout"}
+    return {**_EMPTY, "raw_text": raw_text, "extraction_method": "failed"}
+
+
+# ---------------------------------------------------------------------------
+# Name comparison helpers
+# ---------------------------------------------------------------------------
 
 
 def normalize_name(name: str | None) -> str:

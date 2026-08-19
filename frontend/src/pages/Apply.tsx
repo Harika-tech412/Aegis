@@ -91,7 +91,9 @@ export function Apply() {
   const [form, setForm] = useState<FormState>({ ...EMPTY });
   const [idFile, setIdFile] = useState<File | null>(null);
   const [idPreview, setIdPreview] = useState<string | null>(null);
-  const [idVerify, setIdVerify] = useState<{ name: string | null } | "checking" | null>(null);
+  const [idVerify, setIdVerify] = useState<
+    { name: string | null; method?: string } | "checking" | null
+  >(null);
   const [addressFile, setAddressFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -188,9 +190,9 @@ export function Apply() {
       const result = await fetch(`${API}/public/verify-id`, { method: "POST", body: fd }).then(
         (r) => r.json()
       );
-      setIdVerify({ name: result.name ?? null });
+      setIdVerify({ name: result.name ?? null, method: result.extraction_method });
     } catch {
-      setIdVerify({ name: null });
+      setIdVerify({ name: null, method: "failed" });
     }
   }
 
@@ -454,15 +456,29 @@ export function Apply() {
                 {idPreview && (
                   <div className="mt-3">
                     <img src={idPreview} alt="ID preview" className="h-24 rounded border border-slate-200" />
-                    <div className="mt-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                    <div
+                      className={`mt-2 rounded-md border px-3 py-2 text-xs ${
+                        idVerify !== "checking" && idVerify && !idVerify.name
+                          ? "border-amber-300 bg-amber-50 text-amber-800"
+                          : "border-blue-200 bg-blue-50 text-blue-800"
+                      }`}
+                    >
                       {idVerify === "checking" ? (
                         <span className="flex items-center gap-1.5">
                           <Loader2 className="h-3 w-3 animate-spin" /> Verifying document…
                         </span>
                       ) : idVerify?.name ? (
-                        <>Verify ID: document reads <span className="font-semibold">{idVerify.name}</span></>
+                        // Both extraction strategies report the name the same
+                        // way — we don't overclaim confidence for either.
+                        <>
+                          Verify ID: document reads{" "}
+                          <span className="font-semibold">{idVerify.name}</span>
+                        </>
                       ) : (
-                        "Verify ID: name could not be read automatically; manual review may apply."
+                        <>
+                          We couldn't automatically read this document format. For the live demo,
+                          use the sample ID buttons above for guaranteed extraction.
+                        </>
                       )}
                     </div>
                   </div>
