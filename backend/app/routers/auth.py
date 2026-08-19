@@ -1,9 +1,10 @@
 """Authentication endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.rate_limit import LOGIN_LIMIT, limiter
 from app.schemas import LoginRequest, TokenResponse
 from app.services import audit
 from app.services.auth import authenticate, create_access_token
@@ -12,7 +13,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(body: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
+@limiter.limit(LOGIN_LIMIT)  # brute-force protection, per client IP
+def login(request: Request, body: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
     investigator = authenticate(db, body.username, body.password)
     if investigator is None:
         # Same message for unknown user and wrong password - no user enumeration.

@@ -1,17 +1,22 @@
-"""Core application endpoints: scoring, browsing, feedback, ring context."""
+"""Core application endpoints: scoring, browsing, feedback, ring context.
 
-from __future__ import annotations
+NOTE: no `from __future__ import annotations` here — slowapi's decorator
+wrapper breaks FastAPI's forward-ref resolution under PEP 563 string
+annotations (ScoreRequest would be undefined in the wrapper's namespace).
+Python 3.11 handles the `X | None` unions natively without it.
+"""
 
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.ml.scoring_service import get_scoring_service
 from app.models import Application, Decision, Investigator, InvestigatorFeedback
+from app.rate_limit import SCORE_LIMIT, limiter
 from app.schemas import (
     ApplicationDetailOut,
     ApplicationListOut,
@@ -41,7 +46,9 @@ def _derived_velocity(db: Session, column, value: str) -> int:
 
 
 @router.post("/score", response_model=ScoreResponse)
+@limiter.limit(SCORE_LIMIT)
 def score_application(
+    request: Request,
     body: ScoreRequest,
     db: Session = Depends(get_db),
     investigator: Investigator = Depends(get_current_investigator),

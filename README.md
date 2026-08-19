@@ -80,6 +80,29 @@ aegis/
 
 ---
 
+## Model Governance
+
+**Feedback loop.** Investigator verdicts feed retraining:
+`scripts/retrain_from_feedback.py` demonstrates the full cycle with 200
+simulated confirmations (drawn where investigator attention actually lands —
+uncertain and held-for-review cases; verdicts stand in from labels, saved to
+`simulated_feedback.json` for reproducibility). Evaluated on untouched
+test/holdout splits with identical hyperparameters, no tuning: test PR-AUC
+0.9634 → 0.9643, F1 0.930 → 0.901; holdout PR-AUC 0.9717 → 0.9564. Reported
+as measured — on this already-near-ceiling synthetic model, upweighting
+confirmations of what the model got right adds no new information; the loop's
+mechanics are what is being demonstrated. Full analysis:
+`ml/artifacts/retraining_report.md`.
+
+**Drift monitoring.** `GET /monitoring/drift` compares recent traffic against
+training-time reference distributions using **Population Stability Index** —
+the metric banking model-risk teams actually use (PSI < 0.1 stable, 0.1–0.25
+mild, > 0.25 significant). Windows under 30 applications return
+`INSUFFICIENT_DATA` rather than a noisy verdict.
+
+**Rate limiting.** `/score` 30/min and `/auth/login` 5/min per client IP
+(slowapi), returning clean JSON 429s.
+
 ## Status
 
-🚧 **Work in progress.** Repository skeleton only — features not yet implemented.
+🚧 **Work in progress.** Backend + ML engine live; frontend in progress.

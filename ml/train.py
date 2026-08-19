@@ -112,6 +112,33 @@ def band_table(bands: np.ndarray) -> dict[str, float]:
     return {b: float((bands == b).sum()) / n for b in ("AUTO_APPROVE", "HUMAN_REVIEW", "AUTO_FLAG")}
 
 
+def emit_reference_distribution(df: pd.DataFrame, path: Path) -> None:
+    """Reference stats + decile bins per numeric feature, for PSI drift checks.
+
+    Consumed by the backend drift monitor: PSI compares recent traffic's
+    bin proportions against these training-time proportions.
+    """
+    from features import NUMERIC_FEATURES
+
+    reference: dict[str, dict] = {}
+    for feature in NUMERIC_FEATURES:
+        values = pd.to_numeric(df[feature], errors="coerce").dropna().to_numpy(dtype=float)
+        edges = np.unique(np.quantile(values, np.linspace(0, 1, 11)))
+        if len(edges) < 3:  # near-constant feature: single split at the median
+            edges = np.array([values.min(), np.median(values), values.max()])
+        counts, _ = np.histogram(values, bins=edges)
+        reference[feature] = {
+            "mean": float(values.mean()),
+            "std": float(values.std()),
+            "p10": float(np.percentile(values, 10)),
+            "p50": float(np.percentile(values, 50)),
+            "p90": float(np.percentile(values, 90)),
+            "bin_edges": edges.tolist(),
+            "bin_props": (counts / counts.sum()).tolist(),
+        }
+    path.write_text(json.dumps({"n_reference_rows": len(df), "features": reference}, indent=2))
+
+
 # ---------------------------------------------------------------------------
 # Main pipeline
 # ---------------------------------------------------------------------------
@@ -127,6 +154,7 @@ def main() -> None:
 
     X_all, feature_names, spec = build_feature_matrix(df)
     save_spec(spec)
+    emit_reference_distribution(df, ARTIFACTS_DIR / "reference_distribution.json")
     y_all = df["is_fraud"].astype(int).to_numpy()
 
     idx_train, idx_temp = train_test_split(

@@ -1,0 +1,1402 @@
+[
+  {
+    "application_id": "d76fced2-73b3-49c6-bf45-55a520fdd87d",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_APPROVE",
+    "calibrated_score_at_selection": 0.0,
+    "simulated": true
+  },
+  {
+    "application_id": "a425c686-098d-4541-8aa2-d2684c13905d",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_APPROVE",
+    "calibrated_score_at_selection": 0.0021,
+    "simulated": true
+  },
+  {
+    "application_id": "c7ea5b8c-a017-400d-b864-3842e804d940",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_APPROVE",
+    "calibrated_score_at_selection": 0.0021,
+    "simulated": true
+  },
+  {
+    "application_id": "fe59441f-0c79-47c3-8ce2-9f934a7d1322",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_APPROVE",
+    "calibrated_score_at_selection": 0.0021,
+    "simulated": true
+  },
+  {
+    "application_id": "d7bd81c5-505b-4d56-8f45-e8af1f1f69d4",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "763a2ad3-27f0-448c-bae4-5b48e3aeae6f",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "308eb697-1c00-487b-87a4-cf0308f5e7d4",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "93d83387-ae12-4140-a0db-2fcbb8a4a943",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "74b08b14-39bd-4673-ad63-a015316471ad",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "6a0a1e21-30f4-4459-ad7f-a90b4e7f3931",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "03b85ba8-20d5-4eec-a64d-5bbfaa6d5fd1",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "c60592bf-cfd6-4e38-a328-db8aa54a8c5e",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "96b02a8b-56aa-495a-8697-cee45f14ba06",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0488,
+    "simulated": true
+  },
+  {
+    "application_id": "78ef1f76-1e6f-462d-a4ff-74eacd64e74a",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0488,
+    "simulated": true
+  },
+  {
+    "application_id": "7bde15ba-8a09-4683-985f-f7c34ce584e5",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0488,
+    "simulated": true
+  },
+  {
+    "application_id": "d3637427-d61f-4e1a-98a9-50cde439c09e",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "af7c9005-8bb4-46d1-8161-51350d9e39f4",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "e30e06ce-c852-4973-96c8-9c6c7b7d34ba",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "2c7b0078-639f-4517-b782-fa790e1983f9",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "8680139a-231d-4f30-ae34-161aff12fe92",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "53a2faa1-464d-443d-b987-1d1533dd59fb",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "e7bc7281-82d5-48d7-afc7-a781eeaff107",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "40b5e3c6-8173-4dc8-b369-d9ca9d36b6a1",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "c3476780-2626-451c-8078-77d9f12665f7",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "50a1302b-a097-4726-9c7d-48d975df5192",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "bec69bf2-8f35-4815-975b-96a04b53c2bd",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1,
+    "simulated": true
+  },
+  {
+    "application_id": "c0bb28ed-4daa-4a3a-8b1c-020676725e73",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1232,
+    "simulated": true
+  },
+  {
+    "application_id": "be82db7f-4e44-404a-afd8-a6c238a15979",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "893466c7-e723-4b0f-b6fb-69534c322af2",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "69e4e935-59d0-4f0e-810f-e94d1063c1f4",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "a6dc826a-bb05-4f2d-a2dd-c3e7cb1ee105",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "07148555-a4f1-495e-9508-41d3aee27128",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "2184e0b2-e9ed-4b02-aecf-566a305a8a2e",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "fa141094-a8b6-4717-822e-cd86205682db",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "250a2be2-429f-452d-ac4b-1b5f7422a7de",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "95933390-6129-495e-af28-b579f997ce02",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "0ef0126a-482c-457a-95e9-b1c73f7fb737",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "3adede6e-0d32-4b64-88ac-a3eb1b159919",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "ff80a848-9a79-4abe-b33a-12635d6cc1c8",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "f7b43c7a-308f-4ce6-8519-4128792b94e7",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "1cc23e44-2a25-4b69-bde8-339d7f75dc23",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "337cda04-9264-458d-a449-9bd35e125ed2",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "d54b5bd2-a8f6-4c12-b249-26822e8c59fa",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.1818,
+    "simulated": true
+  },
+  {
+    "application_id": "66faed81-669a-4a85-abad-5f60e19db401",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.3975,
+    "simulated": true
+  },
+  {
+    "application_id": "41b8e9ec-cb50-4295-b3e0-f2bcb241fa9c",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.4348,
+    "simulated": true
+  },
+  {
+    "application_id": "ba6ecee6-45f6-4923-accd-58494c05e73a",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.4427,
+    "simulated": true
+  },
+  {
+    "application_id": "54f81038-edc9-428a-a6d9-005fda5233e5",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.4509,
+    "simulated": true
+  },
+  {
+    "application_id": "888ce611-07d2-4995-9bce-c3b7d8123eb6",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.4614,
+    "simulated": true
+  },
+  {
+    "application_id": "461557cc-536c-4033-b289-0e5ad983976d",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.524,
+    "simulated": true
+  },
+  {
+    "application_id": "0057d2be-2861-4b72-96f9-80cd89d0c959",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "37e5dc1d-1d68-426b-bd36-c37deb3a8f97",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "de627c5b-9ce7-4497-a3d0-2eba67b7e9a2",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "d866a69e-d7fe-454b-8158-550832a8cd21",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "f9cf7b5e-dac4-433e-9b20-055888f0bc5a",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "d3005dba-64ad-4cff-bc06-f7860d68435e",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "14549456-46a2-4d2e-9762-988325dd791a",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "b295e0d3-9597-489c-9ac5-c2afc8c5908f",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "cf3cb571-8592-4276-8334-f34ecf8c7bac",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "28f874cb-5e7d-41ca-935c-e5fa32647c12",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "2a676ebd-e787-4c1e-b7f1-7d307dde757e",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "d06f1a54-ab71-4590-b3a1-c3791d418465",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "a46b9047-cec8-4114-b526-cad3e6b80a50",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "90f0218c-41e4-4206-b55b-825276a41be5",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.5714,
+    "simulated": true
+  },
+  {
+    "application_id": "b56aa94d-74e5-4f02-863a-d596528ebe14",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "8f69d3b5-1a7f-4d9e-9bf8-c4d37ac09999",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "ceef8479-f317-4e77-8f05-c0b169bebce4",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "9bee958b-2e0a-49f8-bf62-aa9b161b5303",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "854990b2-ef94-4ab8-aaae-22b50ee9bdd7",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "b8995030-38cc-4120-9dde-899440faad39",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "55176e0d-ee3f-4337-a3a1-5a9045e20e56",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "ebdb390c-2769-40c2-973c-8cbffc36b712",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "f5dfc6cb-0028-4e69-ab0f-2261a4966109",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "c904058a-5485-4e7a-b36e-3381be415a85",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "a62f327c-8a9a-4a1b-850c-d38817208891",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "c23e9bf1-20d0-4bd8-b997-a51f97f29b21",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "a395b285-8fc2-4699-a872-782ea722b29a",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "67eea095-6d6f-4838-8597-881e59412a4f",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "87cd173e-bdef-48fe-b93b-486315b06d0a",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "81e52baa-d8ac-435f-beef-5d534332125d",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "9aea80c8-3d80-4c52-a74e-1665e095745d",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "34cce096-6e50-4cf6-920f-18903380a86f",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "8411491c-28f5-4be7-b4e7-c31d35e5ca0c",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "492d1774-486c-46fa-88e9-60a4cbfc493f",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "3fcd3b97-d85b-40a4-8696-471ab3a0b3b2",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "c86dd774-3e75-4e0e-8af4-714a696b8872",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "7986556f-f089-4b98-bcd4-4debbcd2793f",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "9d344bbd-3c1a-4412-a87e-cbe4914743c3",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "657147ed-2d3d-4d4a-a60a-19a3cf0bd4c0",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8,
+    "simulated": true
+  },
+  {
+    "application_id": "06cfdc9b-0aca-44b3-ada6-83a83cb65cd9",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8037,
+    "simulated": true
+  },
+  {
+    "application_id": "d2fdfce3-d0d3-4b2c-a80c-b71c4e010719",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8093,
+    "simulated": true
+  },
+  {
+    "application_id": "bfeea3ef-84bc-4f83-99df-c7720cc8d827",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8588,
+    "simulated": true
+  },
+  {
+    "application_id": "970c408c-d480-4ec8-bb3d-acf44f7472c7",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8618,
+    "simulated": true
+  },
+  {
+    "application_id": "0a41ea75-5edb-4849-92f9-d465c955ba15",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8714,
+    "simulated": true
+  },
+  {
+    "application_id": "84180e30-be4a-46b6-a8bd-8ac976f76d21",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8717,
+    "simulated": true
+  },
+  {
+    "application_id": "705984b4-bffb-40f0-b233-afd1b66ac7fc",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8928,
+    "simulated": true
+  },
+  {
+    "application_id": "0c270738-0d63-44ad-9957-881c0acbbe0f",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.8986,
+    "simulated": true
+  },
+  {
+    "application_id": "c529f439-96d2-475a-ad4f-a1abe91047c0",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.9456,
+    "simulated": true
+  },
+  {
+    "application_id": "0ab8e2bc-016b-4b67-8a5c-371be8cb0883",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.9642,
+    "simulated": true
+  },
+  {
+    "application_id": "ad7dcd12-730d-41ae-bd56-cbed81d84eaf",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.9687,
+    "simulated": true
+  },
+  {
+    "application_id": "96eadd6a-7ce2-486a-8b88-0876b96eeb6d",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.9688,
+    "simulated": true
+  },
+  {
+    "application_id": "5004767f-e39d-4305-90fb-8340ec1e204e",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.9717,
+    "simulated": true
+  },
+  {
+    "application_id": "6159bff8-8bdf-4a46-9213-4a81f739bf84",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "abde6a49-d34a-4778-8c36-be5cccf37c65",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "891ea5ee-a5ab-4a9e-a089-25986469ccd9",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "99457952-4b30-4f64-9067-a2a239a15179",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "a460a946-da77-4a6b-9486-e97bbc5c0c0d",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "2d4c7fb7-f209-4db9-b97a-9ba99c8d9706",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "1e9c097b-4754-4def-a842-7f62ba557ea0",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "146643f4-2a9b-488e-9038-33aebe7ff5a4",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "86f4bce6-053c-4ef2-8a0e-9793a2fb6a9f",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "338364b5-837b-4d52-9ed2-cf13fd5adb07",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "27ef1be8-b0c2-4bb2-8a85-aceb24d5f75d",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "5c37395a-45d3-4dec-a924-a80a5049bc82",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "e8db2abd-7bbe-417b-b752-6522f150c956",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "42dfcfef-3eb8-4c84-a8f9-b90cccd2ca3a",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "0f81c474-df20-447e-92ba-24b8ad725f34",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "283a0229-42fe-4a34-b6fe-4633289ff5bc",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "03886539-9fa3-4745-8e6f-fff5dc0b9856",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "65ea077a-c845-4de4-bfdb-aecf9b2e8a0f",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "87782851-125c-4ca6-82fd-3add14b3563b",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "7363a874-1ea4-45a0-ac69-b3dc69c966f0",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "25842399-575f-47a6-9b64-972a904a3896",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "045656d9-17db-4257-a6a3-bb91860e4ac6",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "ec13a4b6-9851-4bd9-9e6f-dff49f5ca792",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "24b8ac76-010f-4d42-9ad8-83ecf54a8b20",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "c6989413-e050-418b-abf8-d81d18391b97",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "e16cb20d-e956-45e6-9901-28d332a79024",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "36d81a1f-84db-4114-9dba-8e7bf8ec6867",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "c051dea1-226e-47f0-baf5-7b42c69478cc",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "0128d0b2-152c-472c-8999-4f1335dc51b9",
+    "verdict": "CONFIRMED_FRAUD",
+    "decision_band_at_selection": "AUTO_FLAG",
+    "calibrated_score_at_selection": 0.973,
+    "simulated": true
+  },
+  {
+    "application_id": "ec886ef8-e1f6-46d0-8f8e-f75659ea7d40",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "b6bed738-e864-4b44-ae8d-2c9e87f5c18c",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "86558fff-d19c-4988-ad27-52aa33cecf26",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "08d030f2-531e-4f53-bc91-8ec160c32bf3",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "74578f66-4092-4d37-81c7-eaafc770a65d",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "9c363f9e-8b12-4e40-83e5-19182a5673fc",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "79229a83-259c-4501-8057-e5d568dc9efc",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "578e4a5d-814a-4f9b-b3ba-a654cf8c2c2b",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0488,
+    "simulated": true
+  },
+  {
+    "application_id": "48709c18-e28f-4c04-b8d0-cd294fe5abf0",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "02583347-6f5c-43d7-bc72-a89a9aec1627",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "f83ac409-5cbd-4bab-ad46-69d71fb4ee15",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "517a2457-02cb-4b49-98ca-83279bdc59a1",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "81818994-3df0-42a0-9e7a-4e49e08b47a7",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "5c63152f-9522-4fc2-937f-6303f8291408",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "3a10b2df-4999-456e-b25c-051e137ec4bd",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "ae5290a2-0773-4895-993c-d0b5413d9867",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "112bafdf-cae9-48d3-b406-8be4ffbe78e1",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "03f7127a-0bcf-40da-a3ad-731b238b3461",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "0810f488-3713-4dc9-b990-60c4d7ecb71b",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "b1a52c47-2443-4f8c-994c-0b60bd7633b1",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "0bf89c5a-53e7-46a5-b689-aa4a696e0191",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "903fb1ab-6f49-4485-aa77-484448f17f4a",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "43213bee-12b3-4841-992e-ef4e7f253fc2",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "1f9deddc-0f3b-41a3-92b8-ed3bdfe2f235",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "dc9e9454-9e47-4b1e-89cc-e3c0ccb66270",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "25980ab2-b432-4ce6-86ad-325d69a28b1a",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "e5b45783-3619-4bd1-87d6-64ddb6b9812f",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "e948f07f-7a5a-4100-be1b-280755242633",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "dfdccfb8-3b89-4988-b17f-2d96baa5e37d",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "e4f20ff9-5651-4bba-9aa1-38ed4c6dbe09",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "88408632-0972-4b7f-8d80-d3dab83fd6ca",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "607f36ed-8553-4286-9317-101d95d5a532",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "549269cf-f916-4ba8-8559-26c5a0415008",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "0578953e-2b7c-43bd-b97f-a46a188d8b21",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "c9201610-4bc9-4d47-a01e-5d369ec60e12",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "00f8da3e-f6b3-4581-af26-83f508dfe38a",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "4ede1e94-4daa-486a-bd1d-5ffa32c210f6",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "abeeea27-0da9-4153-986c-89c7c28cd483",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "04a44a4c-1d5b-4df0-8785-b564d0d84fd0",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "aa5b609e-bb03-4d86-9d7e-de522e83535b",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "19a70c56-3ea9-45e4-aa33-33f7c7b52e30",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "b9272713-f23d-424a-b83f-53ff058e91e1",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "d6ee12a1-b44f-49f7-96b3-06197de1522c",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "7acb39f2-c207-49f1-aacb-469e160fdc62",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "e9c539aa-d788-4388-948a-47cc2520b3b5",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "cf05ee6f-ddb4-4d08-a8e5-5c2fecad648c",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "53b13413-6981-4830-8362-d45a1ac6a482",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "49850f4e-36e7-4f37-b6df-3c879bbfd921",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "da040934-8d23-43fd-9521-4ed0711f4b6e",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0488,
+    "simulated": true
+  },
+  {
+    "application_id": "5c69bdbd-a7fc-450c-b937-ebc0a4799c16",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "3fac924d-c109-47ab-ab7e-1caa03270b2e",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "d1cbfcc6-9648-4849-bb35-dba49c361a24",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "41918c62-b0fe-4b86-bbd7-7ce167df4e89",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "fc22edd8-2714-41c7-bdf3-a2eff2945e15",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "4743c5f4-bfc9-49fe-b58f-6e989a5bb504",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "485d934a-7a25-4d55-b706-02ccbf214062",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "ad4843c4-e159-4f02-8362-bdcaed262cf8",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "f61260a8-7a57-42eb-9a77-d64eb8ab52e3",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "2769d011-6a20-4067-9ebe-822ae9342706",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "2c5c1165-0723-4d06-80af-2ecf7faf8413",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "a0d1f128-2169-4157-9325-1078a65095d4",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "6d5ebbff-40dc-4656-98da-ebf5665773ff",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "ecceb3c3-f414-40dd-aa18-2e3e072aa0c8",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "c08174e2-a5c6-454f-bc10-f8b46f06a12c",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "39750826-6a3d-4be0-9374-12392ce8ba66",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "eac061e8-f72f-4e0d-aac1-37d0d6c61af8",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "7166fd10-f479-4114-a08f-82b4315ca5f3",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "f2e84cb1-3de0-4dfb-ba30-a358f71c82eb",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "41379c9b-8bf7-4c79-89a9-a8a43e8bf962",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  },
+  {
+    "application_id": "eeac2dd6-fe63-41aa-8a96-63b22b34de0a",
+    "verdict": "CONFIRMED_LEGITIMATE",
+    "decision_band_at_selection": "HUMAN_REVIEW",
+    "calibrated_score_at_selection": 0.0022,
+    "simulated": true
+  }
+]

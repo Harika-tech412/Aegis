@@ -3,13 +3,17 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 
 from app.database import init_db
 from app.ml.scoring_service import get_scoring_service
-from app.routers import applications, auth
+from app.rate_limit import limiter
+from app.routers import applications, auth, monitoring
 from app.services.auth import assert_jwt_secret_configured
+from app.services.drift_service import load_reference
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("aegis")
@@ -20,11 +24,25 @@ async def lifespan(app: FastAPI):
     assert_jwt_secret_configured()  # refuse to run with the placeholder secret
     init_db()
     get_scoring_service()  # load ML artifacts once, fail fast if missing
+    load_reference()  # drift reference distributions, loaded once
     logger.info("Aegis API ready: database initialised, scoring artifacts loaded")
     yield
 
 
 app = FastAPI(title="Aegis API", lifespan=lifespan)
+app.state.limiter = limiter
+
+
+@app.exception_handler(RateLimitExceeded)
+def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    """Clean JSON 429 instead of slowapi's default response."""
+    return JSONResponse(
+        status_code=429,
+        content={
+            "error": "rate_limit_exceeded",
+            "detail": f"Rate limit exceeded: {exc.detail}. Retry shortly.",
+        },
+    )
 
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -41,6 +59,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(applications.router)
+app.include_router(monitoring.router)
 
 
 @app.get("/health")

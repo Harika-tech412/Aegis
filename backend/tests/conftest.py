@@ -66,6 +66,15 @@ def db(TestSession):
     session.close()
 
 
+@pytest.fixture(autouse=True)
+def _reset_rate_limiter():
+    """Isolate tests from each other's request counts (in-memory limiter)."""
+    from app.rate_limit import limiter
+
+    limiter.reset()
+    yield
+
+
 @pytest.fixture(scope="session")
 def client(test_engine, TestSession):
     """TestClient with the DB dependency pointed at aegis_test."""
