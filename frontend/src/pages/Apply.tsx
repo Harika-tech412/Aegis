@@ -84,8 +84,8 @@ function randomId(prefix: string) {
 }
 
 const inputCls =
-  "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600";
-const labelCls = "mb-1 block text-xs font-medium text-slate-600";
+  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/25";
+const labelCls = "mb-1.5 block text-xs font-medium tracking-wide text-slate-600";
 
 export function Apply() {
   const [form, setForm] = useState<FormState>({ ...EMPTY });
@@ -449,7 +449,7 @@ export function Apply() {
 
         <form onSubmit={submit} className="mt-5 space-y-5">
           {/* Section 1 */}
-          <section className="rounded-lg border border-slate-200 bg-white p-5">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="mb-4 text-sm font-semibold text-slate-800">1 · Personal Information</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -476,7 +476,7 @@ export function Apply() {
           </section>
 
           {/* Section 2 */}
-          <section className="rounded-lg border border-slate-200 bg-white p-5">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="mb-4 text-sm font-semibold text-slate-800">2 · Address</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="sm:col-span-3">
@@ -499,7 +499,7 @@ export function Apply() {
           </section>
 
           {/* Section 3 */}
-          <section className="rounded-lg border border-slate-200 bg-white p-5">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="mb-4 text-sm font-semibold text-slate-800">3 · Employment & Income</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
@@ -526,7 +526,7 @@ export function Apply() {
           </section>
 
           {/* Section 4 */}
-          <section className="rounded-lg border border-slate-200 bg-white p-5">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="mb-4 text-sm font-semibold text-slate-800">4 · Loan Details</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
@@ -549,7 +549,7 @@ export function Apply() {
           </section>
 
           {/* Section 5 */}
-          <section className="rounded-lg border border-slate-200 bg-white p-5">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="mb-1 text-sm font-semibold text-slate-800">5 · Document Upload</h2>
             <p className="mb-4 text-xs text-slate-500">Captured for KYC compliance.</p>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -613,7 +613,7 @@ export function Apply() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-md bg-blue-700 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-800 disabled:opacity-60 sm:w-auto sm:px-10"
+            className="w-full rounded-lg bg-blue-700 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-800 hover:shadow disabled:opacity-60 sm:w-auto sm:px-10"
           >
             {busy ? "Submitting…" : "Submit Application"}
           </button>

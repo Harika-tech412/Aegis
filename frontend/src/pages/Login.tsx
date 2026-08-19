@@ -51,8 +51,13 @@ export function Login() {
 
         <div className="max-w-lg">
           <h1 className="text-4xl font-semibold leading-tight tracking-tight text-slate-100">
-            Real-time trust intelligence for digital lending.
+            Every application has a story.
+            <br />
+            Aegis makes sure it&rsquo;s the true one.
           </h1>
+          <p className="mt-3 text-sm font-medium uppercase tracking-[0.14em] text-amber-400/80">
+            Real-time trust intelligence for digital lending
+          </p>
           <p className="mt-4 text-base leading-relaxed text-slate-400">
             Multi-signal fraud detection with explainable decisioning, fraud-ring graph
             analysis, and a human investigator always in the loop.
@@ -62,9 +67,11 @@ export function Login() {
             {GLANCE_STATS.map(({ icon: Icon, value, label }) => (
               <div
                 key={label}
-                className="rounded-lg border border-slate-800/80 bg-slate-900/40 p-4"
+                className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4"
               >
-                <Icon className="mb-2 h-4 w-4 text-amber-400/80" />
+                <span className="icon-chip icon-chip-amber mb-2.5">
+                  <Icon className="h-4 w-4" />
+                </span>
                 <p className="text-xl font-semibold tabular-nums text-slate-100">{value}</p>
                 <p className="mt-0.5 text-xs text-slate-500">{label}</p>
               </div>
@@ -95,6 +102,9 @@ export function Login() {
             </div>
             <h2 className="text-2xl font-semibold tracking-tight">Aegis</h2>
             <p className="mt-1 text-sm text-muted-foreground">Investigator Console</p>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:hidden">
+              Every application has a story. Aegis makes sure it&rsquo;s the true one.
+            </p>
           </div>
 
           <form onSubmit={onSubmit} className="space-y-4">

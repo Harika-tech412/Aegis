@@ -1,7 +1,8 @@
-import { AlertTriangle, BadgeCheck, Copy } from "lucide-react";
+import { AlertTriangle, BadgeCheck, Copy, ScanFace } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TitleIcon } from "@/components/ui/title-icon";
 import { api } from "@/lib/api";
 import type { IdentityCheck } from "@/lib/types";
 
@@ -53,7 +54,10 @@ export function IdentityPanel({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Identity verification</CardTitle>
+        <CardTitle>
+          <TitleIcon icon={ScanFace} tone="amber" />
+          Identity verification
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {mismatch && (

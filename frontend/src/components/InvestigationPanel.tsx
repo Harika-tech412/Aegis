@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TitleIcon } from "@/components/ui/title-icon";
 import { api } from "@/lib/api";
 import type { InvestigationResponse } from "@/lib/types";
 import { formatTime } from "@/lib/utils";
@@ -68,8 +69,8 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
-        <CardTitle className="flex items-center gap-2">
-          <Bot className="h-4 w-4 text-amber-400" />
+        <CardTitle>
+          <TitleIcon icon={Bot} tone="amber" />
           AI Investigation Agent
         </CardTitle>
         {data && (

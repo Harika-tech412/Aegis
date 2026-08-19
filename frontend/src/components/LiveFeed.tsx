@@ -1,8 +1,10 @@
+import { Radio } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { BandBadge } from "@/components/BandBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TitleIcon } from "@/components/ui/title-icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -67,7 +69,10 @@ export function LiveFeed({
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
-        <CardTitle>Live application feed</CardTitle>
+        <CardTitle>
+          <TitleIcon icon={Radio} tone="emerald" />
+          Live application feed
+        </CardTitle>
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
           <span className="font-semibold tracking-wider text-emerald-400">LIVE</span>
@@ -105,7 +110,7 @@ export function LiveFeed({
                   <TableRow
                     key={row.id}
                     onClick={() => navigate(`/applications/${row.id}`)}
-                    className={`cursor-pointer odd:bg-secondary/20 ${
+                    className={`cursor-pointer transition-colors odd:bg-secondary/20 hover:bg-secondary/50 ${
                       newIds.has(row.id) ? "animate-feed-in" : ""
                     }`}
                   >

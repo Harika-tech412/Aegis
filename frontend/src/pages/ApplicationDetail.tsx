@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, GitBranch, Lightbulb } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -11,6 +11,7 @@ import { RingPanel } from "@/components/RingPanel";
 import { ShapChart } from "@/components/ShapChart";
 import { SimilarCasesPanel } from "@/components/SimilarCasesPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TitleIcon } from "@/components/ui/title-icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import type {
@@ -18,6 +19,7 @@ import type {
   RingInfo,
   SimilarCasesResponse,
 } from "@/lib/types";
+import { stagger } from "@/lib/motion";
 import { formatMoney, formatTime } from "@/lib/utils";
 
 export function ApplicationDetail() {
@@ -61,7 +63,7 @@ export function ApplicationDetail() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="mx-auto max-w-5xl space-y-5 px-6 py-6">
+      <main className="mx-auto max-w-5xl space-y-4 px-4 py-5 sm:px-6">
         <Link
           to="/dashboard"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -73,8 +75,8 @@ export function ApplicationDetail() {
         {!detail ? (
           <Skeleton className="h-40 w-full" />
         ) : (
-          <Card>
-            <CardContent className="p-6">
+          <Card className="aegis-enter">
+            <CardContent className="p-5 sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3">
@@ -130,9 +132,12 @@ export function ApplicationDetail() {
           <Skeleton className="h-72 w-full" />
         ) : (
           decision && (
-            <Card>
+            <Card className="aegis-enter" style={stagger(1)}>
               <CardHeader>
-                <CardTitle>Why the model decided this</CardTitle>
+                <CardTitle>
+                  <TitleIcon icon={Lightbulb} tone="amber" />
+                  Why the model decided this
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="mb-5 rounded-md border border-border bg-secondary/40 p-4 text-sm leading-relaxed">
@@ -148,9 +153,12 @@ export function ApplicationDetail() {
 
         {/* ---- Counterfactual ---- */}
         {detail && detail.counterfactual && detail.counterfactual.length > 0 && (
-          <Card>
+          <Card className="aegis-enter" style={stagger(2)}>
             <CardHeader>
-              <CardTitle>What would change this decision</CardTitle>
+              <CardTitle>
+                <TitleIcon icon={GitBranch} tone="emerald" />
+                What would change this decision
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {detail.counterfactual.map((c) => (
@@ -178,27 +186,41 @@ export function ApplicationDetail() {
 
         {/* ---- Identity verification (ID modality) ---- */}
         {detail && (
+          <div className="aegis-enter" style={stagger(3)}>
           <IdentityPanel
             identityCheck={detail.identity_check}
             idDocumentFilename={detail.id_document_filename}
           />
+          </div>
         )}
 
         {/* ---- Ring ---- */}
-        <RingPanel ring={ring} loading={!ring && !ringError} error={ringError} />
+        <div className="aegis-enter" style={stagger(4)}>
+          <RingPanel ring={ring} loading={!ring && !ringError} error={ringError} />
+        </div>
 
         {/* ---- Similar past cases ---- */}
-        <SimilarCasesPanel
-          data={similar}
-          loading={!similar && !similarError}
-          error={similarError}
-        />
+        <div className="aegis-enter" style={stagger(5)}>
+          <SimilarCasesPanel
+            data={similar}
+            loading={!similar && !similarError}
+            error={similarError}
+          />
+        </div>
 
         {/* ---- AI investigation agent ---- */}
-        {id && <InvestigationPanel applicationId={id} />}
+        {id && (
+          <div className="aegis-enter" style={stagger(6)}>
+            <InvestigationPanel applicationId={id} />
+          </div>
+        )}
 
         {/* ---- Feedback ---- */}
-        {id && <FeedbackPanel applicationId={id} />}
+        {id && (
+          <div className="aegis-enter" style={stagger(7)}>
+            <FeedbackPanel applicationId={id} />
+          </div>
+        )}
       </main>
     </div>
   );

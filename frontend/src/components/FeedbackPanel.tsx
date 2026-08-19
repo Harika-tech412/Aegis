@@ -1,9 +1,10 @@
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Gavel } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TitleIcon } from "@/components/ui/title-icon";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 
@@ -36,7 +37,10 @@ export function FeedbackPanel({ applicationId }: { applicationId: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Investigator verdict</CardTitle>
+        <CardTitle>
+          <TitleIcon icon={Gavel} tone="slate" />
+          Investigator verdict
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {recorded ? (

@@ -1,8 +1,9 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Library } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TitleIcon } from "@/components/ui/title-icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { SimilarCasesResponse } from "@/lib/types";
 
@@ -20,7 +21,10 @@ export function SimilarCasesPanel({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Similar past cases</CardTitle>
+        <CardTitle>
+          <TitleIcon icon={Library} tone="slate" />
+          Similar past cases
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {loading && (

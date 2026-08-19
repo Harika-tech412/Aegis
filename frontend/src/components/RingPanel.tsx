@@ -1,8 +1,10 @@
+import { Network } from "lucide-react";
 import { useMemo } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { useNavigate } from "react-router-dom";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TitleIcon } from "@/components/ui/title-icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { RingInfo } from "@/lib/types";
 
@@ -49,7 +51,10 @@ export function RingPanel({
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
-        <CardTitle>Fraud ring analysis</CardTitle>
+        <CardTitle>
+          <TitleIcon icon={Network} tone="red" />
+          Fraud ring analysis
+        </CardTitle>
         {ring && ring.ring_size > 0 && (
           <span className="text-sm">
             <span className="text-muted-foreground">ring risk </span>
