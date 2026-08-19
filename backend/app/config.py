@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     JWT_EXPIRY_MINUTES: int = 60
 
     LLM_PROVIDER: str = "groq"
-    LLM_MODEL_GROQ: str = "llama-3.1-8b-instant"
+    LLM_MODEL_GROQ: str = "openai/gpt-oss-20b"
     LLM_MODEL_GEMINI: str = "gemini-2.5-flash"
 
     ENVIRONMENT: str = "development"

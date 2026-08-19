@@ -57,6 +57,9 @@ python ml/generate_synthetic_data.py
    itself). They are never written directly, so they always agree with the
    timestamps and identifiers actually present.
 5. Rows are sorted by timestamp and assigned UUID application ids.
+6. **Free-text purpose and ID document references are attached last**, since
+   they depend on the final fraud labels and on the assigned application ids.
+   See §9.
 
 Per-archetype targets carry +/-12% random jitter and ring/burst sizes are
 themselves random, so the realised fraud rate emerges near 5% rather than being
@@ -74,6 +77,8 @@ forced to it exactly.
 | `employer_name` | string | Fictional employer (Faker). `NOT_EMPLOYED` when unemployed. |
 | `requested_amount` | float | Requested principal, $1,000–$50,000, correlated with income. |
 | `loan_purpose` | categorical | `debt_consolidation`, `home_improvement`, `medical`, `education`, `business`, `other`. |
+| `loan_purpose_text` | string, 20–120 chars | Free-text reason the applicant gave for the loan. Agrees with `loan_purpose` on legitimate applications; see §9. |
+| `id_document_filename` | string, may be empty | Filename of an uploaded synthetic ID image in `data/id_documents/`, or empty when no ID was uploaded (~90% of rows). See §9. |
 | `device_id` | string | 16-char SHA-256 surrogate for a device fingerprint. |
 | `ip_hash` | string | 16-char SHA-256 surrogate for a source IP. |
 | `session_duration_seconds` | int | Time from form open to submit. |
@@ -196,3 +201,86 @@ Employment type and employer name are economic attributes rather than
 protected ones, but they are the most plausible route to proxy discrimination
 in this schema and should be monitored in any fairness audit of the trained
 model.
+
+## 9. Multi-modal data
+
+Aegis fuses three modalities per application. Each carries signal the others
+cannot see, and each is generated here with the same synthetic-only guarantee.
+
+| Modality | Field(s) | Consumed by |
+|---|---|---|
+| **Tabular** | 17 structured columns (velocity, session, consistency, application content) | XGBoost risk model + SHAP attributions |
+| **Free text** | `loan_purpose_text` | Embedding model, checked for agreement with `loan_purpose` |
+| **Image** | `id_document_filename` → PNG in `data/id_documents/` | ID name extraction, compared against the applicant of record |
+
+### 9.1 Free-text purpose (`loan_purpose_text`)
+
+A natural-language sentence, 20–120 characters, drawn from six phrasings per
+`loan_purpose` value. Legitimate applications always draw from the pool
+matching their own dropdown value, so the structured and unstructured channels
+agree.
+
+The two **misrepresentation archetypes** (`income_mismatch`,
+`identity_inconsistency`) contradict their own dropdown value 40% of the
+time: 55% of those describe a different purpose entirely (dropdown says
+`medical`, text describes starting a business), and the remainder collapse into
+vague filler such as *"Personal use of funds."* with no verifiable detail.
+
+Ring, burst and bot archetypes keep consistent text on purpose. They are
+already detectable from velocity and session signals, so leaving their text
+clean forces the text channel to earn its keep on exactly the cases the other
+channels cannot see — rather than flattering the model with a signal that
+correlates with every fraud type at once.
+
+Measured: **93** inconsistent texts in train (of 240 eligible fraud rows —
+53 contradictory, 40 generic) and **26** in holdout (of 58 —
+14 contradictory, 12 generic).
+
+### 9.2 Synthetic ID documents (`id_document_filename`)
+
+ID upload is optional in the real product, so **10% of applications carry a
+document** and the remaining ~90% leave the field empty. Where a document is
+present, the name printed on it follows the rule:
+
+| Application type | Name on ID |
+|---|---|
+| Legitimate (including all hard-legitimate cases) | Matches the applicant |
+| `identity_inconsistency` | Always mismatched |
+| `device_recycling`, `velocity_attack` | Mismatched 30% of the time — ring operators often reuse one document across a batch |
+| `session_anomaly`, `income_mismatch` | Matches the applicant |
+
+A mismatch swaps either the first name or the surname, not both, so it reads
+as a plausible document rather than an obviously different person.
+
+**Where the applicant's name lives.** The CSV deliberately has no name column —
+a name is PII-shaped and is not a modelling feature. The canonical name is
+instead *derived* from `application_id` by `applicant_name_for()` in
+`ml/generate_synthetic_data.py`, and the match/mismatch decision by
+`id_document_plan()`. Both are pure functions of the application id, so the
+image generator and the backend recompute the same answer from the CSV alone,
+with nothing extra to keep in sync. Storing a match/mismatch flag in the CSV
+would have leaked the label straight into a feature column.
+
+Measured: **1,495** documents in train (1,481 matched / 14 mismatched) and
+**300** in holdout (296 matched / 4 mismatched).
+
+### 9.3 Image generation and responsible-AI markings
+
+Images are rendered by `ml/generate_id_documents.py` (Pillow) as 400x250 PNGs.
+They are **stylized cards, not reproductions of any real government ID
+design** — no jurisdiction's layout, seal, colour scheme, security feature, or
+typography is imitated, and nothing here could pass as a genuine document.
+Every card carries three unmissable markings:
+
+1. A navy header reading **"SYNTHETIC ID CARD — DEMO DATA ONLY"**.
+2. A large diagonal **"SYNTHETIC"** watermark across the face of the card.
+3. A footer stating it was generated for the Aegis demo and is not a
+   government document.
+
+Names, dates of birth, document numbers and issue dates are all fabricated and
+derived deterministically from the application id. The images are gitignored
+and regenerated from the CSVs by:
+
+```bash
+python ml/generate_id_documents.py
+```

@@ -50,7 +50,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
 OUTPUT_PATH = DATA_DIR / "case_narratives.json"
 
-MODEL = "llama-3.1-8b-instant"
+MODEL = "openai/gpt-oss-20b"
 SEED = 4242
 
 # 5 archetypes x 22 + 10 false alarms = 120 narratives exactly.

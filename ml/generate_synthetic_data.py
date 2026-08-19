@@ -98,6 +98,85 @@ HOLDOUT_ARCHETYPE_MIX = {
 HARD_LEGIT_FLAVORS = ["family_device", "accessibility_tool", "autofill_manager", "thin_file"]
 HARD_LEGIT_WEIGHTS = [0.30, 0.24, 0.26, 0.20]
 
+# --- Free-text loan purpose ------------------------------------------------
+# Six phrasings per dropdown value. Legitimate applications draw from the pool
+# matching their `loan_purpose`, so the structured field and the free text
+# agree. Only the two misrepresentation archetypes are allowed to contradict.
+PURPOSE_TEXT_TEMPLATES: dict[str, list[str]] = {
+    "debt_consolidation": [
+        "Consolidating three credit cards into one fixed monthly payment.",
+        "Paying off high-interest store cards that got away from me last year.",
+        "Rolling two personal loans and a card balance into a single payment.",
+        "Need to clear revolving balances before the promotional rate expires.",
+        "Combining my outstanding debts so I only track one due date.",
+        "Refinancing card debt at a lower rate to stop the interest snowballing.",
+    ],
+    "home_improvement": [
+        "Replacing the roof before the winter rains get in.",
+        "The kitchen still has original 1980s wiring and needs a full rewire.",
+        "Adding a second bathroom now that both kids are teenagers.",
+        "Furnace finally died and we need a new heating system installed.",
+        "Repairing storm damage to the back deck and the fence line.",
+        "Insulating the attic and replacing the drafty front windows.",
+    ],
+    "medical": [
+        "Need to cover my mother's cataract surgery not covered by insurance.",
+        "Dental implants after an accident; insurance covers only a fraction.",
+        "Out-of-pocket costs for my son's orthodontic treatment.",
+        "Covering the deductible for a knee replacement scheduled next month.",
+        "Paying for physical therapy sessions my plan stopped covering.",
+        "Emergency room bill from a hospital stay earlier in the year.",
+    ],
+    "education": [
+        "Tuition for the final year of my part-time accounting degree.",
+        "Paying for a nursing certification course and the exam fees.",
+        "Covering my daughter's first-semester tuition and textbooks.",
+        "Enrolling in a six-month software bootcamp to change careers.",
+        "Graduate program fees not covered by my employer's assistance plan.",
+        "Trade school tuition for HVAC certification starting in the fall.",
+    ],
+    "business": [
+        "Buying a second delivery van to keep up with customer orders.",
+        "Working capital to cover payroll through a slow quarter.",
+        "Purchasing commercial baking equipment for the shop.",
+        "Stocking inventory ahead of the holiday retail season.",
+        "Fitting out a small studio space for my design practice.",
+        "Upgrading the point-of-sale system across both storefronts.",
+    ],
+    "other": [
+        "Relocating across the state for a new job starting next month.",
+        "Covering legal fees for an ongoing family matter.",
+        "Replacing my car after the transmission failed.",
+        "Funeral expenses for my father earlier this year.",
+        "Moving costs and a security deposit for a new apartment.",
+        "Emergency repairs after a pipe burst in the basement.",
+    ],
+}
+
+# Vague, copy-paste-shaped text with no verifiable detail.
+GENERIC_PURPOSE_TEXTS = [
+    "Personal use of funds.",
+    "For personal use only.",
+    "Personal financial needs.",
+    "Need funds for personal reasons.",
+    "Urgent personal requirement.",
+    "Funds required for personal purposes.",
+]
+
+# Only misrepresentation archetypes contradict their own dropdown value. Ring,
+# burst and bot cases are detectable from velocity and session signals, so
+# their narrative text stays consistent - the text channel has to earn its
+# keep on the cases the other channels cannot see.
+TEXT_INCONSISTENT_ARCHETYPES = {"income_mismatch", "identity_inconsistency"}
+TEXT_MISMATCH_RATE = 0.40
+TEXT_CONTRADICTION_SHARE = 0.55  # of mismatches; the rest are generic filler
+
+# --- Synthetic ID documents ------------------------------------------------
+ID_UPLOAD_RATE = 0.10  # ID upload is optional in the real product
+ID_MISMATCH_ARCHETYPES = {"identity_inconsistency"}  # always mismatched
+ID_PARTIAL_MISMATCH_ARCHETYPES = {"device_recycling", "velocity_attack"}
+ID_PARTIAL_MISMATCH_RATE = 0.30
+
 # Applications cluster in waking hours, peaking mid-morning and mid-evening.
 HOUR_WEIGHTS = np.array(
     [0.6, 0.4, 0.3, 0.3, 0.4, 0.7, 1.2, 2.0, 3.0, 5.5, 6.0, 6.2,
@@ -114,6 +193,8 @@ COLUMNS = [
     "employer_name",
     "requested_amount",
     "loan_purpose",
+    "loan_purpose_text",
+    "id_document_filename",
     "device_id",
     "ip_hash",
     "session_duration_seconds",
@@ -147,6 +228,67 @@ def build_employer_pool(size: int = 50) -> list[str]:
         if name not in pool:
             pool.append(name)
     return pool
+
+
+# --------------------------------------------------------------------------
+# Applicant identity for synthetic ID documents
+#
+# The CSV schema deliberately carries no applicant name - a name column would
+# be PII-shaped and is not a modelling feature. The name printed on an ID
+# document is instead *derived* from the application_id by the two functions
+# below, so `generate_id_documents.py` and the backend can both recompute the
+# same canonical name from the CSV alone, with nothing extra to keep in sync.
+# --------------------------------------------------------------------------
+
+_NAME_FAKER = Faker("en_US")
+
+
+def _stable_hash(value: str) -> int:
+    return int(hashlib.sha256(value.encode("utf-8")).hexdigest()[:12], 16)
+
+
+def applicant_name_for(application_id: str) -> tuple[str, str]:
+    """The applicant's canonical (first, last) name, derived from their id."""
+    _NAME_FAKER.seed_instance(_stable_hash(f"name|{application_id}"))
+    return _NAME_FAKER.first_name(), _NAME_FAKER.last_name()
+
+
+def id_document_plan(application_id: str, fraud_type: object) -> tuple[str, str, bool]:
+    """Return (first, last, is_mismatch) for the name printed on the ID card.
+
+    Legitimate applications present an ID matching the applicant. Identity
+    fabrication always mismatches; ring and burst operators mismatch part of
+    the time, because they often reuse one stolen document across a batch.
+    The decision is a pure function of application_id, so it never has to be
+    stored in the CSV (which would leak the label into a feature).
+    """
+    first, last = applicant_name_for(application_id)
+    h = _stable_hash(f"idmatch|{application_id}")
+
+    if fraud_type in ID_MISMATCH_ARCHETYPES:
+        mismatch = True
+    elif fraud_type in ID_PARTIAL_MISMATCH_ARCHETYPES:
+        mismatch = (h % 100) < int(ID_PARTIAL_MISMATCH_RATE * 100)
+    else:
+        mismatch = False
+
+    if mismatch:
+        _NAME_FAKER.seed_instance(_stable_hash(f"altname|{application_id}"))
+        swap_surname = (h // 100) % 2 == 0
+        for _ in range(8):  # guard against drawing the same name back
+            candidate = _NAME_FAKER.last_name() if swap_surname else _NAME_FAKER.first_name()
+            if candidate != (last if swap_surname else first):
+                if swap_surname:
+                    last = candidate
+                else:
+                    first = candidate
+                break
+
+    return first, last, mismatch
+
+
+def id_document_filename(application_id: str) -> str:
+    return f"id_{application_id.replace('-', '')[:12]}.png"
 
 
 def _sample_timestamps(rng: np.random.Generator, n: int) -> np.ndarray:
@@ -498,6 +640,67 @@ def _inject_hard_legitimate(df, rng, pool, target, tag) -> dict[str, int]:
 
 
 # --------------------------------------------------------------------------
+# Free-text purpose and ID document references
+# --------------------------------------------------------------------------
+
+
+def _assign_purpose_text(df: pd.DataFrame, rng: np.random.Generator) -> dict[str, int]:
+    """Attach a natural-language reason to every application.
+
+    Legitimate text agrees with the `loan_purpose` dropdown. Misrepresentation
+    archetypes contradict it ~40% of the time, either by describing a
+    different purpose entirely or by falling back to vague filler.
+    """
+    purposes = df["loan_purpose"].to_numpy()
+    fraud_types = df["fraud_type"].to_numpy()
+    stats = {"contradictory": 0, "generic": 0}
+    texts: list[str] = []
+
+    for purpose, fraud_type in zip(purposes, fraud_types):
+        inconsistent = (
+            fraud_type in TEXT_INCONSISTENT_ARCHETYPES and rng.random() < TEXT_MISMATCH_RATE
+        )
+        if not inconsistent:
+            pool = PURPOSE_TEXT_TEMPLATES[purpose]
+            texts.append(pool[int(rng.integers(0, len(pool)))])
+            continue
+
+        if rng.random() < TEXT_CONTRADICTION_SHARE:
+            others = [p for p in LOAN_PURPOSES if p != purpose]
+            other = others[int(rng.integers(0, len(others)))]
+            pool = PURPOSE_TEXT_TEMPLATES[other]
+            texts.append(pool[int(rng.integers(0, len(pool)))])
+            stats["contradictory"] += 1
+        else:
+            texts.append(GENERIC_PURPOSE_TEXTS[int(rng.integers(0, len(GENERIC_PURPOSE_TEXTS)))])
+            stats["generic"] += 1
+
+    df["loan_purpose_text"] = texts
+    return stats
+
+
+def _assign_id_documents(df: pd.DataFrame, rng: np.random.Generator) -> dict[str, int]:
+    """Reference a synthetic ID image on the ~10% of applications that upload one."""
+    uploaded = rng.random(len(df)) < ID_UPLOAD_RATE
+    filenames: list[str] = []
+    stats = {"uploaded": 0, "name_matched": 0, "name_mismatched": 0}
+
+    for app_id, fraud_type, has_upload in zip(
+        df["application_id"].to_numpy(), df["fraud_type"].to_numpy(), uploaded
+    ):
+        if not has_upload:
+            filenames.append("")
+            continue
+        filenames.append(id_document_filename(app_id))
+        stats["uploaded"] += 1
+        _, _, mismatch = id_document_plan(app_id, fraud_type)
+        stats["name_mismatched" if mismatch else "name_matched"] += 1
+
+    df["id_document_filename"] = filenames
+    return stats
+
+
+# --------------------------------------------------------------------------
 # Dataset assembly
 # --------------------------------------------------------------------------
 
@@ -537,14 +740,24 @@ def generate_dataset(n_rows: int, seed: int, tag: str, archetype_mix: dict[str, 
         [str(uuid.UUID(bytes=rng.bytes(16), version=4)) for _ in range(len(df))],
     )
 
+    # Free text depends on the final fraud labels; ID references depend on the
+    # assigned application_id, so both run after the table is otherwise fixed.
+    text_stats = _assign_purpose_text(df, rng)
+    id_stats = _assign_id_documents(df, rng)
+
     df["is_fraud"] = df["is_fraud"].astype(bool)
-    return df[COLUMNS], hard_legit
+    meta = {"hard_legit": hard_legit, "text": text_stats, "id_docs": id_stats}
+    return df[COLUMNS], meta
 
 
-def summarize(df: pd.DataFrame, name: str, hard_legit: dict[str, int]) -> str:
+def summarize(df: pd.DataFrame, name: str, meta: dict) -> str:
     n = len(df)
     n_fraud = int(df["is_fraud"].sum())
     counts = df["fraud_type"].value_counts()
+    hard_legit = meta["hard_legit"]
+    text = meta["text"]
+    id_docs = meta["id_docs"]
+
     lines = [
         f"{name}: {n:,} rows | fraud {n_fraud:,} ({n_fraud / n:.2%}) | legit {n - n_fraud:,}",
         "  fraud_type breakdown:",
@@ -555,6 +768,21 @@ def summarize(df: pd.DataFrame, name: str, hard_legit: dict[str, int]) -> str:
     lines.append(f"  hard-legitimate cases injected: {sum(hard_legit.values()):,}")
     for flavor, c in hard_legit.items():
         lines.append(f"    {flavor:<24} {c:>5}")
+
+    inconsistent_pool = int(df["fraud_type"].isin(TEXT_INCONSISTENT_ARCHETYPES).sum())
+    mismatched = text["contradictory"] + text["generic"]
+    lines.append(
+        f"  loan_purpose_text: {n:,} written | {mismatched:,} inconsistent with the dropdown "
+        f"({mismatched / max(inconsistent_pool, 1):.0%} of the {inconsistent_pool:,} eligible fraud rows)"
+    )
+    lines.append(
+        f"    contradictory purpose {text['contradictory']:>5} | generic filler {text['generic']:>5}"
+    )
+    lines.append(
+        f"  id_document_filename: {id_docs['uploaded']:,} uploaded "
+        f"({id_docs['uploaded'] / n:.1%}) | name matched {id_docs['name_matched']:,} | "
+        f"name mismatched {id_docs['name_mismatched']:,}"
+    )
     lines.append(
         "  max applications_from_device_last_24h: "
         f"{int(df['applications_from_device_last_24h'].max())} | "
@@ -578,10 +806,20 @@ def _breakdown_table(df: pd.DataFrame) -> str:
 def write_data_card(
     train: pd.DataFrame,
     holdout: pd.DataFrame,
-    train_hl: dict[str, int],
-    holdout_hl: dict[str, int],
+    train_meta: dict,
+    holdout_meta: dict,
     path: Path,
 ) -> None:
+    train_hl = train_meta["hard_legit"]
+    holdout_hl = holdout_meta["hard_legit"]
+    train_text = train_meta["text"]
+    holdout_text = holdout_meta["text"]
+    train_ids = train_meta["id_docs"]
+    holdout_ids = holdout_meta["id_docs"]
+    train_text_total = train_text["contradictory"] + train_text["generic"]
+    holdout_text_total = holdout_text["contradictory"] + holdout_text["generic"]
+    train_text_pool = int(train["fraud_type"].isin(TEXT_INCONSISTENT_ARCHETYPES).sum())
+    holdout_text_pool = int(holdout["fraud_type"].isin(TEXT_INCONSISTENT_ARCHETYPES).sum())
     card = f"""# Aegis Data Card — Synthetic Digital Lending Applications
 
 ## 1. Synthetic data statement
@@ -641,6 +879,9 @@ python ml/generate_synthetic_data.py
    itself). They are never written directly, so they always agree with the
    timestamps and identifiers actually present.
 5. Rows are sorted by timestamp and assigned UUID application ids.
+6. **Free-text purpose and ID document references are attached last**, since
+   they depend on the final fraud labels and on the assigned application ids.
+   See §9.
 
 Per-archetype targets carry +/-12% random jitter and ring/burst sizes are
 themselves random, so the realised fraud rate emerges near 5% rather than being
@@ -658,6 +899,8 @@ forced to it exactly.
 | `employer_name` | string | Fictional employer (Faker). `NOT_EMPLOYED` when unemployed. |
 | `requested_amount` | float | Requested principal, $1,000–$50,000, correlated with income. |
 | `loan_purpose` | categorical | `debt_consolidation`, `home_improvement`, `medical`, `education`, `business`, `other`. |
+| `loan_purpose_text` | string, 20–120 chars | Free-text reason the applicant gave for the loan. Agrees with `loan_purpose` on legitimate applications; see §9. |
+| `id_document_filename` | string, may be empty | Filename of an uploaded synthetic ID image in `data/id_documents/`, or empty when no ID was uploaded (~90% of rows). See §9. |
 | `device_id` | string | 16-char SHA-256 surrogate for a device fingerprint. |
 | `ip_hash` | string | 16-char SHA-256 surrogate for a source IP. |
 | `session_duration_seconds` | int | Time from form open to submit. |
@@ -770,6 +1013,89 @@ Employment type and employer name are economic attributes rather than
 protected ones, but they are the most plausible route to proxy discrimination
 in this schema and should be monitored in any fairness audit of the trained
 model.
+
+## 9. Multi-modal data
+
+Aegis fuses three modalities per application. Each carries signal the others
+cannot see, and each is generated here with the same synthetic-only guarantee.
+
+| Modality | Field(s) | Consumed by |
+|---|---|---|
+| **Tabular** | 17 structured columns (velocity, session, consistency, application content) | XGBoost risk model + SHAP attributions |
+| **Free text** | `loan_purpose_text` | Embedding model, checked for agreement with `loan_purpose` |
+| **Image** | `id_document_filename` → PNG in `data/id_documents/` | ID name extraction, compared against the applicant of record |
+
+### 9.1 Free-text purpose (`loan_purpose_text`)
+
+A natural-language sentence, 20–120 characters, drawn from six phrasings per
+`loan_purpose` value. Legitimate applications always draw from the pool
+matching their own dropdown value, so the structured and unstructured channels
+agree.
+
+The two **misrepresentation archetypes** (`income_mismatch`,
+`identity_inconsistency`) contradict their own dropdown value {TEXT_MISMATCH_RATE:.0%} of the
+time: {TEXT_CONTRADICTION_SHARE:.0%} of those describe a different purpose entirely (dropdown says
+`medical`, text describes starting a business), and the remainder collapse into
+vague filler such as *"Personal use of funds."* with no verifiable detail.
+
+Ring, burst and bot archetypes keep consistent text on purpose. They are
+already detectable from velocity and session signals, so leaving their text
+clean forces the text channel to earn its keep on exactly the cases the other
+channels cannot see — rather than flattering the model with a signal that
+correlates with every fraud type at once.
+
+Measured: **{train_text_total:,}** inconsistent texts in train (of {train_text_pool:,} eligible fraud rows —
+{train_text['contradictory']:,} contradictory, {train_text['generic']:,} generic) and **{holdout_text_total:,}** in holdout (of {holdout_text_pool:,} —
+{holdout_text['contradictory']:,} contradictory, {holdout_text['generic']:,} generic).
+
+### 9.2 Synthetic ID documents (`id_document_filename`)
+
+ID upload is optional in the real product, so **{ID_UPLOAD_RATE:.0%} of applications carry a
+document** and the remaining ~{1 - ID_UPLOAD_RATE:.0%} leave the field empty. Where a document is
+present, the name printed on it follows the rule:
+
+| Application type | Name on ID |
+|---|---|
+| Legitimate (including all hard-legitimate cases) | Matches the applicant |
+| `identity_inconsistency` | Always mismatched |
+| `device_recycling`, `velocity_attack` | Mismatched {ID_PARTIAL_MISMATCH_RATE:.0%} of the time — ring operators often reuse one document across a batch |
+| `session_anomaly`, `income_mismatch` | Matches the applicant |
+
+A mismatch swaps either the first name or the surname, not both, so it reads
+as a plausible document rather than an obviously different person.
+
+**Where the applicant's name lives.** The CSV deliberately has no name column —
+a name is PII-shaped and is not a modelling feature. The canonical name is
+instead *derived* from `application_id` by `applicant_name_for()` in
+`ml/generate_synthetic_data.py`, and the match/mismatch decision by
+`id_document_plan()`. Both are pure functions of the application id, so the
+image generator and the backend recompute the same answer from the CSV alone,
+with nothing extra to keep in sync. Storing a match/mismatch flag in the CSV
+would have leaked the label straight into a feature column.
+
+Measured: **{train_ids['uploaded']:,}** documents in train ({train_ids['name_matched']:,} matched / {train_ids['name_mismatched']:,} mismatched) and
+**{holdout_ids['uploaded']:,}** in holdout ({holdout_ids['name_matched']:,} matched / {holdout_ids['name_mismatched']:,} mismatched).
+
+### 9.3 Image generation and responsible-AI markings
+
+Images are rendered by `ml/generate_id_documents.py` (Pillow) as 400x250 PNGs.
+They are **stylized cards, not reproductions of any real government ID
+design** — no jurisdiction's layout, seal, colour scheme, security feature, or
+typography is imitated, and nothing here could pass as a genuine document.
+Every card carries three unmissable markings:
+
+1. A navy header reading **"SYNTHETIC ID CARD — DEMO DATA ONLY"**.
+2. A large diagonal **"SYNTHETIC"** watermark across the face of the card.
+3. A footer stating it was generated for the Aegis demo and is not a
+   government document.
+
+Names, dates of birth, document numbers and issue dates are all fabricated and
+derived deterministically from the application id. The images are gitignored
+and regenerated from the CSVs by:
+
+```bash
+python ml/generate_id_documents.py
+```
 """
     path.write_text(card, encoding="utf-8")
 
@@ -777,8 +1103,8 @@ model.
 def main() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-    train, train_hl = generate_dataset(TRAIN_ROWS, TRAIN_SEED, "aegis-train", TRAIN_ARCHETYPE_MIX)
-    holdout, holdout_hl = generate_dataset(
+    train, train_meta = generate_dataset(TRAIN_ROWS, TRAIN_SEED, "aegis-train", TRAIN_ARCHETYPE_MIX)
+    holdout, holdout_meta = generate_dataset(
         HOLDOUT_ROWS, HOLDOUT_SEED, "aegis-holdout", HOLDOUT_ARCHETYPE_MIX
     )
 
@@ -788,14 +1114,14 @@ def main() -> None:
 
     train.to_csv(train_path, index=False)
     holdout.to_csv(holdout_path, index=False)
-    write_data_card(train, holdout, train_hl, holdout_hl, card_path)
+    write_data_card(train, holdout, train_meta, holdout_meta, card_path)
 
     print("=" * 74)
     print("Aegis synthetic dataset generation complete (100% synthetic data)")
     print("=" * 74)
-    print(summarize(train, f"TRAIN   (seed {TRAIN_SEED})", train_hl))
+    print(summarize(train, f"TRAIN   (seed {TRAIN_SEED})", train_meta))
     print()
-    print(summarize(holdout, f"HOLDOUT (seed {HOLDOUT_SEED})", holdout_hl))
+    print(summarize(holdout, f"HOLDOUT (seed {HOLDOUT_SEED})", holdout_meta))
     print()
     print("Written:")
     for p in (train_path, holdout_path, card_path):

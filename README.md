@@ -32,7 +32,7 @@ Every record, applicant, device fingerprint, transaction, and behavioral signal 
 - **Database:** PostgreSQL 16 + `pgvector` extension
 - **ML:** XGBoost, scikit-learn, SHAP
 - **Embeddings:** `sentence-transformers` / `all-MiniLM-L6-v2` (local inference, no external API)
-- **LLM:** Groq API — Llama 3.1 8B Instant (primary), Gemini 2.5 Flash (fallback)
+- **LLM:** Groq API — `openai/gpt-oss-20b` (primary), Gemini 2.5 Flash (fallback)
 - **Frontend:** React 18 + Vite + TypeScript + Tailwind CSS + shadcn/ui + Recharts
 - **Container:** Docker Compose
 

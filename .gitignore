@@ -33,3 +33,7 @@ build/
 data/*.csv
 data/*.parquet
 !data/.gitkeep
+
+# Synthetic ID document images (regenerate with ml/generate_id_documents.py)
+data/id_documents/
+data/*.json
