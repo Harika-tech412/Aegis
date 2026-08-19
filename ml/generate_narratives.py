@@ -13,20 +13,25 @@ spent quota degrades the corpus rather than failing the run:
 
     1. Groq        openai/gpt-oss-20b
     2. Gemini      gemini-2.5-flash        (on any Groq failure)
-    3. Template    deterministic string    (last resort)
+    3. Cerebras    llama-3.3-70b           (on any Gemini failure)
+    4. Template    deterministic string    (last resort)
 
-A Groq *tokens-per-day* ceiling disables Groq for the remainder of the run -
-unlike a per-minute limit, it will not clear before the script finishes, so
-retrying it only wastes time. Per-minute limits still get a short backoff.
+Errors that cannot resolve on their own disable their tier for the rest of the
+run: a Groq *tokens-per-day* ceiling (unlike a per-minute limit, it will not
+clear before the script finishes) and a rejected Cerebras credential. Both
+would otherwise be retried once per remaining case for no benefit. Per-minute
+rate limits still get a short backoff, because those do clear in seconds.
 
 The script is **resumable**: re-running it keeps every narrative already
-produced by Groq or Gemini and retries only the ones that fell through to a
+produced by any LLM tier and retries only the ones that fell through to a
 template. Re-run it after quota frees up to fill in the gaps.
 
 Keys are read from a `.env` file at the project root:
 
     GROQ_API_KEY=gsk_...
     GEMINI_API_KEY=...
+    CEREBRAS_API_KEY=csk-...
+    LLM_MODEL_CEREBRAS=llama-3.3-70b   (optional)
 
 Run standalone:
 
@@ -67,6 +72,11 @@ try:
 except ImportError:  # pragma: no cover - Gemini fallback simply stays disabled
     genai = None
 
+try:  # Cerebras speaks the OpenAI wire protocol, so no vendor SDK is needed
+    from openai import OpenAI
+except ImportError:  # pragma: no cover - Cerebras fallback simply stays disabled
+    OpenAI = None
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
@@ -74,6 +84,8 @@ OUTPUT_PATH = DATA_DIR / "case_narratives.json"
 
 GROQ_MODEL = "openai/gpt-oss-20b"
 GEMINI_MODEL = "gemini-2.5-flash"
+CEREBRAS_BASE_URL = "https://api.cerebras.ai/v1"
+DEFAULT_CEREBRAS_MODEL = "llama-3.3-70b"  # overridable via LLM_MODEL_CEREBRAS
 SEED = 4242
 
 # 5 archetypes x 22 + 10 false alarms = 120 narratives exactly.
@@ -95,7 +107,7 @@ MIN_NARRATIVE_WORDS = 35
 
 # Records already produced by a real LLM are never regenerated - a re-run only
 # retries the ones that fell through to the deterministic template.
-LLM_SOURCES = ("groq", "gemini")
+LLM_SOURCES = ("groq", "gemini", "cerebras")
 
 SYSTEM_PROMPT = (
     "You are a senior fraud investigator at a digital lending institution writing "
@@ -403,14 +415,57 @@ def _is_rate_limit(error: object) -> bool:
     )
 
 
-class Providers:
-    """Groq -> Gemini -> template, with Groq disabled for the run on a TPD wall."""
+def _is_terminal_provider_error(error: object) -> tuple[bool, str]:
+    """True for failures that cannot resolve on their own during this run.
 
-    def __init__(self, groq_client, gemini_model) -> None:
+    Two classes qualify: a rejected credential (401 / 403 / invalid key) and an
+    unavailable model (404 / model_not_found). Same reasoning as the Groq TPD
+    check - a bad key or a model the account cannot reach will be exactly as
+    bad on the next case, so retrying it once per remaining narrative only
+    burns wall-clock. Transient failures are handled separately.
+    """
+    message = str(error).lower()
+    auth_markers = (
+        "401",
+        "403",
+        "invalid_api_key",
+        "invalid api key",
+        "api key not valid",
+        "authentication",
+        "unauthorized",
+        "permission denied",
+        "forbidden",
+    )
+    model_markers = ("model_not_found", "model does not exist", "404")
+    billing_markers = ("402", "payment_required", "payment required")
+
+    if any(marker in message for marker in auth_markers):
+        return True, "credential rejected"
+    if any(marker in message for marker in model_markers):
+        return True, "model unavailable to this account"
+    if any(marker in message for marker in billing_markers):
+        return True, "account requires billing / has no quota"
+    return False, ""
+
+
+class Providers:
+    """Groq -> Gemini -> Cerebras -> template.
+
+    Each tier is disabled for the remainder of the run when it returns an
+    error that cannot resolve on its own: a tokens-per-day ceiling for Groq, a
+    rejected credential for Cerebras. Per-minute limits still get a short
+    backoff, because those genuinely do clear in seconds.
+    """
+
+    def __init__(self, groq_client, gemini_model, cerebras_client, cerebras_model) -> None:
         self.groq = groq_client
         self.gemini = gemini_model
+        self.cerebras = cerebras_client
+        self.cerebras_model = cerebras_model
         self.groq_disabled_reason: str | None = None
-        self.counts = {"groq": 0, "gemini": 0, "template_fallback": 0}
+        self.gemini_disabled_reason: str | None = None
+        self.cerebras_disabled_reason: str | None = None
+        self.counts = {"groq": 0, "gemini": 0, "cerebras": 0, "template_fallback": 0}
 
     # -- Groq ----------------------------------------------------------------
 
@@ -464,8 +519,8 @@ class Providers:
 
     def _try_gemini(self, spec: CaseSpec) -> tuple[str | None, object]:
         last_error: object = "gemini not configured"
-        if self.gemini is None:
-            return None, last_error
+        if self.gemini is None or self.gemini_disabled_reason:
+            return None, self.gemini_disabled_reason or last_error
 
         for attempt, backoff in enumerate([*GEMINI_RETRY_BACKOFF_SECONDS, None]):
             try:
@@ -495,10 +550,65 @@ class Providers:
             except Exception as exc:  # noqa: BLE001
                 last_error = exc
 
+            terminal, why = _is_terminal_provider_error(last_error)
+            if terminal:
+                self.gemini_disabled_reason = str(last_error)
+                print(
+                    f"  [gemini disabled] {spec.case_id}: {why}; "
+                    "skipping Gemini for the remainder of this run"
+                )
+                return None, last_error
+
             if backoff is None or not _is_rate_limit(last_error):
                 break
             print(
                 f"  [gemini retry {attempt + 1}/{len(GEMINI_RETRY_BACKOFF_SECONDS)}] "
+                f"{spec.case_id}: {last_error}"
+            )
+            time.sleep(backoff)
+
+        return None, last_error
+
+    # -- Cerebras ------------------------------------------------------------
+
+    def _try_cerebras(self, spec: CaseSpec) -> tuple[str | None, object]:
+        last_error: object = "cerebras not configured"
+        if self.cerebras is None or self.cerebras_disabled_reason:
+            return None, self.cerebras_disabled_reason or last_error
+
+        for attempt, backoff in enumerate([*RETRY_BACKOFF_SECONDS, None]):
+            try:
+                response = self.cerebras.chat.completions.create(
+                    model=self.cerebras_model,
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": _user_prompt(spec)},
+                    ],
+                    temperature=0.95,
+                    top_p=0.95,
+                    max_tokens=320,
+                )
+                text = _clean(response.choices[0].message.content or "")
+                if len(text.split()) >= MIN_NARRATIVE_WORDS:
+                    return text, None
+                last_error = ValueError(f"response too short ({len(text.split())} words)")
+            except Exception as exc:  # noqa: BLE001
+                last_error = exc
+
+            # A rejected credential or an unreachable model will not fix itself.
+            terminal, why = _is_terminal_provider_error(last_error)
+            if terminal:
+                self.cerebras_disabled_reason = str(last_error)
+                print(
+                    f"  [cerebras disabled] {spec.case_id}: {why}; "
+                    "skipping Cerebras for the remainder of this run"
+                )
+                return None, last_error
+
+            if backoff is None or not _is_rate_limit(last_error):
+                break
+            print(
+                f"  [cerebras retry {attempt + 1}/{len(RETRY_BACKOFF_SECONDS)}] "
                 f"{spec.case_id}: {last_error}"
             )
             time.sleep(backoff)
@@ -521,8 +631,17 @@ class Providers:
             print(f"  [gemini] {spec.case_id}: recovered after Groq failed ({groq_error})")
             return text, "gemini"
 
+        text, cerebras_error = self._try_cerebras(spec)
+        if text is not None:
+            self.counts["cerebras"] += 1
+            time.sleep(REQUEST_SPACING_SECONDS)
+            return text, "cerebras"
+
         self.counts["template_fallback"] += 1
-        print(f"  [template] {spec.case_id}: groq={groq_error} | gemini={gemini_error}")
+        print(
+            f"  [template] {spec.case_id}: groq={groq_error} | "
+            f"gemini={gemini_error} | cerebras={cerebras_error}"
+        )
         return _template_narrative(spec), "template_fallback"
 
 
@@ -585,7 +704,21 @@ def _build_clients() -> tuple[object | None, object | None]:
     elif genai is None:
         print("google-generativeai not installed - skipping the Gemini fallback tier.")
 
-    return groq_client, gemini_model
+    cerebras_key = os.getenv("CEREBRAS_API_KEY", "").strip()
+    cerebras_model = os.getenv("LLM_MODEL_CEREBRAS", "").strip() or DEFAULT_CEREBRAS_MODEL
+    cerebras_client = None
+    if cerebras_key and OpenAI is not None:
+        try:
+            # Cerebras is OpenAI-wire-compatible, so the stock client works.
+            cerebras_client = OpenAI(api_key=cerebras_key, base_url=CEREBRAS_BASE_URL)
+        except Exception as exc:  # noqa: BLE001
+            print(f"Cerebras client unavailable ({exc}); skipping Cerebras.")
+    elif not cerebras_key:
+        print("CEREBRAS_API_KEY not set - skipping the Cerebras fallback tier.")
+    elif OpenAI is None:
+        print("openai package not installed - skipping the Cerebras fallback tier.")
+
+    return groq_client, gemini_model, cerebras_client, cerebras_model
 
 
 def main() -> None:
@@ -595,8 +728,8 @@ def main() -> None:
     specs = _build_case_specs(rng)
     existing = _load_existing()
 
-    groq_client, gemini_model = _build_clients()
-    providers = Providers(groq_client, gemini_model)
+    groq_client, gemini_model, cerebras_client, cerebras_model = _build_clients()
+    providers = Providers(groq_client, gemini_model, cerebras_client, cerebras_model)
 
     todo = [s for s in specs if s.case_id not in existing]
     if not todo:
@@ -604,7 +737,8 @@ def main() -> None:
     else:
         print(
             f"Generating {len(todo)} of {len(specs)} narratives "
-            f"(Groq {GROQ_MODEL} -> Gemini {GEMINI_MODEL} -> template)..."
+            f"(Groq {GROQ_MODEL} -> Gemini {GEMINI_MODEL} -> "
+            f"Cerebras {cerebras_model} -> template)..."
         )
 
     records: list[dict] = []
@@ -648,16 +782,22 @@ def main() -> None:
     print("=" * 70)
     print(f"Wrote {len(records)} narratives to {OUTPUT_PATH.relative_to(PROJECT_ROOT)}")
     print("=" * 70)
-    print(f"  from Groq ({GROQ_MODEL}):     {by_source.get('groq', 0)}")
-    print(f"  from Gemini ({GEMINI_MODEL}):    {by_source.get('gemini', 0)}")
-    print(f"  from template fallback:            {by_source.get('template_fallback', 0)}")
+    print(f"  from Groq ({GROQ_MODEL}):       {by_source.get('groq', 0)}")
+    print(f"  from Gemini ({GEMINI_MODEL}):      {by_source.get('gemini', 0)}")
+    print(f"  from Cerebras ({cerebras_model}):        {by_source.get('cerebras', 0)}")
+    print(f"  from template fallback:              {by_source.get('template_fallback', 0)}")
     print(
         f"  reused from previous run: {len(existing)} | generated this run: {done} "
         f"(groq {providers.counts['groq']}, gemini {providers.counts['gemini']}, "
+        f"cerebras {providers.counts['cerebras']}, "
         f"template {providers.counts['template_fallback']})"
     )
     if providers.groq_disabled_reason:
         print("  note: Groq was disabled mid-run on a tokens-per-day ceiling")
+    if providers.gemini_disabled_reason:
+        print("  note: Gemini was disabled mid-run (credential or quota unusable)")
+    if providers.cerebras_disabled_reason:
+        print("  note: Cerebras was disabled mid-run (credential or model unavailable)")
 
     fallbacks = [r["case_id"] for r in records if r["generated_by"] == "template_fallback"]
     if fallbacks:

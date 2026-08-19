@@ -2,3 +2,4 @@ pandas==2.2.3
 numpy==1.26.4
 faker==33.1.0
 pillow==11.0.0
+openai==1.54.0
