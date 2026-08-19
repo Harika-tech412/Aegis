@@ -8,9 +8,25 @@ search over later.
 All narratives describe fictional cases. No real investigation, investigator,
 customer, or institution is referenced.
 
-Requires a Groq API key. Put it in a `.env` file at the project root:
+Generation falls through three tiers per narrative, so a provider outage or a
+spent quota degrades the corpus rather than failing the run:
+
+    1. Groq        openai/gpt-oss-20b
+    2. Gemini      gemini-2.5-flash        (on any Groq failure)
+    3. Template    deterministic string    (last resort)
+
+A Groq *tokens-per-day* ceiling disables Groq for the remainder of the run -
+unlike a per-minute limit, it will not clear before the script finishes, so
+retrying it only wastes time. Per-minute limits still get a short backoff.
+
+The script is **resumable**: re-running it keeps every narrative already
+produced by Groq or Gemini and retries only the ones that fell through to a
+template. Re-run it after quota frees up to fill in the gaps.
+
+Keys are read from a `.env` file at the project root:
 
     GROQ_API_KEY=gsk_...
+    GEMINI_API_KEY=...
 
 Run standalone:
 
@@ -46,19 +62,40 @@ except ImportError:  # pragma: no cover - defensive
         pass
 
 
+try:
+    import google.generativeai as genai
+except ImportError:  # pragma: no cover - Gemini fallback simply stays disabled
+    genai = None
+
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
 OUTPUT_PATH = DATA_DIR / "case_narratives.json"
 
-MODEL = "openai/gpt-oss-20b"
+GROQ_MODEL = "openai/gpt-oss-20b"
+GEMINI_MODEL = "gemini-2.5-flash"
 SEED = 4242
 
 # 5 archetypes x 22 + 10 false alarms = 120 narratives exactly.
 PER_ARCHETYPE = 22
 FALSE_ALARM_COUNT = 10
 
+# Per-minute Groq limits clear in seconds, so a short backoff is worth it.
 RETRY_BACKOFF_SECONDS = [1, 2, 4]
 REQUEST_SPACING_SECONDS = 0.35  # gentle pacing to stay under the free-tier RPM
+
+# Gemini's free-tier ceiling is per-minute too, but with far less headroom, so
+# its backoff is measured in tens of seconds rather than single digits.
+GEMINI_RETRY_BACKOFF_SECONDS = [4, 10, 20]
+# gemini-2.5-flash is a thinking model: reasoning tokens are drawn from the
+# same output budget, so a 320-token cap can leave nothing for the answer.
+GEMINI_MAX_OUTPUT_TOKENS = 1024
+
+MIN_NARRATIVE_WORDS = 35
+
+# Records already produced by a real LLM are never regenerated - a re-run only
+# retries the ones that fell through to the deterministic template.
+LLM_SOURCES = ("groq", "gemini")
 
 SYSTEM_PROMPT = (
     "You are a senior fraud investigator at a digital lending institution writing "
@@ -343,65 +380,249 @@ def _template_narrative(spec: CaseSpec) -> str:
 # --------------------------------------------------------------------------
 
 
-def _generate_one(client: "Groq", spec: CaseSpec) -> tuple[str, str]:
-    """Return (narrative_text, generated_by). Falls back to a template on failure."""
-    last_error: Exception | None = None
+def _is_tpd_error(error: object) -> bool:
+    """True for a Groq tokens-per-DAY ceiling, as opposed to a per-minute one.
 
-    for attempt, backoff in enumerate([*RETRY_BACKOFF_SECONDS, None]):
-        try:
-            response = client.chat.completions.create(
-                model=MODEL,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": _user_prompt(spec)},
-                ],
-                temperature=0.95,
-                top_p=0.95,
-                max_tokens=320,
+    The distinction matters: a per-minute limit clears in seconds and is worth
+    retrying, while a daily token ceiling does not clear until rollover. Once
+    we see one, retrying Groq for the rest of the run is pure waste.
+    """
+    message = str(error).lower()
+    return "tokens per day" in message or "tpd" in message
+
+
+def _is_rate_limit(error: object) -> bool:
+    message = str(error).lower()
+    return (
+        isinstance(error, RateLimitError)
+        or "rate_limit" in message
+        or "rate limit" in message
+        or "429" in message
+        or "resource_exhausted" in message
+        or "quota" in message
+    )
+
+
+class Providers:
+    """Groq -> Gemini -> template, with Groq disabled for the run on a TPD wall."""
+
+    def __init__(self, groq_client, gemini_model) -> None:
+        self.groq = groq_client
+        self.gemini = gemini_model
+        self.groq_disabled_reason: str | None = None
+        self.counts = {"groq": 0, "gemini": 0, "template_fallback": 0}
+
+    # -- Groq ----------------------------------------------------------------
+
+    def _try_groq(self, spec: CaseSpec) -> tuple[str | None, object]:
+        last_error: object = "groq not configured"
+        if self.groq is None or self.groq_disabled_reason:
+            return None, self.groq_disabled_reason or last_error
+
+        for attempt, backoff in enumerate([*RETRY_BACKOFF_SECONDS, None]):
+            try:
+                response = self.groq.chat.completions.create(
+                    model=GROQ_MODEL,
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": _user_prompt(spec)},
+                    ],
+                    temperature=0.95,
+                    top_p=0.95,
+                    max_tokens=320,
+                )
+                text = _clean(response.choices[0].message.content or "")
+                if len(text.split()) >= MIN_NARRATIVE_WORDS:
+                    return text, None
+                last_error = ValueError(f"response too short ({len(text.split())} words)")
+            except Exception as exc:  # noqa: BLE001 - one bad case must not kill the run
+                last_error = exc
+
+            # A daily token ceiling will not clear during this run. Stop asking
+            # Groq entirely and let Gemini carry the rest.
+            if _is_tpd_error(last_error):
+                self.groq_disabled_reason = str(last_error)
+                print(
+                    f"  [groq disabled] {spec.case_id}: daily token ceiling reached; "
+                    "switching to Gemini for the remainder of this run"
+                )
+                return None, last_error
+
+            # Only per-minute limits are worth waiting out. Anything else -
+            # connection error, timeout, bad response - goes straight to Gemini.
+            if backoff is None or not _is_rate_limit(last_error):
+                break
+            print(
+                f"  [groq retry {attempt + 1}/{len(RETRY_BACKOFF_SECONDS)}] "
+                f"{spec.case_id}: {last_error}"
             )
-            text = _clean(response.choices[0].message.content or "")
-            if len(text.split()) >= 35:
-                return text, "groq"
-            last_error = ValueError(f"response too short ({len(text.split())} words)")
-        except (RateLimitError, APIStatusError, APIConnectionError) as exc:
-            last_error = exc
-        except Exception as exc:  # noqa: BLE001 - never let one case kill the run
-            last_error = exc
+            time.sleep(backoff)
 
-        if backoff is None:
-            break
-        print(f"  [retry {attempt + 1}/{len(RETRY_BACKOFF_SECONDS)}] {spec.case_id}: {last_error}")
-        time.sleep(backoff)
+        return None, last_error
 
-    print(f"  [fallback] {spec.case_id}: {last_error}")
-    return _template_narrative(spec), "template_fallback"
+    # -- Gemini --------------------------------------------------------------
+
+    def _try_gemini(self, spec: CaseSpec) -> tuple[str | None, object]:
+        last_error: object = "gemini not configured"
+        if self.gemini is None:
+            return None, last_error
+
+        for attempt, backoff in enumerate([*GEMINI_RETRY_BACKOFF_SECONDS, None]):
+            try:
+                response = self.gemini.generate_content(
+                    _user_prompt(spec),
+                    generation_config={
+                        "temperature": 0.95,
+                        "top_p": 0.95,
+                        "max_output_tokens": GEMINI_MAX_OUTPUT_TOKENS,
+                    },
+                )
+                text = ""
+                try:
+                    text = _clean(response.text or "")
+                except (ValueError, AttributeError):
+                    # .text raises when the candidate carries no usable parts.
+                    finish = None
+                    try:
+                        finish = response.candidates[0].finish_reason
+                    except (AttributeError, IndexError):
+                        pass
+                    raise ValueError(f"no text in Gemini response (finish_reason={finish})")
+
+                if len(text.split()) >= MIN_NARRATIVE_WORDS:
+                    return text, None
+                last_error = ValueError(f"response too short ({len(text.split())} words)")
+            except Exception as exc:  # noqa: BLE001
+                last_error = exc
+
+            if backoff is None or not _is_rate_limit(last_error):
+                break
+            print(
+                f"  [gemini retry {attempt + 1}/{len(GEMINI_RETRY_BACKOFF_SECONDS)}] "
+                f"{spec.case_id}: {last_error}"
+            )
+            time.sleep(backoff)
+
+        return None, last_error
+
+    # -- Chain ---------------------------------------------------------------
+
+    def generate(self, spec: CaseSpec) -> tuple[str, str]:
+        """Return (narrative_text, generated_by), never raising."""
+        text, groq_error = self._try_groq(spec)
+        if text is not None:
+            self.counts["groq"] += 1
+            time.sleep(REQUEST_SPACING_SECONDS)
+            return text, "groq"
+
+        text, gemini_error = self._try_gemini(spec)
+        if text is not None:
+            self.counts["gemini"] += 1
+            print(f"  [gemini] {spec.case_id}: recovered after Groq failed ({groq_error})")
+            return text, "gemini"
+
+        self.counts["template_fallback"] += 1
+        print(f"  [template] {spec.case_id}: groq={groq_error} | gemini={gemini_error}")
+        return _template_narrative(spec), "template_fallback"
+
+
+# --------------------------------------------------------------------------
+# Resume support
+# --------------------------------------------------------------------------
+
+
+def _load_existing() -> dict[str, dict]:
+    """Existing narratives worth keeping, keyed by case_id.
+
+    Only records produced by a real LLM survive. Template fallbacks are dropped
+    so this run can try to replace them.
+    """
+    if not OUTPUT_PATH.exists():
+        return {}
+    try:
+        records = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        print(f"Could not read {OUTPUT_PATH.name} ({exc}); starting fresh.")
+        return {}
+
+    keep = {
+        r["case_id"]: r
+        for r in records
+        if isinstance(r, dict) and r.get("generated_by") in LLM_SOURCES and r.get("narrative_text")
+    }
+    dropped = len(records) - len(keep)
+    print(
+        f"Resuming from {OUTPUT_PATH.name}: keeping {len(keep)} existing LLM narratives, "
+        f"retrying {dropped} template fallback(s)."
+    )
+    return keep
+
+
+def _build_clients() -> tuple[object | None, object | None]:
+    groq_key = os.getenv("GROQ_API_KEY", "").strip()
+    gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+
+    groq_client = None
+    if groq_key:
+        try:
+            groq_client = Groq(api_key=groq_key)
+        except Exception as exc:  # noqa: BLE001
+            print(f"Groq client unavailable ({exc}); skipping Groq.")
+    else:
+        print("GROQ_API_KEY not set - skipping Groq.")
+
+    gemini_model = None
+    if gemini_key and genai is not None:
+        try:
+            genai.configure(api_key=gemini_key)
+            gemini_model = genai.GenerativeModel(
+                GEMINI_MODEL, system_instruction=SYSTEM_PROMPT
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"Gemini client unavailable ({exc}); skipping Gemini.")
+    elif not gemini_key:
+        print("GEMINI_API_KEY not set - skipping the Gemini fallback tier.")
+    elif genai is None:
+        print("google-generativeai not installed - skipping the Gemini fallback tier.")
+
+    return groq_client, gemini_model
 
 
 def main() -> None:
     load_dotenv(PROJECT_ROOT / ".env")
-    api_key = os.getenv("GROQ_API_KEY", "").strip()
 
     rng = np.random.default_rng(SEED)
     specs = _build_case_specs(rng)
+    existing = _load_existing()
 
-    client = None
-    if api_key:
-        client = Groq(api_key=api_key)
+    groq_client, gemini_model = _build_clients()
+    providers = Providers(groq_client, gemini_model)
+
+    todo = [s for s in specs if s.case_id not in existing]
+    if not todo:
+        print("Every narrative already has real LLM output - nothing to regenerate.")
     else:
         print(
-            "GROQ_API_KEY not found in environment or .env - every narrative will use "
-            "the deterministic template fallback."
+            f"Generating {len(todo)} of {len(specs)} narratives "
+            f"(Groq {GROQ_MODEL} -> Gemini {GEMINI_MODEL} -> template)..."
         )
 
-    print(f"Generating {len(specs)} case narratives with {MODEL}...")
-    records = []
-    for i, spec in enumerate(specs, start=1):
-        if client is None:
-            text, source = _template_narrative(spec), "template_fallback"
-        else:
-            text, source = _generate_one(client, spec)
-            time.sleep(REQUEST_SPACING_SECONDS)
+    records: list[dict] = []
+    done = 0
+    for spec in specs:
+        cached = existing.get(spec.case_id)
+        if cached is not None:
+            records.append(
+                {
+                    "case_id": spec.case_id,
+                    "fraud_type": spec.fraud_type,
+                    "narrative_text": cached["narrative_text"],
+                    "generated_by": cached["generated_by"],
+                }
+            )
+            continue
 
+        text, source = providers.generate(spec)
         records.append(
             {
                 "case_id": spec.case_id,
@@ -410,32 +631,57 @@ def main() -> None:
                 "generated_by": source,
             }
         )
-        if i % 20 == 0:
-            print(f"  {i}/{len(specs)} complete")
+        done += 1
+        if done % 20 == 0:
+            print(f"  {done}/{len(todo)} generated this run")
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUT_PATH.write_text(json.dumps(records, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    from_groq = sum(1 for r in records if r["generated_by"] == "groq")
-    fallback = len(records) - from_groq
+    by_source: dict[str, int] = {}
     by_type: dict[str, int] = {}
     for r in records:
+        by_source[r["generated_by"]] = by_source.get(r["generated_by"], 0) + 1
         by_type[r["fraud_type"]] = by_type.get(r["fraud_type"], 0) + 1
 
     print()
-    print("=" * 66)
+    print("=" * 70)
     print(f"Wrote {len(records)} narratives to {OUTPUT_PATH.relative_to(PROJECT_ROOT)}")
-    print("=" * 66)
-    print(f"  from Groq ({MODEL}): {from_groq}")
-    print(f"  from template fallback: {fallback}")
-    if fallback:
-        failed = [r["case_id"] for r in records if r["generated_by"] == "template_fallback"]
-        preview = ", ".join(failed[:10])
-        more = f" (+{len(failed) - 10} more)" if len(failed) > 10 else ""
+    print("=" * 70)
+    print(f"  from Groq ({GROQ_MODEL}):     {by_source.get('groq', 0)}")
+    print(f"  from Gemini ({GEMINI_MODEL}):    {by_source.get('gemini', 0)}")
+    print(f"  from template fallback:            {by_source.get('template_fallback', 0)}")
+    print(
+        f"  reused from previous run: {len(existing)} | generated this run: {done} "
+        f"(groq {providers.counts['groq']}, gemini {providers.counts['gemini']}, "
+        f"template {providers.counts['template_fallback']})"
+    )
+    if providers.groq_disabled_reason:
+        print("  note: Groq was disabled mid-run on a tokens-per-day ceiling")
+
+    fallbacks = [r["case_id"] for r in records if r["generated_by"] == "template_fallback"]
+    if fallbacks:
+        preview = ", ".join(fallbacks[:10])
+        more = f" (+{len(fallbacks) - 10} more)" if len(fallbacks) > 10 else ""
         print(f"  fallback case ids: {preview}{more}")
+        print("  re-run this script to retry just those once quota frees up")
+
     print("  by fraud_type:")
     for fraud_type, count in by_type.items():
         print(f"    {fraud_type:<24} {count:>4}")
+
+    print("  by fraud_type x source:")
+    for fraud_type in sorted(by_type):
+        parts = []
+        for source in (*LLM_SOURCES, "template_fallback"):
+            c = sum(
+                1
+                for r in records
+                if r["fraud_type"] == fraud_type and r["generated_by"] == source
+            )
+            parts.append(f"{source} {c}")
+        print(f"    {fraud_type:<24} {' | '.join(parts)}")
+
     words = [len(r["narrative_text"].split()) for r in records]
     print(f"  word count: min {min(words)} / mean {sum(words) / len(words):.0f} / max {max(words)}")
 
