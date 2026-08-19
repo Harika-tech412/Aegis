@@ -10,9 +10,12 @@ from __future__ import annotations
 
 import random
 import re
+import string
 import threading
+import uuid
 from pathlib import Path
 
+from faker import Faker
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 
@@ -89,12 +92,11 @@ def id_image(filename: str) -> FileResponse:
     return FileResponse(path, media_type=media)
 
 
-@router.get("/ring-device")
-def ring_device() -> dict:
+def _pick_ring_device() -> dict:
     """A device/IP pair known to connect to seeded flagged applications.
 
     Picks a historical ring whose members are mostly confirmed fraud, so the
-    'Fraud ring member' preset reliably lights up the ring panel.
+    ring presets reliably light up the ring panel.
     """
     service = get_scoring_service()
     best: tuple[float, int, str, list[str]] | None = None
@@ -119,4 +121,152 @@ def ring_device() -> dict:
         "ip_hash": ip_hash,
         "known_ring_size": size,
         "known_fraud_fraction": round(fraud_fraction, 2),
+    }
+
+
+@router.get("/ring-device")
+def ring_device() -> dict:
+    return _pick_ring_device()
+
+
+# ---------------------------------------------------------------------------
+# Fraud-bot profiles (live-demo attack simulation)
+#
+# SCOPE, STATED PLAINLY: these are DETERMINISTIC SCRIPTED profiles, not an AI
+# agent. This endpoint fabricates a realistic-looking application exhibiting a
+# chosen attack pattern. Everything downstream of submission - OCR, scoring,
+# ring detection, explanation, the LangGraph investigation agent - is the real
+# pipeline, unmocked. The only thing automated here is the form-filling a
+# human fraudster would otherwise do by hand.
+# ---------------------------------------------------------------------------
+
+_faker = Faker("en_IN")
+
+# Text/number inputs on the public form (dropdowns are selected, not pasted).
+_PASTEABLE_FIELD_COUNT = 14
+
+_EMPLOYERS = [
+    "Trantow-Torphy Group", "Sanchez PLC", "Bray Inc", "Nova Systems Pvt Ltd",
+    "Harbour Analytics", "Lakeside Traders",
+]
+
+
+def _pan_number() -> str:
+    letters = "".join(random.choice(string.ascii_uppercase) for _ in range(5))
+    digits = "".join(random.choice(string.digits) for _ in range(4))
+    return f"{letters}{digits}{random.choice(string.ascii_uppercase)}"
+
+
+def _base_identity() -> dict:
+    """Realistic-looking applicant fields shared by every scenario."""
+    birth = _faker.date_of_birth(minimum_age=23, maximum_age=58)
+    return {
+        "full_name": _faker.name(),
+        "date_of_birth": birth.isoformat(),
+        "pan_number": _pan_number(),
+        "email": _faker.free_email(),
+        "mobile": _faker.msisdn()[:10],
+        "address": _faker.street_address(),
+        "city": _faker.city(),
+        "state": _faker.state(),
+        "pin_code": _faker.postcode(),
+        "employment_type": "salaried",
+        "employer_name": random.choice(_EMPLOYERS),
+        "monthly_income_inr": random.randrange(60_000, 160_000, 5_000),
+        "years_in_employment": round(random.uniform(1.0, 9.0), 1),
+        "loan_amount_inr": random.randrange(300_000, 1_800_000, 50_000),
+        "loan_purpose": random.choice(
+            ["home_improvement", "debt_consolidation", "business", "medical"]
+        ),
+        "purpose_text": "Consolidating existing obligations into a single monthly payment.",
+    }
+
+
+def _fresh_device() -> dict:
+    token = uuid.uuid4().hex[:10]
+    return {"device_id": f"bot_device_{token}", "ip_hash": f"bot_ip_{token}"}
+
+
+@router.get("/bot-profile")
+def bot_profile(
+    scenario: str = Query(..., pattern="^(bot_filler|identity_theft|ring_operator)$"),
+) -> dict:
+    """A ready-to-submit application exhibiting the requested attack pattern."""
+    payload = _base_identity()
+    id_document = None
+
+    if scenario == "bot_filler":
+        # The tell is behavioural: no human fills a loan form in five seconds
+        # with no pointer movement and every field pasted.
+        payload.update(_fresh_device())
+        payload.update(
+            {
+                "session_duration_seconds": random.randint(3, 8),
+                "mouse_movement_events": random.randint(0, 5),
+                "form_paste_count": _PASTEABLE_FIELD_COUNT,
+                "income_employer_consistency_score": round(random.uniform(0.62, 0.78), 2),
+                "identity_consistency_score": round(random.uniform(0.60, 0.76), 2),
+            }
+        )
+        label = "Automated bot session"
+        description = (
+            "Automated bot session - near-zero mouse activity, every field pasted, "
+            "form completed in seconds"
+        )
+
+    elif scenario == "identity_theft":
+        # A patient attacker: behaviour looks human. The tell is that the
+        # uploaded document belongs to somebody else.
+        sample = random.choice(_load_samples()["mismatched"])
+        payload.update(_fresh_device())
+        payload.update(
+            {
+                "full_name": sample["applicant_name"],  # the identity being claimed
+                "session_duration_seconds": random.randint(180, 320),
+                "mouse_movement_events": random.randint(120, 220),
+                "form_paste_count": random.randint(0, 2),
+                "income_employer_consistency_score": round(random.uniform(0.78, 0.90), 2),
+                "identity_consistency_score": round(random.uniform(0.76, 0.88), 2),
+            }
+        )
+        id_document = {
+            "filename": sample["filename"],
+            "id_name": sample["id_name"],  # the name actually printed on the card
+            "claimed_name": sample["applicant_name"],
+            "image_url": f"/demo/id-image/{sample['filename']}",
+        }
+        label = "Stolen identity document"
+        description = (
+            f"Patient human attacker - normal browsing behaviour, but the uploaded ID is "
+            f"printed for {sample['id_name']} while the form claims {sample['applicant_name']}"
+        )
+
+    else:  # ring_operator
+        ring = _pick_ring_device()
+        payload.update({"device_id": ring["device_id"], "ip_hash": ring["ip_hash"]})
+        velocity = max(2, min(9, ring["known_ring_size"]))
+        payload.update(
+            {
+                "session_duration_seconds": random.randint(90, 170),
+                "mouse_movement_events": random.randint(60, 130),
+                "form_paste_count": random.randint(2, 5),
+                "applications_from_device_last_24h": velocity,
+                "applications_from_ip_last_24h": velocity,
+                "income_employer_consistency_score": round(random.uniform(0.60, 0.80), 2),
+                "identity_consistency_score": round(random.uniform(0.58, 0.78), 2),
+            }
+        )
+        label = "Fraud ring operator"
+        description = (
+            f"Ring operator - new identity submitted from a device already linked to "
+            f"{ring['known_ring_size']} applications, "
+            f"{ring['known_fraud_fraction']:.0%} of them confirmed fraudulent"
+        )
+
+    return {
+        **payload,
+        "scenario": scenario,
+        "scenario_label": label,
+        "scenario_description": description,
+        "id_document": id_document,
     }

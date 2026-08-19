@@ -125,6 +125,94 @@ export function Apply() {
   const set = (key: keyof FormState, value: string) =>
     setForm((f) => ({ ...f, [key]: value }));
 
+  // -------------------------------------------------------------------------
+  // Scripted demo-bot channel (only ever driven by the /demo page's Fraud Bot
+  // Console, same-origin). This is form-filling automation — a script doing
+  // what a fraudster's hands would do. Detection downstream is untouched.
+  // -------------------------------------------------------------------------
+  useEffect(() => {
+    async function onMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "aegis:botFill") return;
+
+      const profile = event.data.profile as Record<string, any>;
+      const notify = (stage: string, detail?: Record<string, unknown>) =>
+        window.parent?.postMessage(
+          { type: "aegis:botProgress", stage, ...detail },
+          window.location.origin
+        );
+
+      try {
+        setConfirmation(null);
+        setError(null);
+        setHelperOpen(false);
+        setScenario(profile.scenario);
+        deviceRef.current = profile.device_id;
+        ipRef.current = profile.ip_hash;
+        velocityOverride.current = profile.applications_from_device_last_24h ?? null;
+
+        // Field-by-field fill, visible but brisk (~2.5s for 16 fields).
+        const started = performance.now();
+        const order: (keyof FormState)[] = [
+          "full_name", "date_of_birth", "pan_number", "email", "mobile",
+          "address", "city", "state", "pin_code", "employment_type",
+          "employer_name", "monthly_income_inr", "years_in_employment",
+          "loan_amount_inr", "loan_purpose", "purpose_text",
+        ];
+        setForm({ ...EMPTY });
+        for (const key of order) {
+          const value = profile[key];
+          if (value === undefined || value === null) continue;
+          set(key, String(value));
+          await new Promise((r) => setTimeout(r, 150));
+        }
+
+        // Attach the scenario's document through the same path the manual
+        // sample-ID buttons use.
+        let attached: File | null = null;
+        if (profile.id_document) {
+          const blob = await fetch(
+            `${API}/demo/id-image/${profile.id_document.filename}`
+          ).then((r) => r.blob());
+          attached = new File([blob], profile.id_document.filename, { type: "image/png" });
+          setIdFile(attached);
+          setIdPreview(URL.createObjectURL(blob));
+          setIdVerify({ name: profile.id_document.id_name, method: "synthetic_template" });
+        } else {
+          setIdFile(null);
+          setIdPreview(null);
+          setIdVerify(null);
+        }
+
+        const elapsed = ((performance.now() - started) / 1000).toFixed(1);
+        notify("filled", { fields: order.length, seconds: elapsed });
+
+        // The bot's intended behavioural fingerprint replaces this page's
+        // live human-interaction measurements (see submitApplication).
+        const reference = await submitApplication(
+          {
+            ...profile,
+            monthly_income_inr: Number(profile.monthly_income_inr),
+            years_in_employment: Number(profile.years_in_employment ?? 0),
+            loan_amount_inr: Number(profile.loan_amount_inr),
+            scenario: undefined,
+            scenario_label: undefined,
+            scenario_description: undefined,
+            id_document: undefined,
+          },
+          attached
+        );
+        notify("submitted", { reference });
+      } catch (err) {
+        notify("error", { message: (err as Error).message });
+      }
+    }
+
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form]);
+
   async function attachSampleId(mismatching: boolean) {
     const sample = await fetch(
       `${API}/demo/sample-id?scenario=${mismatching ? "mismatching" : "matching"}`
@@ -196,45 +284,64 @@ export function Apply() {
     }
   }
 
+  /**
+   * @param overrides  Supplied only by the scripted demo bot. The bot's whole
+   *   point is a specific behavioural fingerprint (5-second session, no mouse,
+   *   everything pasted), and this page's live instrumentation — built to
+   *   measure a real human — would otherwise record whatever the scripted fill
+   *   happened to produce. So the bot's intended values replace the measured
+   *   ones. Nothing downstream is affected: the request is the same multipart
+   *   POST /public/apply a real applicant sends.
+   */
+  async function submitApplication(
+    overrides?: Record<string, unknown>,
+    fileOverride?: File | null
+  ): Promise<string> {
+    const payload = {
+      ...form,
+      monthly_income_inr: Number(form.monthly_income_inr),
+      years_in_employment: Number(form.years_in_employment || 0),
+      loan_amount_inr: Number(form.loan_amount_inr),
+      device_id: deviceRef.current,
+      ip_hash: ipRef.current,
+      session_duration_seconds: Math.max(
+        1,
+        Math.round((Date.now() - sessionStart.current) / 1000)
+      ),
+      mouse_movement_events: mouseEvents.current,
+      form_paste_count: pasteEvents.current,
+      ...(velocityOverride.current
+        ? {
+            applications_from_device_last_24h: velocityOverride.current,
+            applications_from_ip_last_24h: velocityOverride.current,
+          }
+        : {}),
+      ...(overrides ?? {}),
+    };
+    const fd = new FormData();
+    fd.append("payload", JSON.stringify(payload));
+    const attachment = fileOverride !== undefined ? fileOverride : idFile;
+    if (attachment) fd.append("id_document", attachment);
+    if (addressFile) fd.append("address_proof", addressFile);
+
+    const response = await fetch(`${API}/public/apply`, { method: "POST", body: fd });
+    if (!response.ok) {
+      const detail = await response.json().catch(() => ({}));
+      throw new Error(
+        typeof detail.detail === "string" ? detail.detail : "Submission failed. Please retry."
+      );
+    }
+    const body = await response.json();
+    setConfirmation(body.reference);
+    return body.reference as string;
+  }
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
     try {
-      const payload = {
-        ...form,
-        monthly_income_inr: Number(form.monthly_income_inr),
-        years_in_employment: Number(form.years_in_employment || 0),
-        loan_amount_inr: Number(form.loan_amount_inr),
-        device_id: deviceRef.current,
-        ip_hash: ipRef.current,
-        session_duration_seconds: Math.max(
-          1,
-          Math.round((Date.now() - sessionStart.current) / 1000)
-        ),
-        mouse_movement_events: mouseEvents.current,
-        form_paste_count: pasteEvents.current,
-        ...(velocityOverride.current
-          ? {
-              applications_from_device_last_24h: velocityOverride.current,
-              applications_from_ip_last_24h: velocityOverride.current,
-            }
-          : {}),
-      };
-      const fd = new FormData();
-      fd.append("payload", JSON.stringify(payload));
-      if (idFile) fd.append("id_document", idFile);
-      if (addressFile) fd.append("address_proof", addressFile);
-
-      const response = await fetch(`${API}/public/apply`, { method: "POST", body: fd });
-      if (!response.ok) {
-        const detail = await response.json().catch(() => ({}));
-        throw new Error(
-          typeof detail.detail === "string" ? detail.detail : "Submission failed. Please retry."
-        );
-      }
-      const body = await response.json();
-      setConfirmation(body.reference);
+      await submitApplication();
     } catch (err) {
       setError((err as Error).message);
     } finally {
