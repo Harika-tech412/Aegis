@@ -32,9 +32,158 @@ from app.schemas import (
 from app.services import audit
 from app.services.auth import get_current_investigator
 from app.services.llm_explainer import explain_result
+from app.services.ocr_service import names_match
 from app.services.similar_cases import find_similar_cases
 
+# ---------------------------------------------------------------------------
+# Rules layer for the ID (image) modality.
+#
+# These are EXPLICIT RULES layered on top of the calibrated ML score — the ML
+# model never sees names or document images. Applied to the CALIBRATED score
+# (not pre-calibration as originally specced): pushing a fixed boost through
+# the isotonic step function would make its effect data-dependent and opaque,
+# whereas "+0.35 on the final probability" means exactly what the explanation
+# panel says. Disclosed as pseudo-features in top_shap_features.
+# ---------------------------------------------------------------------------
+ID_NAME_MISMATCH_BOOST = 0.35
+ID_REUSE_BOOST = 0.45
+# A document whose OCR-extracted name MATCHES the declared applicant is
+# affirmative identity evidence and reduces risk. (Also offsets the mild
+# has_id_document fraud prior the model learned from training data, where
+# identity fraudsters upload documents 4x more often than others.)
+ID_VERIFIED_CREDIT = -0.05
+
+
+def apply_id_rules(
+    service,
+    result,
+    *,
+    name_mismatch: bool,
+    reuse_across_names: bool,
+    form_name: str | None,
+    id_name: str | None,
+    prior_names: list[str],
+    name_verified: bool = False,
+) -> None:
+    """Mutates the scoring result in place with the rule-based ID signals."""
+    boost = 0.0
+    rules = []
+    if name_verified and not name_mismatch and not reuse_across_names:
+        boost += ID_VERIFIED_CREDIT
+        rules.append(
+            {
+                "feature": "ID_NAME_VERIFIED",
+                "label": "ID name verified (rule)",
+                "value": 1.0,
+                "shap_value": ID_VERIFIED_CREDIT,  # rule weight, NOT a SHAP value
+                "direction": "decreases_risk",
+                "explanation": (
+                    f"OCR-extracted ID name matches the declared applicant name "
+                    f"('{form_name}') — verified identity, {ID_VERIFIED_CREDIT:.2f} risk"
+                ),
+            }
+        )
+    if name_mismatch:
+        boost += ID_NAME_MISMATCH_BOOST
+        rules.append(
+            {
+                "feature": "ID_NAME_MISMATCH",
+                "label": "ID name mismatch (rule)",
+                "value": 1.0,
+                "shap_value": ID_NAME_MISMATCH_BOOST,  # rule weight, NOT a SHAP value
+                "direction": "increases_risk",
+                "explanation": (
+                    f"OCR-extracted ID name ('{id_name}') does not match the declared "
+                    f"applicant name ('{form_name}') — rule-based identity check, "
+                    f"+{ID_NAME_MISMATCH_BOOST:.2f} risk"
+                ),
+            }
+        )
+    if reuse_across_names:
+        boost += ID_REUSE_BOOST
+        listed = ", ".join(prior_names[:4]) or "unknown"
+        rules.append(
+            {
+                "feature": "ID_IMAGE_REUSED_ACROSS_NAMES",
+                "label": "ID image reused across names (rule)",
+                "value": 1.0,
+                "shap_value": ID_REUSE_BOOST,  # rule weight, NOT a SHAP value
+                "direction": "increases_risk",
+                "explanation": (
+                    f"This exact document image was previously submitted under different "
+                    f"name(s): {listed} — perceptual-hash match, +{ID_REUSE_BOOST:.2f} risk"
+                ),
+            }
+        )
+    if boost != 0:
+        result.calibrated_risk_score = min(1.0, max(0.0, result.calibrated_risk_score + boost))
+        result.decision_band = service.band_of(result.calibrated_risk_score)
+        result.top_shap_features = [*rules, *result.top_shap_features]
+
 router = APIRouter(tags=["applications"])
+
+
+def persist_scored_application(
+    db: Session,
+    payload: dict,
+    result,
+    explanation_text: str,
+    explanation_source: str,
+    *,
+    requested_by: str,
+    id_document_filename: str | None,
+) -> tuple[Application, Decision]:
+    """One write path for scored applications (investigator /score and public intake)."""
+    application = Application(
+        applicant_age=payload["applicant_age"],
+        annual_income=payload["annual_income"],
+        employment_type=payload["employment_type"],
+        employer_name=payload["employer_name"],
+        requested_amount=payload["requested_amount"],
+        loan_purpose=payload["loan_purpose"],
+        loan_purpose_text=payload.get("loan_purpose_text", ""),
+        device_id=payload["device_id"],
+        ip_hash=payload["ip_hash"],
+        session_duration_seconds=payload["session_duration_seconds"],
+        mouse_movement_events=payload["mouse_movement_events"],
+        form_paste_count=payload["form_paste_count"],
+        id_document_filename=id_document_filename,
+        raw_payload=payload,
+    )
+    db.add(application)
+    db.flush()
+
+    decision = Decision(
+        application_id=application.id,
+        model_version=result.model_version,
+        xgboost_probability=result.xgboost_probability,
+        anomaly_score=result.anomaly_score,
+        calibrated_risk_score=result.calibrated_risk_score,
+        decision_band=result.decision_band,
+        top_shap_features=result.top_shap_features,
+        explanation_text=explanation_text,
+        counterfactual=result.counterfactual,
+        ring_size=result.ring_size,
+        ring_risk_score=result.ring_risk_score,
+        latency_ms=result.latency_ms,
+    )
+    db.add(decision)
+    db.flush()
+
+    audit.log_event(
+        db,
+        event_type="application_scored",
+        actor="system",
+        target_type="application",
+        target_id=str(application.id),
+        details={
+            "decision_band": result.decision_band,
+            "calibrated_risk_score": result.calibrated_risk_score,
+            "explanation_source": explanation_source,
+            "requested_by": requested_by,
+        },
+    )
+    return application, decision
 
 
 def _derived_velocity(db: Session, column, value: str) -> int:
@@ -69,86 +218,28 @@ def score_application(
     service = get_scoring_service()
     result = service.score(payload)
 
-    # ---- ID-name check: a RULE-BASED signal for the image modality, layered
-    # on top of the ML score. The ML model never sees names; when a document's
-    # printed name disagrees with the declared applicant name, that is direct
-    # documentary evidence, so it adds a fixed +0.3 to the calibrated risk and
-    # the band is re-derived. Deliberately a transparent rule, not a model.
     id_mismatch = False
     if body.id_document_uploaded_name and body.applicant_name:
-        id_mismatch = (
-            body.id_document_uploaded_name.strip().lower()
-            != body.applicant_name.strip().lower()
-        )
-    if id_mismatch:
-        result.calibrated_risk_score = min(1.0, result.calibrated_risk_score + 0.3)
-        result.decision_band = service.band_of(result.calibrated_risk_score)
-        result.top_shap_features = [
-            {
-                "feature": "id_name_mismatch",
-                "label": "ID name mismatch (rule)",
-                "value": 1.0,
-                "shap_value": 0.30,  # rule weight, NOT a SHAP value - see label
-                "direction": "increases_risk",
-                "explanation": (
-                    f"The name on the uploaded ID ('{body.id_document_uploaded_name}') does not "
-                    f"match the declared applicant name ('{body.applicant_name}') — "
-                    "rule-based identity check, +0.30 risk"
-                ),
-            },
-            *result.top_shap_features,
-        ]
+        id_mismatch = not names_match(body.id_document_uploaded_name, body.applicant_name)
+    apply_id_rules(
+        service,
+        result,
+        name_mismatch=id_mismatch,
+        reuse_across_names=False,
+        form_name=body.applicant_name,
+        id_name=body.id_document_uploaded_name,
+        prior_names=[],
+    )
 
     explanation_text, explanation_source = explain_result(result)
-
-    application = Application(
-        applicant_age=body.applicant_age,
-        annual_income=body.annual_income,
-        employment_type=body.employment_type,
-        employer_name=body.employer_name,
-        requested_amount=body.requested_amount,
-        loan_purpose=body.loan_purpose,
-        loan_purpose_text=body.loan_purpose_text,
-        device_id=body.device_id,
-        ip_hash=body.ip_hash,
-        session_duration_seconds=body.session_duration_seconds,
-        mouse_movement_events=body.mouse_movement_events,
-        form_paste_count=body.form_paste_count,
-        id_document_filename=body.id_document_filename,
-        raw_payload=payload,
-    )
-    db.add(application)
-    db.flush()
-
-    decision = Decision(
-        application_id=application.id,
-        model_version=result.model_version,
-        xgboost_probability=result.xgboost_probability,
-        anomaly_score=result.anomaly_score,
-        calibrated_risk_score=result.calibrated_risk_score,
-        decision_band=result.decision_band,
-        top_shap_features=result.top_shap_features,
-        explanation_text=explanation_text,
-        counterfactual=result.counterfactual,
-        ring_size=result.ring_size,
-        ring_risk_score=result.ring_risk_score,
-        latency_ms=result.latency_ms,
-    )
-    db.add(decision)
-    db.flush()
-
-    audit.log_event(
+    application, decision = persist_scored_application(
         db,
-        event_type="application_scored",
-        actor="system",
-        target_type="application",
-        target_id=str(application.id),
-        details={
-            "decision_band": result.decision_band,
-            "calibrated_risk_score": result.calibrated_risk_score,
-            "explanation_source": explanation_source,
-            "requested_by": investigator.username,
-        },
+        payload,
+        result,
+        explanation_text,
+        explanation_source,
+        requested_by=investigator.username,
+        id_document_filename=body.id_document_filename,
     )
     db.commit()
 
@@ -237,20 +328,25 @@ def get_application(
         )
         connected = ctx["connected_applications"]
 
-    # Identity-check summary from the audited payload (demo ID-name rule).
+    # Identity-check summary from the audited payload (OCR + reuse results
+    # are recorded there at scoring time).
     identity_check = None
     payload = application.raw_payload or {}
-    if payload.get("id_document_uploaded_name") or payload.get("applicant_name"):
-        id_name = payload.get("id_document_uploaded_name")
-        applicant_name = payload.get("applicant_name")
+    ocr = payload.get("ocr") or {}
+    reuse = payload.get("id_reuse") or {}
+    id_name = payload.get("id_document_uploaded_name") or ocr.get("name")
+    applicant_name = payload.get("applicant_name")
+    if id_name or applicant_name or ocr:
         identity_check = {
             "applicant_name": applicant_name,
             "id_document_name": id_name,
-            "mismatch": bool(
-                id_name
-                and applicant_name
-                and id_name.strip().lower() != applicant_name.strip().lower()
-            ),
+            "mismatch": bool(id_name and applicant_name and not names_match(id_name, applicant_name)),
+            "form_dob": payload.get("date_of_birth"),
+            "ocr_dob": ocr.get("dob"),
+            "ocr_id_number": ocr.get("id_number"),
+            "reused_across_names": bool(reuse.get("reused_across_names")),
+            "prior_names": reuse.get("prior_names", []),
+            "prior_uses": int(reuse.get("prior_uses", 0)),
         }
 
     return ApplicationDetailOut(

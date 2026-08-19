@@ -1,4 +1,4 @@
-import { AlertTriangle, BadgeCheck } from "lucide-react";
+import { AlertTriangle, BadgeCheck, Copy } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,8 +24,6 @@ export function IdentityPanel({
           revoked = url;
           setImageUrl(url);
         })
-        // Custom uploads are previewed client-side at scoring time and not
-        // retained server-side; only sample documents are re-servable here.
         .catch(() => setImageMissing(true));
     }
     return () => {
@@ -36,31 +34,53 @@ export function IdentityPanel({
   if (!identityCheck && !idDocumentFilename) return null;
 
   const mismatch = identityCheck?.mismatch ?? false;
+  const reused = identityCheck?.reused_across_names ?? false;
+  const priorNames = identityCheck?.prior_names ?? [];
+  const verified =
+    identityCheck?.id_document_name && identityCheck.applicant_name && !mismatch && !reused;
+
+  const rows: { label: string; form: string | null | undefined; doc: string | null | undefined; alert?: boolean }[] = [
+    {
+      label: "Name",
+      form: identityCheck?.applicant_name,
+      doc: identityCheck?.id_document_name,
+      alert: mismatch,
+    },
+    { label: "Date of birth", form: identityCheck?.form_dob, doc: identityCheck?.ocr_dob },
+    { label: "ID number", form: "—", doc: identityCheck?.ocr_id_number },
+  ];
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Identity verification</CardTitle>
       </CardHeader>
-      <CardContent>
-        {identityCheck && identityCheck.id_document_name && (
-          <div
-            className={`mb-4 flex items-start gap-2.5 rounded-md border p-3 text-sm ${
-              mismatch
-                ? "border-red-800 bg-red-950/50 text-red-300"
-                : "border-emerald-900 bg-emerald-950/40 text-emerald-300"
-            }`}
-          >
-            {mismatch ? (
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-            ) : (
-              <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0" />
-            )}
+      <CardContent className="space-y-4">
+        {mismatch && (
+          <div className="flex items-start gap-2.5 rounded-md border border-red-800 bg-red-950/60 p-3.5 text-sm font-medium text-red-300">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
             <span>
-              {mismatch
-                ? "The name on the submitted ID does NOT match the declared applicant — rule-based identity signal applied (+0.30 risk)."
-                : "The name on the submitted ID matches the declared applicant."}
+              IDENTITY MISMATCH DETECTED — OCR-extracted name on the document does not match the
+              applicant's declared name.
             </span>
+          </div>
+        )}
+        {reused && (
+          <div className="flex items-start gap-2.5 rounded-md border border-red-800 bg-red-950/60 p-3.5 text-sm font-medium text-red-300">
+            <Copy className="mt-0.5 h-5 w-5 shrink-0" />
+            <span>
+              ID IMAGE REUSED — this same document image has been submitted with{" "}
+              {priorNames.length} other name{priorNames.length === 1 ? "" : "s"}:{" "}
+              <span className="font-semibold">{priorNames.join(", ") || "unknown"}</span>{" "}
+              (perceptual-hash match across {identityCheck?.prior_uses ?? 0} prior upload
+              {(identityCheck?.prior_uses ?? 0) === 1 ? "" : "s"}).
+            </span>
+          </div>
+        )}
+        {verified && (
+          <div className="flex items-center gap-2 rounded-md border border-emerald-900 bg-emerald-950/40 px-3 py-2 text-sm text-emerald-300">
+            <BadgeCheck className="h-4 w-4" /> Identity verified — document name matches the
+            applicant.
           </div>
         )}
 
@@ -68,33 +88,38 @@ export function IdentityPanel({
           {imageUrl && (
             <img
               src={imageUrl}
-              alt="Submitted synthetic ID document"
-              className="w-64 max-w-full rounded-md border border-border"
+              alt="Submitted ID document (synthetic)"
+              className="w-72 max-w-full rounded-md border border-border"
             />
           )}
           {imageMissing && (
             <p className="w-64 rounded-md border border-border bg-secondary/30 p-3 text-xs text-muted-foreground">
-              Document image not retained — custom uploads are previewed at scoring time only;
-              sample documents remain viewable.
+              Document image not available for this application.
             </p>
           )}
 
           {identityCheck && (
-            <div className="grid min-w-[220px] flex-1 grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Form name
-                </p>
-                <p className="mt-1 font-medium">{identityCheck.applicant_name ?? "—"}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                  ID name
-                </p>
-                <p className={`mt-1 font-medium ${mismatch ? "text-red-300" : ""}`}>
-                  {identityCheck.id_document_name ?? "—"}
-                </p>
-              </div>
+            <div className="min-w-[260px] flex-1 overflow-hidden rounded-md border border-border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-secondary/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                    <th className="px-3 py-2 font-medium">Field</th>
+                    <th className="px-3 py-2 font-medium">Form said</th>
+                    <th className="px-3 py-2 font-medium">ID document said</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.label} className="border-b border-border/60 last:border-0">
+                      <td className="px-3 py-2 text-muted-foreground">{r.label}</td>
+                      <td className="px-3 py-2">{r.form || "—"}</td>
+                      <td className={`px-3 py-2 ${r.alert ? "font-semibold text-red-300" : ""}`}>
+                        {r.doc || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

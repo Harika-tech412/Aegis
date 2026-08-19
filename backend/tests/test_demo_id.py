@@ -3,8 +3,9 @@
 from tests.test_applications_api import VALID_PAYLOAD
 
 
-def test_sample_id_requires_auth(client):
-    assert client.get("/demo/sample-id").status_code == 401
+def test_sample_id_is_public(client):
+    # Deliberately unauthenticated: the public /apply page consumes it.
+    assert client.get("/demo/sample-id").status_code == 200
 
 
 def test_sample_id_matched_and_mismatched(client, auth_headers):
@@ -48,10 +49,10 @@ def test_score_with_id_name_mismatch_boosts_risk(client, auth_headers):
 
     assert (
         boosted["decision"]["calibrated_risk_score"]
-        >= base["decision"]["calibrated_risk_score"] + 0.29
+        >= base["decision"]["calibrated_risk_score"] + 0.34
     )
     rule = boosted["top_shap_features"][0]
-    assert rule["feature"] == "id_name_mismatch"
+    assert rule["feature"] == "ID_NAME_MISMATCH"
     assert "does not match" in rule["explanation"]
 
     # Detail endpoint surfaces the identity check for the UI panel.
@@ -74,4 +75,4 @@ def test_score_with_matching_id_name_adds_no_boost(client, auth_headers):
         },
         headers=auth_headers,
     ).json()
-    assert all(f["feature"] != "id_name_mismatch" for f in result["top_shap_features"])
+    assert all(f["feature"] != "ID_NAME_MISMATCH" for f in result["top_shap_features"])

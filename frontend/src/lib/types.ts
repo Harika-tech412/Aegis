@@ -56,6 +56,12 @@ export interface IdentityCheck {
   applicant_name: string | null;
   id_document_name: string | null;
   mismatch: boolean;
+  form_dob?: string | null;
+  ocr_dob?: string | null;
+  ocr_id_number?: string | null;
+  reused_across_names?: boolean;
+  prior_names?: string[];
+  prior_uses?: number;
 }
 
 export interface SampleId {

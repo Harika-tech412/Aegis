@@ -8,6 +8,7 @@ RUN apt-get update \
         gcc \
         g++ \
         libpq-dev \
+        tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

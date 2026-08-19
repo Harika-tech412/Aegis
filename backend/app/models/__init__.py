@@ -115,6 +115,18 @@ class AuditLog(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class IdDocumentHash(Base):
+    """Perceptual hash of every uploaded ID image, for reuse detection."""
+
+    __tablename__ = "id_document_hashes"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    phash: Mapped[str] = mapped_column(String(80), index=True)  # 256-bit hash = 64 hex chars
+    application_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("applications.id"), index=True)
+    extracted_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class Investigator(Base):
     __tablename__ = "investigators"
 

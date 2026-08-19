@@ -139,6 +139,10 @@ export function Login() {
 
           <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
             Not an investigator? Access is provisioned by your IT administrator.
+            <br />
+            <a href="/apply" className="mt-1 inline-block text-amber-400/90 hover:underline">
+              Apply for a loan →
+            </a>
           </p>
         </div>
       </div>

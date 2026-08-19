@@ -20,6 +20,12 @@ export function Navbar() {
           </span>
         </Link>
         <div className="flex items-center gap-3">
+          <Link
+            to="/demo"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-amber-400 hover:bg-secondary/60"
+          >
+            Live Demo
+          </Link>
           <ArchitectureDialog />
           <span className="hidden text-sm text-muted-foreground sm:inline">
             Investigator: <span className="text-foreground">{username}</span>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { DriftWidget } from "@/components/DriftWidget";
 import { LiveFeed } from "@/components/LiveFeed";
@@ -9,6 +10,10 @@ import { api } from "@/lib/api";
 
 export function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
+  // Inside the split-screen demo (?demo=1) the feed polls faster so a
+  // submission on the applicant side lands within ~2 seconds.
+  const [searchParams] = useSearchParams();
+  const demoMode = searchParams.get("demo") === "1";
 
   // Band counts come from the list endpoint's filtered totals (limit=1 keeps
   // the payloads tiny) — no dedicated stats endpoint needed at this scale.
@@ -55,7 +60,7 @@ export function Dashboard() {
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
           <div className="xl:col-span-2">
-            <LiveFeed />
+            <LiveFeed pollMs={demoMode ? 2000 : 3500} />
           </div>
           <div className="space-y-4">
             <DriftWidget />

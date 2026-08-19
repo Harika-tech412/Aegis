@@ -37,3 +37,6 @@ data/*.parquet
 # Synthetic ID document images (regenerate with ml/generate_id_documents.py)
 data/id_documents/
 data/*.json
+
+# Applicant-uploaded documents (demo runtime data)
+data/uploads/

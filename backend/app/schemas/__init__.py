@@ -119,6 +119,14 @@ class IdentityCheckOut(BaseModel):
     applicant_name: str | None
     id_document_name: str | None
     mismatch: bool
+    # OCR-extracted fields (present when a document was actually processed)
+    form_dob: str | None = None
+    ocr_dob: str | None = None
+    ocr_id_number: str | None = None
+    # Perceptual-hash reuse check
+    reused_across_names: bool = False
+    prior_names: list[str] = []
+    prior_uses: int = 0
 
 
 class ApplicationDetailOut(BaseModel):

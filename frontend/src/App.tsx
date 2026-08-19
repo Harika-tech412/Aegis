@@ -3,7 +3,9 @@ import { Toaster } from "sonner";
 
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ApplicationDetail } from "@/pages/ApplicationDetail";
+import { Apply } from "@/pages/Apply";
 import { Dashboard } from "@/pages/Dashboard";
+import { DemoSplit } from "@/pages/DemoSplit";
 import { Login } from "@/pages/Login";
 
 function Protected({ children }: { children: JSX.Element }) {
@@ -17,6 +19,15 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/apply" element={<Apply />} />
+        <Route
+          path="/demo"
+          element={
+            <Protected>
+              <DemoSplit />
+            </Protected>
+          }
+        />
         <Route
           path="/dashboard"
           element={

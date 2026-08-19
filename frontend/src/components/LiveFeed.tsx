@@ -18,7 +18,13 @@ import { formatMoney, formatTime } from "@/lib/utils";
 
 const POLL_MS = 3500;
 
-export function LiveFeed({ onData }: { onData?: (total: number) => void }) {
+export function LiveFeed({
+  onData,
+  pollMs = POLL_MS,
+}: {
+  onData?: (total: number) => void;
+  pollMs?: number;
+}) {
   const [rows, setRows] = useState<ApplicationSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
@@ -51,12 +57,12 @@ export function LiveFeed({ onData }: { onData?: (total: number) => void }) {
     }
 
     poll();
-    const timer = setInterval(poll, POLL_MS);
+    const timer = setInterval(poll, pollMs);
     return () => {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [onData]);
+  }, [onData, pollMs]);
 
   return (
     <Card>
@@ -65,7 +71,7 @@ export function LiveFeed({ onData }: { onData?: (total: number) => void }) {
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
           <span className="font-semibold tracking-wider text-emerald-400">LIVE</span>
-          <span>· every {POLL_MS / 1000}s</span>
+          <span>· every {pollMs / 1000}s</span>
         </span>
       </CardHeader>
       <CardContent className="p-0">

@@ -11,7 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from app.database import init_db
 from app.ml.scoring_service import get_scoring_service
 from app.rate_limit import limiter
-from app.routers import applications, auth, demo, monitoring
+from app.routers import applications, auth, demo, monitoring, public
 from app.services.auth import assert_jwt_secret_configured
 from app.services.drift_service import load_reference
 
@@ -61,6 +61,7 @@ app.include_router(auth.router)
 app.include_router(applications.router)
 app.include_router(monitoring.router)
 app.include_router(demo.router)
+app.include_router(public.router)
 
 
 @app.get("/health")
