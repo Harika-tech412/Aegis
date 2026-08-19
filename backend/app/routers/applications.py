@@ -15,7 +15,13 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.ml.scoring_service import get_scoring_service
-from app.models import Application, Decision, Investigator, InvestigatorFeedback
+from app.models import (
+    AgentInvestigation,
+    Application,
+    Decision,
+    Investigator,
+    InvestigatorFeedback,
+)
 from app.rate_limit import SCORE_LIMIT, limiter
 from app.schemas import (
     ApplicationDetailOut,
@@ -31,6 +37,7 @@ from app.schemas import (
 )
 from app.services import audit
 from app.services.auth import get_current_investigator
+from app.services.investigation_agent import run_investigation
 from app.services.llm_explainer import explain_result
 from app.services.ocr_service import names_match
 from app.services.similar_cases import find_similar_cases
@@ -403,6 +410,74 @@ def submit_feedback(
     )
     db.commit()
     return FeedbackOut.model_validate(feedback)
+
+
+@router.get("/applications/{application_id}/investigate")
+def investigate_application(
+    application_id: uuid.UUID,
+    refresh: bool = Query(default=False),
+    db: Session = Depends(get_db),
+    investigator: Investigator = Depends(get_current_investigator),
+) -> dict:
+    """Run the LangGraph investigation agent (cached unless ?refresh=true)."""
+    _load_application(db, application_id)  # 404s on unknown ids
+
+    if not refresh:
+        cached = (
+            db.execute(
+                select(AgentInvestigation)
+                .where(AgentInvestigation.application_id == application_id)
+                .order_by(AgentInvestigation.created_at.desc())
+            )
+            .scalars()
+            .first()
+        )
+        if cached is not None:
+            return {
+                "application_id": str(application_id),
+                "investigation_log": cached.investigation_log,
+                "recommended_action": cached.recommendation,
+                "confidence": cached.confidence,
+                "reasoning_summary": cached.reasoning_summary,
+                "synthesis_source": cached.synthesis_source,
+                "cached": True,
+                "created_at": cached.created_at.isoformat(),
+            }
+
+    result = run_investigation(db, str(application_id))
+
+    record = AgentInvestigation(
+        application_id=application_id,
+        investigation_log=result["investigation_log"],
+        recommendation=result["recommended_action"],
+        confidence=result["confidence"],
+        reasoning_summary=result["reasoning_summary"],
+        synthesis_source=result["synthesis_source"],
+    )
+    db.add(record)
+    db.flush()
+    audit.log_event(
+        db,
+        event_type="agent_investigation_run",
+        actor=investigator.username,
+        target_type="application",
+        target_id=str(application_id),
+        details={
+            "steps": [entry["step"] for entry in result["investigation_log"]],
+            "recommendation": result["recommended_action"],
+            "confidence": result["confidence"],
+        },
+    )
+    db.commit()
+
+    return {
+        **{k: v for k, v in result.items() if k in {
+            "application_id", "investigation_log", "recommended_action",
+            "confidence", "reasoning_summary", "synthesis_source",
+        }},
+        "cached": False,
+        "created_at": record.created_at.isoformat(),
+    }
 
 
 @router.get("/applications/{application_id}/similar-cases")

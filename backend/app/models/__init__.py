@@ -127,6 +127,23 @@ class IdDocumentHash(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class AgentInvestigation(Base):
+    """Cached output of the LangGraph investigation agent for one application."""
+
+    __tablename__ = "agent_investigations"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("applications.id"), index=True
+    )
+    investigation_log: Mapped[list] = mapped_column(JSON, default=list)
+    recommendation: Mapped[str] = mapped_column(Text, default="")
+    confidence: Mapped[str] = mapped_column(String(16), default="MEDIUM")
+    reasoning_summary: Mapped[str] = mapped_column(Text, default="")
+    synthesis_source: Mapped[str] = mapped_column(String(24), default="template")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class Investigator(Base):
     __tablename__ = "investigators"
 

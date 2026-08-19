@@ -181,3 +181,20 @@ export interface FeedbackResponse {
   notes: string | null;
   created_at: string;
 }
+
+export interface InvestigationStep {
+  step: string;
+  description: string;
+  timestamp: string;
+}
+
+export interface InvestigationResponse {
+  application_id: string;
+  investigation_log: InvestigationStep[];
+  recommended_action: string;
+  confidence: "HIGH" | "MEDIUM" | "LOW";
+  reasoning_summary: string;
+  synthesis_source: string;
+  cached: boolean;
+  created_at: string;
+}

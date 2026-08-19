@@ -14,6 +14,7 @@ import type {
   RingInfo,
   SampleId,
   ScoreRequest,
+  InvestigationResponse,
   ScoreResponse,
   SimilarCasesResponse,
 } from "./types";
@@ -81,6 +82,11 @@ export const api = {
 
   getApplication: (id: string) => request<ApplicationDetail>(`/applications/${id}`),
   getRing: (id: string) => request<RingInfo>(`/applications/${id}/ring`),
+  investigate: (id: string, refresh = false) =>
+    request<InvestigationResponse>(
+      `/applications/${id}/investigate${refresh ? "?refresh=true" : ""}`
+    ),
+
   getSimilarCases: (id: string) =>
     request<SimilarCasesResponse>(`/applications/${id}/similar-cases`),
 

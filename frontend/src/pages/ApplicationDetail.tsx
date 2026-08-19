@@ -5,6 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import { BandBadge } from "@/components/BandBadge";
 import { FeedbackPanel } from "@/components/FeedbackPanel";
 import { IdentityPanel } from "@/components/IdentityPanel";
+import { InvestigationPanel } from "@/components/InvestigationPanel";
 import { Navbar } from "@/components/Navbar";
 import { RingPanel } from "@/components/RingPanel";
 import { ShapChart } from "@/components/ShapChart";
@@ -192,6 +193,9 @@ export function ApplicationDetail() {
           loading={!similar && !similarError}
           error={similarError}
         />
+
+        {/* ---- AI investigation agent ---- */}
+        {id && <InvestigationPanel applicationId={id} />}
 
         {/* ---- Feedback ---- */}
         {id && <FeedbackPanel applicationId={id} />}
