@@ -44,7 +44,7 @@ export default {
         },
       },
       animation: {
-        "feed-in": "feed-in 1.6s ease-out",
+        "feed-in": "feed-in 2s ease-out",
       },
     },
   },

@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
+import { Bar, BarChart, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import type { DriftResponse } from "@/lib/types";
+
+function psiColor(psi: number): string {
+  if (psi > 0.25) return "#ef4444";
+  if (psi > 0.1) return "#f59e0b";
+  return "#10b981";
+}
 
 const STATUS_STYLE: Record<string, { dot: string; text: string; label: string }> = {
   STABLE: { dot: "bg-emerald-400", text: "text-emerald-400", label: "Stable" },
@@ -57,12 +64,48 @@ export function DriftWidget() {
             </div>
             <p className="text-sm leading-relaxed text-muted-foreground">{drift.summary}</p>
             {drift.features.length > 0 && (
-              <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-xs text-muted-foreground">
-                {drift.features.slice(0, 4).map((f) => (
-                  <span key={f.feature} className="tabular-nums">
-                    {f.feature.replace(/_/g, " ")}: {f.psi.toFixed(2)}
-                  </span>
-                ))}
+              <div className="h-40 w-full pt-1">
+                <ResponsiveContainer>
+                  <BarChart
+                    data={drift.features.slice(0, 6).map((f) => ({
+                      name: f.feature.replace(/_/g, " ").replace("applications from", "apps"),
+                      psi: f.psi,
+                    }))}
+                    layout="vertical"
+                    margin={{ left: 4, right: 16, top: 0, bottom: 0 }}
+                  >
+                    <XAxis
+                      type="number"
+                      tick={{ fill: "#64748b", fontSize: 10 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      width={130}
+                      tick={{ fill: "#94a3b8", fontSize: 10 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <ReferenceLine x={0.25} stroke="#7f1d1d" strokeDasharray="3 3" />
+                    <Tooltip
+                      cursor={{ fill: "rgba(148,163,184,0.06)" }}
+                      contentStyle={{
+                        background: "#0f172a",
+                        border: "1px solid #1e293b",
+                        borderRadius: 6,
+                        fontSize: 11,
+                      }}
+                      formatter={(v: number) => [v.toFixed(3), "PSI"]}
+                    />
+                    <Bar dataKey="psi" barSize={10} radius={[2, 2, 2, 2]}>
+                      {drift.features.slice(0, 6).map((f) => (
+                        <Cell key={f.feature} fill={psiColor(f.psi)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             )}
           </div>

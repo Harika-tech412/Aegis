@@ -52,6 +52,20 @@ export interface Decision {
   created_at: string;
 }
 
+export interface IdentityCheck {
+  applicant_name: string | null;
+  id_document_name: string | null;
+  mismatch: boolean;
+}
+
+export interface SampleId {
+  filename: string;
+  applicant_name: string;
+  id_name: string;
+  mismatch: boolean;
+  image_url: string;
+}
+
 export interface ApplicationDetail {
   id: string;
   created_at: string;
@@ -72,6 +86,7 @@ export interface ApplicationDetail {
   top_shap_features: ShapFeature[];
   counterfactual: Counterfactual[] | null;
   connected_applications: string[];
+  identity_check: IdentityCheck | null;
 }
 
 export interface RingMember {
@@ -136,6 +151,8 @@ export interface ScoreRequest {
   mouse_movement_events: number;
   form_paste_count: number;
   id_document_filename?: string | null;
+  applicant_name?: string | null;
+  id_document_uploaded_name?: string | null;
   applications_from_device_last_24h?: number | null;
   applications_from_ip_last_24h?: number | null;
   income_employer_consistency_score: number;

@@ -66,7 +66,39 @@ def score_application(
             db, Application.ip_hash, body.ip_hash
         )
 
-    result = get_scoring_service().score(payload)
+    service = get_scoring_service()
+    result = service.score(payload)
+
+    # ---- ID-name check: a RULE-BASED signal for the image modality, layered
+    # on top of the ML score. The ML model never sees names; when a document's
+    # printed name disagrees with the declared applicant name, that is direct
+    # documentary evidence, so it adds a fixed +0.3 to the calibrated risk and
+    # the band is re-derived. Deliberately a transparent rule, not a model.
+    id_mismatch = False
+    if body.id_document_uploaded_name and body.applicant_name:
+        id_mismatch = (
+            body.id_document_uploaded_name.strip().lower()
+            != body.applicant_name.strip().lower()
+        )
+    if id_mismatch:
+        result.calibrated_risk_score = min(1.0, result.calibrated_risk_score + 0.3)
+        result.decision_band = service.band_of(result.calibrated_risk_score)
+        result.top_shap_features = [
+            {
+                "feature": "id_name_mismatch",
+                "label": "ID name mismatch (rule)",
+                "value": 1.0,
+                "shap_value": 0.30,  # rule weight, NOT a SHAP value - see label
+                "direction": "increases_risk",
+                "explanation": (
+                    f"The name on the uploaded ID ('{body.id_document_uploaded_name}') does not "
+                    f"match the declared applicant name ('{body.applicant_name}') — "
+                    "rule-based identity check, +0.30 risk"
+                ),
+            },
+            *result.top_shap_features,
+        ]
+
     explanation_text, explanation_source = explain_result(result)
 
     application = Application(
@@ -205,7 +237,24 @@ def get_application(
         )
         connected = ctx["connected_applications"]
 
+    # Identity-check summary from the audited payload (demo ID-name rule).
+    identity_check = None
+    payload = application.raw_payload or {}
+    if payload.get("id_document_uploaded_name") or payload.get("applicant_name"):
+        id_name = payload.get("id_document_uploaded_name")
+        applicant_name = payload.get("applicant_name")
+        identity_check = {
+            "applicant_name": applicant_name,
+            "id_document_name": id_name,
+            "mismatch": bool(
+                id_name
+                and applicant_name
+                and id_name.strip().lower() != applicant_name.strip().lower()
+            ),
+        }
+
     return ApplicationDetailOut(
+        identity_check=identity_check,
         id=application.id,
         created_at=application.created_at,
         applicant_age=application.applicant_age,

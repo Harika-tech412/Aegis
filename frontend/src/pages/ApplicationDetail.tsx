@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { BandBadge } from "@/components/BandBadge";
 import { FeedbackPanel } from "@/components/FeedbackPanel";
+import { IdentityPanel } from "@/components/IdentityPanel";
 import { Navbar } from "@/components/Navbar";
 import { RingPanel } from "@/components/RingPanel";
 import { ShapChart } from "@/components/ShapChart";
@@ -172,6 +173,14 @@ export function ApplicationDetail() {
               ))}
             </CardContent>
           </Card>
+        )}
+
+        {/* ---- Identity verification (ID modality) ---- */}
+        {detail && (
+          <IdentityPanel
+            identityCheck={detail.identity_check}
+            idDocumentFilename={detail.id_document_filename}
+          />
         )}
 
         {/* ---- Ring ---- */}

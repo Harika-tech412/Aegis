@@ -12,6 +12,7 @@ import type {
   DriftResponse,
   FeedbackResponse,
   RingInfo,
+  SampleId,
   ScoreRequest,
   ScoreResponse,
   SimilarCasesResponse,
@@ -94,4 +95,16 @@ export const api = {
 
   getDrift: (windowHours = 24) =>
     request<DriftResponse>(`/monitoring/drift?window_hours=${windowHours}`),
+
+  getSampleId: (mismatch: boolean) =>
+    request<SampleId>(`/demo/sample-id?mismatch=${mismatch}`),
+
+  /** Fetch a protected ID image as an object URL (img tags can't send JWTs). */
+  getIdImageUrl: async (filename: string): Promise<string> => {
+    const headers: Record<string, string> = {};
+    if (authToken) headers.Authorization = `Bearer ${authToken}`;
+    const response = await fetch(`${BASE_URL}/demo/id-image/${filename}`, { headers });
+    if (!response.ok) throw new ApiError(response.status, "Document image not found");
+    return URL.createObjectURL(await response.blob());
+  },
 };

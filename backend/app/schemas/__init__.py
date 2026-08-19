@@ -57,6 +57,10 @@ class ScoreRequest(BaseModel):
     mouse_movement_events: int = Field(ge=0, le=100_000)
     form_paste_count: int = Field(ge=0, le=1_000)
     id_document_filename: str | None = Field(default=None, max_length=128)
+    # Demo-only identity fields: used by the rule-based ID-name check, stored
+    # in raw_payload for audit, never a DB column and never a model feature.
+    applicant_name: str | None = Field(default=None, max_length=100)
+    id_document_uploaded_name: str | None = Field(default=None, max_length=100)
     applications_from_device_last_24h: int | None = Field(default=None, ge=1, le=10_000)
     applications_from_ip_last_24h: int | None = Field(default=None, ge=1, le=10_000)
     income_employer_consistency_score: float = Field(ge=0.0, le=1.0)
@@ -111,6 +115,12 @@ class ApplicationSummaryOut(BaseModel):
     decision_band: str | None = None
 
 
+class IdentityCheckOut(BaseModel):
+    applicant_name: str | None
+    id_document_name: str | None
+    mismatch: bool
+
+
 class ApplicationDetailOut(BaseModel):
     id: uuid.UUID
     created_at: datetime
@@ -131,6 +141,7 @@ class ApplicationDetailOut(BaseModel):
     top_shap_features: list[ShapFeatureOut] = []
     counterfactual: list[CounterfactualOut] | None = None
     connected_applications: list[str] = []
+    identity_check: IdentityCheckOut | None = None
 
 
 class ScoreResponse(BaseModel):

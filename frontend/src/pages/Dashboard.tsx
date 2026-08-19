@@ -40,8 +40,8 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="mx-auto max-w-7xl space-y-5 px-6 py-6">
-        <div className="flex items-center justify-between">
+      <main className="mx-auto max-w-7xl space-y-4 px-4 py-4 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Fraud operations</h1>
             <p className="text-sm text-muted-foreground">
@@ -53,11 +53,11 @@ export function Dashboard() {
 
         <StatCards stats={stats} />
 
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
           <div className="xl:col-span-2">
             <LiveFeed />
           </div>
-          <div className="space-y-5">
+          <div className="space-y-4">
             <DriftWidget />
           </div>
         </div>

@@ -63,8 +63,9 @@ export function LiveFeed({ onData }: { onData?: (total: number) => void }) {
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle>Live application feed</CardTitle>
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-          polling every {POLL_MS / 1000}s
+          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+          <span className="font-semibold tracking-wider text-emerald-400">LIVE</span>
+          <span>· every {POLL_MS / 1000}s</span>
         </span>
       </CardHeader>
       <CardContent className="p-0">
@@ -81,8 +82,8 @@ export function LiveFeed({ onData }: { onData?: (total: number) => void }) {
           </div>
         )}
         {!error && rows !== null && (
-          <div className="feed-scroll max-h-[430px] overflow-y-auto">
-            <Table>
+          <div className="feed-scroll max-h-[430px] overflow-x-auto overflow-y-auto">
+            <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead>Received</TableHead>
@@ -98,7 +99,9 @@ export function LiveFeed({ onData }: { onData?: (total: number) => void }) {
                   <TableRow
                     key={row.id}
                     onClick={() => navigate(`/applications/${row.id}`)}
-                    className={`cursor-pointer ${newIds.has(row.id) ? "animate-feed-in" : ""}`}
+                    className={`cursor-pointer odd:bg-secondary/20 ${
+                      newIds.has(row.id) ? "animate-feed-in" : ""
+                    }`}
                   >
                     <TableCell className="whitespace-nowrap text-muted-foreground">
                       {formatTime(row.created_at)}

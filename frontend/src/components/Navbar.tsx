@@ -1,6 +1,7 @@
 import { LogOut, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { ArchitectureDialog } from "@/components/ArchitectureDialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
@@ -18,8 +19,9 @@ export function Navbar() {
             Trust Intelligence
           </span>
         </Link>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-3">
+          <ArchitectureDialog />
+          <span className="hidden text-sm text-muted-foreground sm:inline">
             Investigator: <span className="text-foreground">{username}</span>
           </span>
           <Button
