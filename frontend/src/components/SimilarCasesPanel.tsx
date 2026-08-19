@@ -22,9 +22,10 @@ export function SimilarCasesPanel({
     <Card>
       <CardHeader>
         <CardTitle>
-          <TitleIcon icon={Library} tone="slate" />
+          <TitleIcon icon={Library} tone="neutral" />
           Similar past cases
         </CardTitle>
+        <p className="aegis-section-desc mt-1">Semantically retrieved from the historical case corpus</p>
       </CardHeader>
       <CardContent>
         {loading && (
@@ -35,7 +36,7 @@ export function SimilarCasesPanel({
           </div>
         )}
         {error && (
-          <p className="text-sm text-red-400">Similar-case search unavailable — {error}</p>
+          <p className="text-sm text-danger">Similar-case search unavailable — {error}</p>
         )}
         {!loading && !error && data && (
           <>

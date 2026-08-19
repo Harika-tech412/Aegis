@@ -70,18 +70,18 @@ export function LiveFeed({
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle>
-          <TitleIcon icon={Radio} tone="emerald" />
+          <TitleIcon icon={Radio} tone="success" />
           Live application feed
         </CardTitle>
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-          <span className="font-semibold tracking-wider text-emerald-400">LIVE</span>
+          <span className="h-2 w-2 animate-pulse rounded-full bg-success" />
+          <span className="font-semibold tracking-wider text-success">LIVE</span>
           <span>· every {pollMs / 1000}s</span>
         </span>
       </CardHeader>
       <CardContent className="p-0">
         {error && (
-          <p className="px-5 py-6 text-sm text-red-400">
+          <p className="px-5 py-6 text-sm text-danger">
             Could not load the application feed — {error}
           </p>
         )}

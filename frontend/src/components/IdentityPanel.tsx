@@ -55,13 +55,14 @@ export function IdentityPanel({
     <Card>
       <CardHeader>
         <CardTitle>
-          <TitleIcon icon={ScanFace} tone="amber" />
+          <TitleIcon icon={ScanFace} tone="brand" />
           Identity verification
         </CardTitle>
+        <p className="aegis-section-desc mt-1">Document OCR compared against the declared applicant</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {mismatch && (
-          <div className="flex items-start gap-2.5 rounded-md border border-red-800 bg-red-950/60 p-3.5 text-sm font-medium text-red-300">
+          <div className="flex items-start gap-2.5 rounded-md border border-danger/50 bg-danger/10 p-3.5 text-sm font-medium text-danger">
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
             <span>
               IDENTITY MISMATCH DETECTED — OCR-extracted name on the document does not match the
@@ -70,7 +71,7 @@ export function IdentityPanel({
           </div>
         )}
         {reused && (
-          <div className="flex items-start gap-2.5 rounded-md border border-red-800 bg-red-950/60 p-3.5 text-sm font-medium text-red-300">
+          <div className="flex items-start gap-2.5 rounded-md border border-danger/50 bg-danger/10 p-3.5 text-sm font-medium text-danger">
             <Copy className="mt-0.5 h-5 w-5 shrink-0" />
             <span>
               ID IMAGE REUSED — this same document image has been submitted with{" "}
@@ -82,7 +83,7 @@ export function IdentityPanel({
           </div>
         )}
         {verified && (
-          <div className="flex items-center gap-2 rounded-md border border-emerald-900 bg-emerald-950/40 px-3 py-2 text-sm text-emerald-300">
+          <div className="flex items-center gap-2 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-sm text-success">
             <BadgeCheck className="h-4 w-4" /> Identity verified — document name matches the
             applicant.
           </div>
@@ -117,7 +118,7 @@ export function IdentityPanel({
                     <tr key={r.label} className="border-b border-border/60 last:border-0">
                       <td className="px-3 py-2 text-muted-foreground">{r.label}</td>
                       <td className="px-3 py-2">{r.form || "—"}</td>
-                      <td className={`px-3 py-2 ${r.alert ? "font-semibold text-red-300" : ""}`}>
+                      <td className={`px-3 py-2 ${r.alert ? "font-semibold text-danger" : ""}`}>
                         {r.doc || "—"}
                       </td>
                     </tr>

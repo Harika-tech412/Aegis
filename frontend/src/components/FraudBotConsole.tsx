@@ -12,7 +12,7 @@
  * detection, explanation) is the real pipeline, unmocked.
  */
 
-import { ChevronDown, ChevronUp, Terminal } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, Terminal, TriangleAlert } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { api } from "@/lib/api";
@@ -137,8 +137,9 @@ export function FraudBotConsole({ applyFrame }: { applyFrame: React.RefObject<HT
         className="flex w-full items-center justify-between gap-2 border-b border-red-900/60 bg-red-950/40 px-3 py-2 text-left"
       >
         <span className="flex items-center gap-2 text-xs font-bold tracking-wider text-red-400">
-          <Terminal className="h-3.5 w-3.5" />
-          ⚠ FRAUD BOT CONSOLE — scripted attack simulation
+          <TriangleAlert className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} />
+          <Terminal className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} />
+          FRAUD BOT CONSOLE — scripted attack simulation
         </span>
         {open ? (
           <ChevronDown className="h-4 w-4 text-red-400/70" />
@@ -167,7 +168,13 @@ export function FraudBotConsole({ applyFrame }: { applyFrame: React.RefObject<HT
                 disabled={running !== null}
                 className="rounded border border-red-900/70 bg-red-950/30 px-2.5 py-1.5 text-left text-[11px] font-semibold text-red-300 transition-colors hover:bg-red-900/40 disabled:opacity-40"
               >
-                {running === s.key ? `▸ running… ${s.label}` : s.label}
+                {running === s.key ? (
+                  <span className="flex items-center gap-1.5">
+                    <Loader2 className="h-3 w-3 animate-spin" /> running… {s.label}
+                  </span>
+                ) : (
+                  s.label
+                )}
               </button>
             ))}
           </div>

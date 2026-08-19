@@ -2,25 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Aegis theme: dark slate/navy operations console. Single-mode by design —
-   this is a fraud-ops tool demoed on a projector, not a consumer app. */
+/* ===========================================================================
+   AEGIS DESIGN TOKENS
+   Premium fintech: deep navy surfaces, one blue interactive accent, and
+   status colours that ONLY ever carry their meaning.
+
+   Colour contract (do not use these outside their meaning):
+     brand   #3B82F6  interactive: primary buttons, links, active nav, focus
+     success #22C55E  AUTO_APPROVE / healthy
+     warning #F59E0B  HUMAN_REVIEW / monitor  -- amber is reserved for this
+     danger  #EF4444  AUTO_FLAG / drift / mismatch
+     agent   #8B5CF6  the AI Investigation Agent surfaces ONLY
+   =========================================================================== */
 @layer base {
   :root {
-    --background: 222 47% 7%;
-    --foreground: 214 32% 91%;
-    --card: 222 44% 10%;
-    --card-foreground: 214 32% 91%;
-    --border: 218 30% 18%;
-    --input: 218 30% 22%;
-    --ring: 216 60% 55%;
-    --primary: 214 90% 88%;
-    --primary-foreground: 222 47% 10%;
-    --secondary: 219 32% 16%;
-    --secondary-foreground: 214 32% 88%;
-    --muted: 219 30% 14%;
-    --muted-foreground: 217 15% 62%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
+    /* Surfaces */
+    --background: 218 58% 6%; /* #070E1A */
+    --card: 218 49% 10%; /* #0D1626 */
+    --elevated: 218 45% 13%; /* #121D30 */
+    --secondary: 217 35% 16%;
+    --muted: 218 40% 12%;
+
+    /* Borders */
+    --border: 217 35% 21%; /* #223047 */
+    --border-emphasis: 216 33% 26%; /* #2C3E58 */
+    --input: 216 33% 26%;
+
+    /* Text */
+    --foreground: 210 40% 96%; /* #F1F5F9 */
+    --card-foreground: 210 40% 96%;
+    --secondary-foreground: 210 40% 96%;
+    --muted-foreground: 215 20% 65%; /* #94A3B8 */
+    --subtle-foreground: 215 16% 47%; /* #64748B */
+
+    /* Interactive + semantic */
+    --brand: 217 91% 60%; /* #3B82F6 */
+    --brand-foreground: 0 0% 100%;
+    --success: 142 71% 45%; /* #22C55E */
+    --warning: 38 92% 50%; /* #F59E0B */
+    --danger: 0 84% 60%; /* #EF4444 */
+    --agent: 258 90% 66%; /* #8B5CF6 */
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 217 91% 60%;
   }
 
   * {
@@ -29,77 +56,90 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    /* Single family, project-wide. Weights: 700 titles/metrics, 600 section
+       headings/labels, 500 body/buttons, 400 supporting text. */
     font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
       Roboto, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+
+  /* Focus is always visible, always brand blue. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--brand));
+    outline-offset: 2px;
+  }
 }
 
 /* ---------------------------------------------------------------------------
-   DESIGN SYSTEM
-   One source of truth for surfaces, type scale, and interaction. Every page
-   pulls from these classes rather than restyling ad hoc.
+   SYSTEM COMPONENTS
+   Spacing scale 4/8/12/16/24/32/48/64 (Tailwind 1/2/3/4/6/8/12/16).
+   Radius scale: input/button 8-10px (rounded-lg), card 12-16px (rounded-xl),
+   modal 16-20px (rounded-2xl).
    --------------------------------------------------------------------------- */
 @layer components {
   /* -- Surfaces ------------------------------------------------------------ */
-  /* Soft elevation via a 1px border + faint inner highlight, never a heavy
-     drop shadow. rounded-xl is the system-wide corner radius. */
   .aegis-surface {
     @apply rounded-xl border border-border bg-card;
     box-shadow:
-      0 1px 0 0 hsl(220 40% 100% / 0.03) inset,
-      0 1px 2px 0 hsl(222 47% 3% / 0.4);
+      0 1px 0 0 hsl(210 40% 100% / 0.03) inset,
+      0 1px 2px 0 hsl(218 58% 2% / 0.5);
   }
 
   .aegis-surface-hover {
     @apply transition-[transform,box-shadow,border-color] duration-150;
   }
   .aegis-surface-hover:hover {
-    @apply border-border/80;
+    border-color: hsl(var(--border-emphasis));
     transform: translateY(-1px);
     box-shadow:
-      0 1px 0 0 hsl(220 40% 100% / 0.05) inset,
-      0 6px 18px -6px hsl(222 47% 2% / 0.65);
+      0 1px 0 0 hsl(210 40% 100% / 0.05) inset,
+      0 6px 18px -6px hsl(218 58% 1% / 0.7);
   }
 
   /* -- Type scale ---------------------------------------------------------- */
   .aegis-overline {
-    @apply text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground;
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
   }
   .aegis-label {
-    @apply text-xs font-medium uppercase tracking-wider text-muted-foreground;
+    @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground;
   }
   .aegis-title {
-    @apply text-xl font-semibold tracking-tight text-foreground;
+    @apply text-xl font-bold tracking-tight text-foreground;
   }
   .aegis-metric {
-    @apply text-2xl font-semibold tabular-nums tracking-tight;
+    @apply text-3xl font-bold tabular-nums tracking-tight;
   }
   .aegis-body {
-    @apply text-sm leading-relaxed text-muted-foreground;
+    @apply text-sm font-normal leading-relaxed text-muted-foreground;
+  }
+  .aegis-section-desc {
+    @apply text-xs font-normal leading-relaxed text-subtle;
   }
 
   /* -- Icon chip ----------------------------------------------------------- */
-  /* Icons always sit in a translucent squircle, never bare in whitespace. */
   .icon-chip {
     @apply inline-flex shrink-0 items-center justify-center rounded-lg p-2;
   }
-  .icon-chip-amber {
-    @apply bg-amber-500/10 text-amber-400;
+  .icon-chip-brand {
+    @apply bg-brand/10 text-brand;
   }
-  .icon-chip-emerald {
-    @apply bg-emerald-500/10 text-emerald-400;
+  .icon-chip-success {
+    @apply bg-success/10 text-success;
   }
-  .icon-chip-red {
-    @apply bg-red-500/10 text-red-400;
+  .icon-chip-warning {
+    @apply bg-warning/10 text-warning;
   }
-  .icon-chip-slate {
-    @apply bg-slate-400/10 text-slate-300;
+  .icon-chip-danger {
+    @apply bg-danger/10 text-danger;
+  }
+  .icon-chip-agent {
+    @apply bg-agent/10 text-agent;
+  }
+  .icon-chip-neutral {
+    @apply bg-slate-400/10 text-muted-foreground;
   }
 
   /* -- Entrance ------------------------------------------------------------ */
-  /* Applied on initial mount only; stagger comes from an inline
-     animation-delay so the sequence reads as intentional. */
   .aegis-enter {
     animation: aegis-enter 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -137,6 +177,6 @@
   width: 6px;
 }
 .feed-scroll::-webkit-scrollbar-thumb {
-  background: hsl(219 30% 22%);
+  background: hsl(var(--border-emphasis));
   border-radius: 3px;
 }

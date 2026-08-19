@@ -52,27 +52,27 @@ function bucketHealth(features: DriftFeature[], names: string[]): number | null 
 }
 
 const STATUS = {
-  STABLE: { label: "Healthy", ring: "#10b981", text: "text-emerald-400", dot: "bg-emerald-400" },
-  MILD_DRIFT: { label: "Monitor", ring: "#f59e0b", text: "text-amber-400", dot: "bg-amber-400" },
+  STABLE: { label: "Healthy", ring: "#22C55E", text: "text-success", dot: "bg-success" },
+  MILD_DRIFT: { label: "Monitor", ring: "#F59E0B", text: "text-warning", dot: "bg-warning" },
   SIGNIFICANT_DRIFT: {
     label: "Significant Drift",
-    ring: "#ef4444",
-    text: "text-red-400",
-    dot: "bg-red-400",
+    ring: "#EF4444",
+    text: "text-danger",
+    dot: "bg-danger",
   },
   INSUFFICIENT_DATA: {
     label: "Awaiting data",
-    ring: "#64748b",
+    ring: "#64748B",
     text: "text-muted-foreground",
-    dot: "bg-slate-500",
+    dot: "bg-subtle",
   },
 } as const;
 
 function toneFor(health: number | null): string {
-  if (health === null) return "bg-slate-500";
-  if (health >= 80) return "bg-emerald-400";
-  if (health >= 50) return "bg-amber-400";
-  return "bg-red-400";
+  if (health === null) return "bg-subtle";
+  if (health >= 80) return "bg-success";
+  if (health >= 50) return "bg-warning";
+  return "bg-danger";
 }
 
 /** Hand-rolled SVG arc gauge — no chart library sizing quirks to fight. */
@@ -92,7 +92,7 @@ function Gauge({ percent, color }: { percent: number | null; color: string }) {
           cy="60"
           r={radius}
           fill="none"
-          stroke="hsl(219 30% 18%)"
+          stroke="hsl(var(--border))"
           strokeWidth="9"
           strokeLinecap="round"
           strokeDasharray={`${circumference * sweep} ${circumference}`}
@@ -110,7 +110,7 @@ function Gauge({ percent, color }: { percent: number | null; color: string }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-semibold tabular-nums text-foreground">
+        <span className="text-[26px] font-bold tabular-nums leading-none text-foreground">
           {percent === null ? "—" : `${percent}%`}
         </span>
         <span className="aegis-overline mt-0.5">health</span>
@@ -146,13 +146,13 @@ export function ModelHealthCard() {
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle>
-          <TitleIcon icon={Activity} tone="amber" />
+          <TitleIcon icon={Activity} tone="brand" />
           Model Health
         </CardTitle>
         <span className="aegis-overline">24h window</span>
       </CardHeader>
       <CardContent>
-        {error && <p className="text-sm text-red-400">Monitor unavailable — {error}</p>}
+        {error && <p className="text-sm text-danger">Monitor unavailable — {error}</p>}
         {!error && !drift && <Skeleton className="h-28 w-full" />}
 
         {!error && drift && status && (
@@ -160,7 +160,7 @@ export function ModelHealthCard() {
             <div className="flex items-center gap-5">
               <Gauge percent={health} color={status.ring} />
               <div className="min-w-0 flex-1">
-                <p className={`text-base font-semibold ${status.text}`}>{status.label}</p>
+                <p className={`text-lg font-bold tracking-tight ${status.text}`}>{status.label}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {drift.recent_applications} application
                   {drift.recent_applications === 1 ? "" : "s"} scored
@@ -238,7 +238,7 @@ export function ModelHealthCard() {
                           {drift.features.slice(0, 6).map((f) => (
                             <Cell
                               key={f.feature}
-                              fill={f.psi > 0.25 ? "#ef4444" : f.psi > 0.1 ? "#f59e0b" : "#10b981"}
+                              fill={f.psi > 0.25 ? "#EF4444" : f.psi > 0.1 ? "#F59E0B" : "#22C55E"}
                             />
                           ))}
                         </Bar>

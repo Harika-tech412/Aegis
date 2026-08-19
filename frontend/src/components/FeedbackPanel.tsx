@@ -38,14 +38,15 @@ export function FeedbackPanel({ applicationId }: { applicationId: string }) {
     <Card>
       <CardHeader>
         <CardTitle>
-          <TitleIcon icon={Gavel} tone="slate" />
+          <TitleIcon icon={Gavel} tone="neutral" />
           Investigator verdict
         </CardTitle>
+        <p className="aegis-section-desc mt-1">Your decision is recorded and feeds the retraining loop</p>
       </CardHeader>
       <CardContent>
         {recorded ? (
-          <div className="flex items-center gap-2.5 rounded-md border border-emerald-900 bg-emerald-950/40 p-3 text-sm">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+          <div className="flex items-center gap-2.5 rounded-md border border-success/40 bg-success/10 p-3 text-sm">
+            <CheckCircle2 className="h-4 w-4 text-success" />
             <span>
               Recorded: <span className="font-semibold">{recorded.replace(/_/g, " ")}</span>.
               This verdict is stored and will inform the next retraining cycle.

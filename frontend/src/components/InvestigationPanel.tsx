@@ -9,10 +9,11 @@ import { api } from "@/lib/api";
 import type { InvestigationResponse } from "@/lib/types";
 import { formatTime } from "@/lib/utils";
 
-const CONFIDENCE_STYLE: Record<string, "approve" | "review" | "flag"> = {
-  HIGH: "flag",
-  MEDIUM: "review",
-  LOW: "approve",
+// Confidence is agent-scoped: HIGH reads solid, MEDIUM/LOW lighter.
+const CONFIDENCE_STYLE: Record<string, "agent" | "outline"> = {
+  HIGH: "agent",
+  MEDIUM: "outline",
+  LOW: "outline",
 };
 
 const STEP_LABELS: Record<string, string> = {
@@ -67,10 +68,10 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
   const allRevealed = data !== null && visibleSteps >= data.investigation_log.length;
 
   return (
-    <Card>
+    <Card className="border-agent/35">
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle>
-          <TitleIcon icon={Bot} tone="amber" />
+          <TitleIcon icon={Bot} tone="agent" />
           AI Investigation Agent
         </CardTitle>
         {data && (
@@ -108,7 +109,7 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
         )}
 
         {error && (
-          <p className="text-sm text-red-400">Investigation unavailable — {error}</p>
+          <p className="text-sm text-danger">Investigation unavailable — {error}</p>
         )}
 
         {data && (
@@ -117,13 +118,15 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
               {data.investigation_log.slice(0, visibleSteps).map((entry, i) => (
                 <li
                   key={`${entry.step}-${i}`}
-                  className="flex animate-feed-in items-start gap-3 rounded-md border border-border bg-background/40 p-3"
+                  className="flex animate-feed-in items-start gap-3 rounded-lg border border-border bg-background/40 p-3"
                 >
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[11px] font-semibold text-muted-foreground">
-                    {i + 1}
-                  </span>
+                  <CheckCircle2
+                    className="mt-0.5 h-5 w-5 shrink-0 text-agent"
+                    strokeWidth={2.25}
+                    aria-label={`step ${i + 1} complete`}
+                  />
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-amber-400/90">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-agent">
                       {STEP_LABELS[entry.step] ?? entry.step}
                     </p>
                     <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
@@ -140,17 +143,17 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
             </ol>
 
             {allRevealed && (
-              <div className="animate-feed-in rounded-md border border-amber-500/40 bg-amber-500/5 p-4">
+              <div className="animate-feed-in rounded-lg border border-agent/40 border-l-4 border-l-agent bg-agent/5 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    <CheckCircle2 className="h-4 w-4 text-amber-400" />
+                    <Sparkles className="h-4 w-4 text-agent" strokeWidth={2} />
                     Recommended action
                   </p>
                   <Badge variant={CONFIDENCE_STYLE[data.confidence] ?? "default"}>
                     {data.confidence} CONFIDENCE
                   </Badge>
                 </div>
-                <p className="mt-2 text-base font-semibold text-foreground">
+                <p className="mt-2 text-base font-bold tracking-tight text-foreground">
                   {data.recommended_action}
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">

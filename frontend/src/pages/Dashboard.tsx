@@ -61,23 +61,23 @@ export function Dashboard() {
         {!demoMode && (
           <Link
             to="/demo"
-            className="aegis-enter aegis-surface-hover flex flex-wrap items-center justify-between gap-4 rounded-xl border border-amber-500/50 bg-amber-500/10 px-5 py-4"
+            className="aegis-enter aegis-surface-hover flex flex-wrap items-center justify-between gap-4 rounded-xl border border-brand/50 bg-brand/10 px-5 py-4"
           >
             <div className="flex items-center gap-4">
-              <span className="icon-chip icon-chip-amber !p-2.5">
+              <span className="icon-chip icon-chip-brand !p-2.5">
                 <MonitorPlay className="h-6 w-6" />
               </span>
               <div>
-                <p className="text-base font-semibold tracking-tight text-amber-300 sm:text-lg">
+                <p className="text-base font-semibold tracking-tight text-brand sm:text-lg">
                   Open Live Demo (Applicant + Fraud Console)
                 </p>
-                <p className="mt-0.5 text-sm leading-relaxed text-amber-200/70">
+                <p className="mt-0.5 text-sm leading-relaxed text-brand/70">
                   Split-screen: submit an application as a fraudster on the left, watch Aegis
                   catch it on the right — with real OCR ID verification.
                 </p>
               </div>
             </div>
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground">
               Launch <ArrowRight className="h-4 w-4" />
             </span>
           </Link>
@@ -110,7 +110,7 @@ export function Dashboard() {
       <footer className="border-t border-border bg-background/80">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[11px] text-muted-foreground sm:px-6">
           <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="h-1.5 w-1.5 rounded-full bg-success" />
             All systems operational
           </span>
           <span className="text-border">·</span>

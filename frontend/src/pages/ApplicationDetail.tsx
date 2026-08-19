@@ -49,7 +49,7 @@ export function ApplicationDetail() {
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="mx-auto max-w-4xl px-6 py-16 text-center">
-          <p className="text-sm text-red-400">Could not load this application — {detailError}</p>
+          <p className="text-sm text-danger">Could not load this application — {detailError}</p>
           <Link to="/dashboard" className="mt-4 inline-block text-sm text-muted-foreground underline">
             Back to dashboard
           </Link>
@@ -135,9 +135,10 @@ export function ApplicationDetail() {
             <Card className="aegis-enter" style={stagger(1)}>
               <CardHeader>
                 <CardTitle>
-                  <TitleIcon icon={Lightbulb} tone="amber" />
+                  <TitleIcon icon={Lightbulb} tone="brand" />
                   Why the model decided this
                 </CardTitle>
+                <p className="aegis-section-desc mt-1">Model factors ranked by contribution to this score</p>
               </CardHeader>
               <CardContent>
                 <p className="mb-5 rounded-md border border-border bg-secondary/40 p-4 text-sm leading-relaxed">
@@ -156,9 +157,10 @@ export function ApplicationDetail() {
           <Card className="aegis-enter" style={stagger(2)}>
             <CardHeader>
               <CardTitle>
-                <TitleIcon icon={GitBranch} tone="emerald" />
+                <TitleIcon icon={GitBranch} tone="success" />
                 What would change this decision
               </CardTitle>
+              <p className="aegis-section-desc mt-1">Smallest single-factor change that reaches a lower-risk band</p>
             </CardHeader>
             <CardContent className="space-y-2">
               {detail.counterfactual.map((c) => (
@@ -167,8 +169,8 @@ export function ApplicationDetail() {
                     <>
                       If <span className="text-foreground">{c.feature.replace(/_/g, " ")}</span>{" "}
                       changed from{" "}
-                      <span className="tabular-nums text-red-300">{c.current_value}</span> to{" "}
-                      <span className="tabular-nums text-emerald-300">{c.required_value}</span>,
+                      <span className="tabular-nums text-danger">{c.current_value}</span> to{" "}
+                      <span className="tabular-nums text-success">{c.required_value}</span>,
                       this application would move to a lower-risk band.
                     </>
                   ) : (

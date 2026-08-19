@@ -3,15 +3,18 @@ import type { HTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
+/** Compact enterprise badge. Status meaning is carried by label text too, never colour alone. */
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold tracking-wide",
+  "inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap",
   {
     variants: {
       variant: {
-        default: "border-border bg-secondary text-secondary-foreground",
-        approve: "border-emerald-800 bg-emerald-950/70 text-emerald-400",
-        review: "border-amber-800 bg-amber-950/60 text-amber-400",
-        flag: "border-red-800 bg-red-950/60 text-red-400",
+        default: "border-border-emphasis bg-secondary text-muted-foreground",
+        brand: "border-brand/40 bg-brand/10 text-brand",
+        approve: "border-success/40 bg-success/10 text-success",
+        review: "border-warning/40 bg-warning/10 text-warning",
+        flag: "border-danger/40 bg-danger/10 text-danger",
+        agent: "border-agent/40 bg-agent/10 text-agent",
         outline: "border-border text-muted-foreground",
       },
     },

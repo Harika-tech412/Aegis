@@ -65,7 +65,7 @@ export function ShapChart({ features }: { features: ShapFeature[] }) {
           <li key={f.feature} className="flex items-start gap-2 text-sm">
             <span
               className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
-                f.shap_value > 0 ? "bg-red-400" : "bg-emerald-400"
+                f.shap_value > 0 ? "bg-danger" : "bg-success"
               }`}
             />
             <span className="text-muted-foreground">{f.explanation}</span>

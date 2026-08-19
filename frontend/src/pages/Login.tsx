@@ -43,43 +43,43 @@ export function Login() {
   return (
     <div className="flex min-h-screen bg-background">
       {/* ---- Left brand panel (hidden under 768px) ---- */}
-      <div className="relative hidden w-3/5 flex-col justify-between overflow-hidden bg-gradient-to-br from-[#0a1428] via-[#0c1a33] to-[#111f3d] p-10 md:flex">
+      <div className="relative hidden w-3/5 flex-col justify-center overflow-hidden border-r border-border bg-gradient-to-br from-[#070E1A] via-[#0B1424] to-[#101C31] p-10 lg:p-14 md:flex">
         <div className="flex items-center gap-2.5">
-          <ShieldCheck className="h-6 w-6 text-amber-400" />
+          <ShieldCheck className="h-6 w-6 text-brand" />
           <span className="text-lg font-semibold tracking-tight text-slate-100">Aegis</span>
         </div>
 
-        <div className="max-w-lg">
-          <h1 className="text-4xl font-semibold leading-tight tracking-tight text-slate-100">
+        <div className="max-w-xl">
+          <h1 className="text-[2.5rem] font-bold leading-[1.12] tracking-tight text-foreground">
             Every application has a story.
             <br />
             Aegis makes sure it&rsquo;s the true one.
           </h1>
-          <p className="mt-3 text-sm font-medium uppercase tracking-[0.14em] text-amber-400/80">
+          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
             Real-time trust intelligence for digital lending
           </p>
-          <p className="mt-4 text-base leading-relaxed text-slate-400">
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
             Multi-signal fraud detection with explainable decisioning, fraud-ring graph
             analysis, and a human investigator always in the loop.
           </p>
 
-          <div className="mt-10 grid grid-cols-2 gap-3">
+          <div className="mt-8 grid grid-cols-4 gap-2">
             {GLANCE_STATS.map(({ icon: Icon, value, label }) => (
               <div
                 key={label}
-                className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4"
+                className="rounded-lg border border-border bg-card/50 px-3 py-2.5"
               >
-                <span className="icon-chip icon-chip-amber mb-2.5">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <p className="text-xl font-semibold tabular-nums text-slate-100">{value}</p>
-                <p className="mt-0.5 text-xs text-slate-500">{label}</p>
+                <Icon className="mb-1.5 h-3.5 w-3.5 text-brand/70" strokeWidth={2} />
+                <p className="text-base font-bold tabular-nums leading-none text-foreground">
+                  {value}
+                </p>
+                <p className="mt-1 text-[10px] leading-tight text-subtle">{label}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-xs text-slate-600">
+        <p className="absolute bottom-8 left-10 text-[11px] text-subtle lg:left-14">
           Demonstration environment · all data is synthetic · Synchrony Hackathon 2026
         </p>
       </div>
@@ -88,7 +88,7 @@ export function Login() {
       <div className="flex w-full flex-col items-center justify-center px-6 md:w-2/5">
         {/* compact logo strip for small screens where the brand panel is hidden */}
         <div className="mb-8 flex items-center gap-2 md:hidden">
-          <ShieldCheck className="h-5 w-5 text-amber-400" />
+          <ShieldCheck className="h-5 w-5 text-brand" />
           <span className="text-lg font-semibold">Aegis</span>
           <span className="text-xs uppercase tracking-widest text-muted-foreground">
             Trust Intelligence
@@ -97,10 +97,10 @@ export function Login() {
 
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-secondary">
-              <ShieldCheck className="h-7 w-7 text-amber-400" />
+            <div className="icon-chip icon-chip-brand mb-4 !p-3">
+              <ShieldCheck className="h-6 w-6" strokeWidth={2} />
             </div>
-            <h2 className="text-2xl font-semibold tracking-tight">Aegis</h2>
+            <h2 className="text-2xl font-bold tracking-tight">AEGIS</h2>
             <p className="mt-1 text-sm text-muted-foreground">Investigator Console</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:hidden">
               Every application has a story. Aegis makes sure it&rsquo;s the true one.
@@ -131,7 +131,7 @@ export function Login() {
             </div>
 
             {error && (
-              <div className="flex items-start gap-2.5 rounded-md border border-red-900 bg-red-950/50 p-3 text-sm text-red-300">
+              <div className="flex items-start gap-2.5 rounded-md border border-danger/40 bg-danger/10 p-3 text-sm text-danger">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -142,15 +142,14 @@ export function Login() {
             </Button>
           </form>
 
-          <div className="mt-4 rounded-md border border-amber-900/50 bg-amber-950/30 px-3 py-2 text-xs text-amber-300/90">
-            Demo credentials pre-filled — click <span className="font-semibold">Sign in</span> to
-            continue.
-          </div>
+          <p className="mt-3 text-center text-xs text-subtle">
+            Demo credentials pre-filled — click <span className="font-medium text-muted-foreground">Sign in</span> to continue.
+          </p>
 
           <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
             Not an investigator? Access is provisioned by your IT administrator.
             <br />
-            <a href="/apply" className="mt-1 inline-block text-amber-400/90 hover:underline">
+            <a href="/apply" className="mt-1 inline-block text-brand/90 hover:underline">
               Apply for a loan →
             </a>
           </p>

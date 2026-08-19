@@ -52,7 +52,7 @@ export function RingPanel({
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
         <CardTitle>
-          <TitleIcon icon={Network} tone="red" />
+          <TitleIcon icon={Network} tone="danger" />
           Fraud ring analysis
         </CardTitle>
         {ring && ring.ring_size > 0 && (
@@ -60,7 +60,7 @@ export function RingPanel({
             <span className="text-muted-foreground">ring risk </span>
             <span
               className={`font-semibold tabular-nums ${
-                ring.ring_risk_score >= 0.5 ? "text-red-400" : "text-amber-400"
+                ring.ring_risk_score >= 0.5 ? "text-danger" : "text-brand"
               }`}
             >
               {(ring.ring_risk_score * 100).toFixed(0)}%
@@ -70,7 +70,7 @@ export function RingPanel({
       </CardHeader>
       <CardContent>
         {loading && <Skeleton className="h-48 w-full" />}
-        {error && <p className="text-sm text-red-400">Ring lookup unavailable — {error}</p>}
+        {error && <p className="text-sm text-danger">Ring lookup unavailable — {error}</p>}
         {!loading && !error && ring && ring.ring_size === 0 && (
           <p className="py-6 text-center text-sm text-muted-foreground">
             No connections found — this application is not linked to any others by device or IP.
@@ -104,9 +104,9 @@ export function RingPanel({
             </div>
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span><span className="mr-1 inline-block h-2 w-2 rounded-full" style={{ background: SELF_COLOR }} />this application</span>
-              <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-red-400" />auto-flagged</span>
-              <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-amber-400" />human review</span>
-              <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-400" />auto-approved</span>
+              <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-danger" />auto-flagged</span>
+              <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-warning" />human review</span>
+              <span><span className="mr-1 inline-block h-2 w-2 rounded-full bg-success" />auto-approved</span>
               <span><span className="mr-1 inline-block h-2 w-2 rounded-full" style={{ background: HISTORICAL_COLOR }} />historical record</span>
             </div>
           </>

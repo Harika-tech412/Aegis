@@ -23,10 +23,10 @@ const CARDS: {
   chip: string;
   icon: typeof Inbox;
 }[] = [
-  { key: "total", label: "Total applications", accent: "text-foreground", chip: "icon-chip-slate", icon: Inbox },
-  { key: "approve", label: "Auto-approved", accent: "text-emerald-400", chip: "icon-chip-emerald", icon: CheckCircle2 },
-  { key: "review", label: "Human review", accent: "text-amber-400", chip: "icon-chip-amber", icon: UserSearch },
-  { key: "flag", label: "Auto-flagged", accent: "text-red-400", chip: "icon-chip-red", icon: AlertOctagon },
+  { key: "total", label: "Total applications", accent: "text-foreground", chip: "icon-chip-brand", icon: Inbox },
+  { key: "approve", label: "Auto-approved", accent: "text-success", chip: "icon-chip-success", icon: CheckCircle2 },
+  { key: "review", label: "Human review", accent: "text-warning", chip: "icon-chip-warning", icon: UserSearch },
+  { key: "flag", label: "Auto-flagged", accent: "text-danger", chip: "icon-chip-danger", icon: AlertOctagon },
 ];
 
 function StatCard({

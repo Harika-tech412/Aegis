@@ -27,8 +27,8 @@ export function DemoSplit() {
   return (
     <div className="flex h-screen flex-col bg-background">
       <div className="flex h-11 shrink-0 items-center justify-center gap-2 border-b border-border bg-secondary/60 px-3 text-xs font-medium tracking-wide">
-        <MonitorPlay className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-        <span className="font-semibold text-amber-400">AEGIS LIVE DEMO</span>
+        <MonitorPlay className="h-3.5 w-3.5 shrink-0 text-brand" />
+        <span className="font-semibold text-brand">AEGIS LIVE DEMO</span>
         <span className="hidden text-muted-foreground sm:inline">
           — Left: applicant view · Right: fraud operations console
         </span>
@@ -46,7 +46,7 @@ export function DemoSplit() {
               onClick={() => setActivePane(pane)}
               className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
                 activePane === pane
-                  ? "bg-amber-500/15 text-amber-300"
+                  ? "bg-brand/15 text-brand"
                   : "text-muted-foreground hover:bg-secondary"
               }`}
             >

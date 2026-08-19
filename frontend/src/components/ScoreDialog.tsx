@@ -86,7 +86,7 @@ function SliderField({
     <div className="space-y-1">
       <div className="flex items-baseline justify-between">
         <Label>{label}</Label>
-        <span className="text-sm tabular-nums text-amber-300">{format(value)}</span>
+        <span className="text-sm tabular-nums text-brand">{format(value)}</span>
       </div>
       <input
         type="range"
@@ -95,7 +95,7 @@ function SliderField({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-secondary accent-amber-400"
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-secondary accent-brand"
       />
       <p className="text-xs text-muted-foreground">{hint}</p>
     </div>
@@ -159,7 +159,7 @@ export function ScoreDialog({ onScored }: { onScored?: () => void }) {
           <Button
             variant="secondary"
             size="sm"
-            className="border-red-900 text-red-300"
+            className="border-danger/40 text-danger"
             onClick={() => setForm((f) => ({ ...f, ...FRAUD_PRESET, ...freshIds() }))}
           >
             Preset: obvious fraud
@@ -306,10 +306,10 @@ export function ScoreDialog({ onScored }: { onScored?: () => void }) {
             dialog is a tabular-signals test bench and never asks anyone to
             transcribe a document by hand. */}
         <div className="mt-5 flex items-start gap-2.5 rounded-md border border-border bg-secondary/30 p-3 text-sm text-muted-foreground">
-          <FileSearch className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+          <FileSearch className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
           <span>
             For full ID document verification with OCR, use the{" "}
-            <Link to="/demo" className="font-medium text-amber-400 hover:underline">
+            <Link to="/demo" className="font-medium text-brand hover:underline">
               Live Demo
             </Link>
             .
