@@ -31,7 +31,18 @@ services:
       - ./ml:/ml
       - ./data:/data
       - ./scripts:/scripts
+      # Persist the sentence-transformers model download across container
+      # recreations (seeding and similar-cases both use it).
+      - aegis_hf_cache:/root/.cache/huggingface
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
 
 volumes:
   aegis_pgdata:
+  aegis_hf_cache:

@@ -32,6 +32,7 @@ from app.schemas import (
 from app.services import audit
 from app.services.auth import get_current_investigator
 from app.services.llm_explainer import explain_result
+from app.services.similar_cases import find_similar_cases
 
 router = APIRouter(tags=["applications"])
 
@@ -257,6 +258,16 @@ def submit_feedback(
     )
     db.commit()
     return FeedbackOut.model_validate(feedback)
+
+
+@router.get("/applications/{application_id}/similar-cases")
+def get_similar_cases(
+    application_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    _: Investigator = Depends(get_current_investigator),
+) -> dict:
+    application, decision = _load_application(db, application_id)
+    return find_similar_cases(db, application, decision)
 
 
 @router.get("/applications/{application_id}/ring", response_model=RingOut)

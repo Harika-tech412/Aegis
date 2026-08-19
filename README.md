@@ -105,4 +105,4 @@ mild, > 0.25 significant). Windows under 30 applications return
 
 ## Status
 
-🚧 **Work in progress.** Backend + ML engine live; frontend in progress.
+🚧 **Work in progress.** Backend + ML engine + React dashboard live; demo polish remaining.
