@@ -1,5 +1,6 @@
+import { ArrowRight, MonitorPlay } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import { DriftWidget } from "@/components/DriftWidget";
 import { LiveFeed } from "@/components/LiveFeed";
@@ -46,6 +47,31 @@ export function Dashboard() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-4 sm:px-6">
+        {/* Primary CTA. Hidden inside the split-screen demo itself (?demo=1),
+            where this dashboard IS the right-hand pane. */}
+        {!demoMode && (
+          <Link
+            to="/demo"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-500/60 bg-amber-500/10 px-5 py-4 transition-colors hover:bg-amber-500/20"
+          >
+            <div className="flex items-center gap-3.5">
+              <MonitorPlay className="h-7 w-7 shrink-0 text-amber-400" />
+              <div>
+                <p className="text-lg font-semibold text-amber-300">
+                  Open Live Demo (Applicant + Fraud Console)
+                </p>
+                <p className="text-sm text-amber-200/70">
+                  Split-screen: submit an application as a fraudster on the left, watch Aegis
+                  catch it on the right — with real OCR ID verification.
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950">
+              Launch <ArrowRight className="h-4 w-4" />
+            </span>
+          </Link>
+        )}
+
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Fraud operations</h1>

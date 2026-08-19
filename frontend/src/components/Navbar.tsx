@@ -1,4 +1,4 @@
-import { LogOut, ShieldCheck } from "lucide-react";
+import { LogOut, MonitorPlay, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { ArchitectureDialog } from "@/components/ArchitectureDialog";
@@ -22,8 +22,9 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           <Link
             to="/demo"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-amber-400 hover:bg-secondary/60"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-amber-500/50 bg-amber-500/10 px-3 text-sm font-semibold text-amber-300 transition-colors hover:bg-amber-500/20"
           >
+            <MonitorPlay className="h-3.5 w-3.5" />
             Live Demo
           </Link>
           <ArchitectureDialog />

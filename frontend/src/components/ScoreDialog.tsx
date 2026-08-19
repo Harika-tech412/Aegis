@@ -1,5 +1,6 @@
-import { BadgeCheck, FileWarning, Upload } from "lucide-react";
-import { useRef, useState } from "react";
+import { FileSearch } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,6 @@ const LOAN_PURPOSES = [
 interface FormState extends ScoreRequest {}
 
 const LEGIT_PRESET: FormState = {
-  applicant_name: "Morgan Reyes",
   applicant_age: 38,
   annual_income: 68000,
   employment_type: "salaried",
@@ -102,20 +102,10 @@ function SliderField({
   );
 }
 
-interface IdDoc {
-  previewUrl: string;
-  printedName: string | null;
-  filename: string | null;
-  source: "sample" | "upload";
-  sampleMismatch?: boolean;
-}
-
 export function ScoreDialog({ onScored }: { onScored?: () => void }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState<FormState>({ ...LEGIT_PRESET });
-  const [idDoc, setIdDoc] = useState<IdDoc | null>(null);
-  const fileInput = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -125,54 +115,15 @@ export function ScoreDialog({ onScored }: { onScored?: () => void }) {
     ip_hash: `demo_ip_${Math.random().toString(36).slice(2, 8)}`,
   });
 
-  async function loadSampleId(mismatch: boolean) {
-    try {
-      const sample = await api.getSampleId(mismatch);
-      const previewUrl = await api.getIdImageUrl(sample.filename);
-      setIdDoc({
-        previewUrl,
-        printedName: sample.id_name,
-        filename: sample.filename,
-        source: "sample",
-        sampleMismatch: sample.mismatch,
-      });
-      // The sample knows the applicant of record — fill the name field so the
-      // match/mismatch comparison is meaningful.
-      set("applicant_name", sample.applicant_name);
-      toast.info(
-        mismatch
-          ? "Loaded a mismatched ID — synthetic identity-theft scenario"
-          : "Loaded a matching ID document"
-      );
-    } catch (e) {
-      toast.error("Could not load sample ID", { description: (e as Error).message });
-    }
-  }
-
-  function onFileChosen(file: File | undefined) {
-    if (!file) return;
-    setIdDoc({
-      previewUrl: URL.createObjectURL(file),
-      printedName: null, // custom upload: presenter types the printed name below
-      filename: null,
-      source: "upload",
-    });
-  }
-
   async function submit() {
     setBusy(true);
     try {
-      const result = await api.score({
-        ...form,
-        id_document_filename: idDoc?.filename ?? form.id_document_filename ?? null,
-        id_document_uploaded_name: idDoc?.printedName ?? null,
-      });
+      const result = await api.score(form);
       const band = result.decision.decision_band.replace("_", "-");
       toast.success(`Scored: ${band}`, {
         description: `Calibrated risk ${result.decision.calibrated_risk_score.toFixed(3)} in ${result.decision.latency_ms.toFixed(0)}ms — watch the live feed.`,
       });
       setOpen(false);
-      setIdDoc(null);
       onScored?.();
     } catch (e) {
       toast.error("Scoring failed", { description: (e as Error).message });
@@ -184,16 +135,16 @@ export function ScoreDialog({ onScored }: { onScored?: () => void }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-amber-500 font-semibold text-slate-950 hover:bg-amber-400">
-          Score new application
+        <Button variant="outline" size="sm">
+          Quick manual test (advanced, no ID upload)
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Score a new application</DialogTitle>
+          <DialogTitle>Quick manual test</DialogTitle>
           <DialogDescription>
-            Submit a synthetic application to the live scoring engine. Use the presets, then
-            adjust the behavioral signals to see the decision change.
+            Test the tabular and behavioral signals directly against the live scoring engine.
+            Use a preset, then adjust the sliders to see the decision change.
           </DialogDescription>
         </DialogHeader>
 
@@ -216,14 +167,6 @@ export function ScoreDialog({ onScored }: { onScored?: () => void }) {
         </div>
 
         <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-          <div className="space-y-1 sm:col-span-2">
-            <Label>Applicant full name</Label>
-            <Input
-              value={form.applicant_name ?? ""}
-              onChange={(e) => set("applicant_name", e.target.value)}
-              placeholder="As declared on the application"
-            />
-          </div>
           <div className="space-y-1">
             <Label>Applicant age</Label>
             <Input
@@ -358,87 +301,19 @@ export function ScoreDialog({ onScored }: { onScored?: () => void }) {
           </div>
         </div>
 
-        {/* ---- ID document (multimodal demo) ---- */}
-        <div className="mt-5 border-t border-border pt-4">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Upload ID document (optional)
-          </p>
-          <p className="mb-3 text-xs text-muted-foreground">
-            The printed name is checked against the declared applicant name — a mismatch is a
-            rule-based identity signal layered on the ML score.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" size="sm" onClick={() => fileInput.current?.click()}>
-              <Upload className="h-3.5 w-3.5" /> Upload PNG/JPG
-            </Button>
-            <input
-              ref={fileInput}
-              type="file"
-              accept="image/png,image/jpeg"
-              className="hidden"
-              onChange={(e) => onFileChosen(e.target.files?.[0])}
-            />
-            <Button variant="secondary" size="sm" onClick={() => loadSampleId(false)}>
-              <BadgeCheck className="h-3.5 w-3.5 text-emerald-400" /> Sample ID (matches)
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="border-red-900"
-              onClick={() => loadSampleId(true)}
-            >
-              <FileWarning className="h-3.5 w-3.5 text-red-400" /> Sample ID (mismatch — ID theft
-              demo)
-            </Button>
-          </div>
-
-          {idDoc && (
-            <div className="mt-3 flex flex-wrap items-start gap-4 rounded-md border border-border bg-background/50 p-3">
-              <img
-                src={idDoc.previewUrl}
-                alt="Synthetic ID document preview"
-                className="h-28 w-auto rounded border border-border"
-              />
-              <div className="min-w-[200px] flex-1 space-y-2 text-sm">
-                {idDoc.source === "sample" ? (
-                  <>
-                    <p>
-                      <span className="text-muted-foreground">Name printed on ID: </span>
-                      <span className="font-medium">{idDoc.printedName}</span>
-                    </p>
-                    <p>
-                      <span className="text-muted-foreground">Declared applicant: </span>
-                      <span className="font-medium">{form.applicant_name}</span>
-                    </p>
-                    <p
-                      className={`text-xs font-semibold ${
-                        idDoc.sampleMismatch ? "text-red-400" : "text-emerald-400"
-                      }`}
-                    >
-                      {idDoc.sampleMismatch
-                        ? "⚠ Names will NOT match — expect an ID_NAME_MISMATCH signal"
-                        : "✓ Names match"}
-                    </p>
-                  </>
-                ) : (
-                  <div className="space-y-1">
-                    <Label className="text-xs">Name printed on this ID</Label>
-                    <Input
-                      placeholder="Type the name shown on the document"
-                      value={idDoc.printedName ?? ""}
-                      onChange={(e) =>
-                        setIdDoc((d) => d && { ...d, printedName: e.target.value })
-                      }
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Custom uploads are previewed locally; OCR is out of scope for this demo, so
-                      enter the printed name manually.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+        {/* ID document verification deliberately lives ONLY in the Live Demo,
+            where it runs real OCR + perceptual-hash reuse detection. This
+            dialog is a tabular-signals test bench and never asks anyone to
+            transcribe a document by hand. */}
+        <div className="mt-5 flex items-start gap-2.5 rounded-md border border-border bg-secondary/30 p-3 text-sm text-muted-foreground">
+          <FileSearch className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+          <span>
+            For full ID document verification with OCR, use the{" "}
+            <Link to="/demo" className="font-medium text-amber-400 hover:underline">
+              Live Demo
+            </Link>
+            .
+          </span>
         </div>
 
         <div className="mt-6 flex justify-end gap-2">

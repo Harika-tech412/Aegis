@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -10,6 +11,18 @@ function psiColor(psi: number): string {
   if (psi > 0.25) return "#ef4444";
   if (psi > 0.1) return "#f59e0b";
   return "#10b981";
+}
+
+/** One short sentence for the collapsed view (the API summary is a paragraph). */
+function shortSummary(drift: DriftResponse): string {
+  const n = drift.recent_applications;
+  const apps = `${n} application${n === 1 ? "" : "s"}`;
+  if (drift.overall_drift_status === "INSUFFICIENT_DATA")
+    return `Only ${apps} in the last ${drift.window_hours}h — 30 needed for a PSI verdict.`;
+  const drifted = drift.features.filter((f) => f.status !== "STABLE").length;
+  if (drift.overall_drift_status === "STABLE")
+    return `Input distributions match training data across ${apps}.`;
+  return `${drifted} of ${drift.features.length} features drifting across ${apps}.`;
 }
 
 const STATUS_STYLE: Record<string, { dot: string; text: string; label: string }> = {
@@ -26,6 +39,8 @@ const STATUS_STYLE: Record<string, { dot: string; text: string; label: string }>
 export function DriftWidget() {
   const [drift, setDrift] = useState<DriftResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Collapsed on every page load by design — details are opt-in, not sticky.
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,8 +77,27 @@ export function DriftWidget() {
                 {drift.recent_applications === 1 ? "" : "s"} in window
               </span>
             </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">{drift.summary}</p>
-            {drift.features.length > 0 && (
+
+            {/* Collapsed by default: one status line + one short sentence. The
+                per-feature PSI bars and the full explanation are opt-in. */}
+            <p className="text-sm leading-relaxed text-muted-foreground">{shortSummary(drift)}</p>
+
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {expanded ? "Hide details" : "Show details"}
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {expanded && (
+              <p className="border-t border-border pt-2.5 text-sm leading-relaxed text-muted-foreground">
+                {drift.summary}
+              </p>
+            )}
+            {expanded && drift.features.length > 0 && (
               <div className="h-40 w-full pt-1">
                 <ResponsiveContainer>
                   <BarChart
