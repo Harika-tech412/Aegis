@@ -3,3 +3,8 @@ numpy==1.26.4
 faker==33.1.0
 pillow==11.0.0
 openai==1.54.0
+xgboost==2.1.2
+scikit-learn==1.5.2
+shap==0.46.0
+networkx==3.4.2
+joblib==1.4.2

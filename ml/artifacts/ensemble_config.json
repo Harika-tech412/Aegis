@@ -1,0 +1,18 @@
+{
+  "xgb_weight": 0.7,
+  "anomaly_weight": 0.3,
+  "anomaly_norm": {
+    "min": 0.37216018899231534,
+    "max": 0.6488515270036531
+  },
+  "bands": {
+    "auto_approve_below": 0.002176278563656148,
+    "auto_flag_above": 0.04878048780487805
+  },
+  "xgb_params": {
+    "max_depth": 4,
+    "n_estimators": 200,
+    "learning_rate": 0.05
+  },
+  "scale_pos_weight_final": 18.984326018808776
+}

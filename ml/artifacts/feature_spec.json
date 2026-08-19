@@ -1,0 +1,58 @@
+{
+  "numeric_features": [
+    "applicant_age",
+    "annual_income",
+    "requested_amount",
+    "session_duration_seconds",
+    "mouse_movement_events",
+    "form_paste_count",
+    "applications_from_device_last_24h",
+    "applications_from_ip_last_24h",
+    "income_employer_consistency_score",
+    "identity_consistency_score"
+  ],
+  "derived_features": [
+    "loan_to_income_ratio",
+    "has_id_document"
+  ],
+  "categorical_features": {
+    "employment_type": [
+      "gig_worker",
+      "salaried",
+      "self_employed",
+      "unemployed"
+    ],
+    "loan_purpose": [
+      "business",
+      "debt_consolidation",
+      "education",
+      "home_improvement",
+      "medical",
+      "other"
+    ]
+  },
+  "feature_names": [
+    "applicant_age",
+    "annual_income",
+    "requested_amount",
+    "session_duration_seconds",
+    "mouse_movement_events",
+    "form_paste_count",
+    "applications_from_device_last_24h",
+    "applications_from_ip_last_24h",
+    "income_employer_consistency_score",
+    "identity_consistency_score",
+    "loan_to_income_ratio",
+    "has_id_document",
+    "employment_type=gig_worker",
+    "employment_type=salaried",
+    "employment_type=self_employed",
+    "employment_type=unemployed",
+    "loan_purpose=business",
+    "loan_purpose=debt_consolidation",
+    "loan_purpose=education",
+    "loan_purpose=home_improvement",
+    "loan_purpose=medical",
+    "loan_purpose=other"
+  ]
+}

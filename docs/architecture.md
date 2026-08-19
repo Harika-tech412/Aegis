@@ -2,17 +2,33 @@
 
 ## Decision Bands
 
-**Status: specification only. Not implemented yet — this documents the target
-for the scoring/decisioning layer so we build to it in the next step.**
+**Status: implemented and tuned.** Thresholds below are the actual values
+produced by `ml/train.py` on the validation split and stored in
+`ml/artifacts/ensemble_config.json`; the placeholder 0.10/0.90 values from the
+original spec are superseded.
 
-Every scored application falls into one of three bands based on the model's
-`risk_score` (0.0–1.0):
+Every scored application falls into one of three bands based on the
+**calibrated** ensemble `risk_score` (0.0–1.0):
 
 | Band | Condition | Action |
 |---|---|---|
-| `AUTO_APPROVE` | `risk_score < 0.10` | High-confidence legitimate. Proceeds without human involvement. |
-| `HUMAN_REVIEW` | `0.10 <= risk_score <= 0.90` | Low confidence. Routed to the investigator queue with SHAP attributions, the free-text purpose check, and the ID-name check attached. |
-| `AUTO_FLAG` | `risk_score > 0.90` | High-confidence fraud. Flagged and held for action. |
+| `AUTO_APPROVE` | `risk_score < 0.0022` | High-confidence legitimate. Proceeds without human involvement. |
+| `HUMAN_REVIEW` | `0.0022 <= risk_score <= 0.0488` band and everything between | Low confidence. Routed to the investigator queue with SHAP attributions, the free-text purpose check, and the ID-name check attached. |
+| `AUTO_FLAG` | `risk_score > 0.0488` | High-confidence fraud. Flagged and held for action. |
+
+**How these were chosen.** On the validation split (never used for model
+fitting of the final evaluation), we selected the smallest AUTO_FLAG cutoff
+that keeps the false-positive rate on legitimate applications at or under 3%,
+and the largest AUTO_APPROVE cutoff that keeps missed fraud inside the
+approve band at or under 2%. The numbers look small because the isotonic
+calibrator maps the score distribution honestly: 95% of traffic is legitimate
+and concentrates near zero, so "more than ~5% calibrated fraud probability"
+is already an unusual application. On the untouched test split this yields
+AUTO_APPROVE 48.7% / HUMAN_REVIEW 44.2% / AUTO_FLAG 7.1% of traffic, with
+69.4% of AUTO_FLAG being true fraud and 0.00% fraud inside AUTO_APPROVE
+(holdout: 49.3% / 43.4% / 7.3%, flag precision 70.3%, approve leak 0.07%).
+Full derivation and the hard-legitimate stress test are in
+`ml/artifacts/model_report.md` §6.
 
 ### Why three bands and not a single threshold
 
@@ -40,18 +56,26 @@ regardless of its headline accuracy.
 
 ### Threshold status
 
-**The 0.10 and 0.90 values above are placeholders.** They were chosen to state
-the shape of the policy, not because any evidence supports them yet. They must
-be tuned once training produces real score distributions, using at minimum:
+Tuned as described above. The checks the original spec demanded were run and
+are reported in `ml/artifacts/model_report.md`:
 
-- The precision/recall curve on the holdout set at each candidate cutoff.
-- Resulting `HUMAN_REVIEW` queue volume — the band is only useful if a real
-  team could work it.
-- Behaviour on the hard-legitimate cohort specifically, not just aggregate
-  accuracy.
-- Score calibration. If the model's probabilities are not calibrated, a
-  "confidence" band built on raw scores is measuring the wrong thing, and
-  calibration (Platt scaling or isotonic regression) has to come first.
+- **Calibration first** — the score is isotonic-calibrated on validation
+  before thresholds are chosen; the out-of-sample calibration table (test
+  split) is in report §5.
+- **Queue volume** — HUMAN_REVIEW receives ~44% of traffic. That is high for
+  a production team and is an accepted trade for the demo: the synthetic data
+  is deliberately seeded with ambiguous cases, and the review queue is the
+  product surface being demonstrated.
+- **Hard-legitimate cohort** — the honesty check is reported in §6 of the
+  model report: on test, 9.4% of hard-legitimate customers land in
+  AUTO_APPROVE, 65.6% in HUMAN_REVIEW, and 25.0% in AUTO_FLAG. That last
+  number is the real miscalibration cost of the current thresholds and is
+  reported unvarnished; the mitigation is that AUTO_FLAG holds for action
+  rather than auto-declining, so a human still sees these before any adverse
+  outcome.
 
-Until that tuning happens, treat any band assignment produced by the system as
-provisional.
+One known limitation, stated plainly: the calibrator is fitted on validation
+scores from the pre-refit model (the final model is then retrained on
+train+val). Refitting calibration on data the final model has seen would bias
+it, so we accept the small model-drift instead and verify the result on the
+untouched test split — where the calibration table confirms the mapping holds.
