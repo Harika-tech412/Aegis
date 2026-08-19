@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.coverage
+
+# Secrets / env
+.env
+.env.local
+
+# Node
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Model artifacts
+*.pkl
+*.joblib
+
+# Data
+data/*.csv
+data/*.parquet
+!data/.gitkeep
