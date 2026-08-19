@@ -239,8 +239,18 @@ Measured: **93** inconsistent texts in train (of 240 eligible fraud rows —
 ### 9.2 Synthetic ID documents (`id_document_filename`)
 
 ID upload is optional in the real product, so **10% of applications carry a
-document** and the remaining ~90% leave the field empty. Where a document is
-present, the name printed on it follows the rule:
+document** and the remaining ~90% leave the field empty.
+
+One archetype departs from that base rate. `identity_inconsistency` cases
+upload at **40%**, because presenting a stolen or altered document *is* the
+mechanism of that attack — an identity fabricator has a reason to attach an ID
+that an ordinary applicant does not. Every other row, legitimate or fraudulent,
+stays at the 10% base rate, so the realistic "most people skip the optional
+upload" distribution is preserved for the bulk of traffic. The practical effect
+is that the ID-check feature has enough positive examples to demonstrate and
+evaluate rather than a handful.
+
+Where a document is present, the name printed on it follows the rule:
 
 | Application type | Name on ID |
 |---|---|
@@ -261,8 +271,8 @@ image generator and the backend recompute the same answer from the CSV alone,
 with nothing extra to keep in sync. Storing a match/mismatch flag in the CSV
 would have leaked the label straight into a feature column.
 
-Measured: **1,495** documents in train (1,481 matched / 14 mismatched) and
-**300** in holdout (296 matched / 4 mismatched).
+Measured: **1,529** documents in train (1,481 matched / 48 mismatched) and
+**309** in holdout (296 matched / 13 mismatched).
 
 ### 9.3 Image generation and responsible-AI markings
 

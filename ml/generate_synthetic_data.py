@@ -173,6 +173,12 @@ TEXT_CONTRADICTION_SHARE = 0.55  # of mismatches; the rest are generic filler
 
 # --- Synthetic ID documents ------------------------------------------------
 ID_UPLOAD_RATE = 0.10  # ID upload is optional in the real product
+# Identity fabricators upload a document far more often than the general
+# population: presenting a stolen or altered ID is the point of the attack.
+# Raising only this archetype keeps the honest ~90%-no-upload realism for
+# everyone else while giving the ID-check feature enough positives to
+# demonstrate and evaluate.
+ID_UPLOAD_RATE_IDENTITY_FRAUD = 0.40
 ID_MISMATCH_ARCHETYPES = {"identity_inconsistency"}  # always mismatched
 ID_PARTIAL_MISMATCH_ARCHETYPES = {"device_recycling", "velocity_attack"}
 ID_PARTIAL_MISMATCH_RATE = 0.30
@@ -680,8 +686,17 @@ def _assign_purpose_text(df: pd.DataFrame, rng: np.random.Generator) -> dict[str
 
 
 def _assign_id_documents(df: pd.DataFrame, rng: np.random.Generator) -> dict[str, int]:
-    """Reference a synthetic ID image on the ~10% of applications that upload one."""
-    uploaded = rng.random(len(df)) < ID_UPLOAD_RATE
+    """Reference a synthetic ID image on the applications that upload one.
+
+    ~10% of applications overall, but identity fabricators upload at a much
+    higher rate - presenting a document is the mechanism of that attack.
+    """
+    upload_rate = np.where(
+        df["fraud_type"].isin(ID_MISMATCH_ARCHETYPES).to_numpy(),
+        ID_UPLOAD_RATE_IDENTITY_FRAUD,
+        ID_UPLOAD_RATE,
+    )
+    uploaded = rng.random(len(df)) < upload_rate
     filenames: list[str] = []
     stats = {"uploaded": 0, "name_matched": 0, "name_mismatched": 0}
 
@@ -1051,8 +1066,18 @@ Measured: **{train_text_total:,}** inconsistent texts in train (of {train_text_p
 ### 9.2 Synthetic ID documents (`id_document_filename`)
 
 ID upload is optional in the real product, so **{ID_UPLOAD_RATE:.0%} of applications carry a
-document** and the remaining ~{1 - ID_UPLOAD_RATE:.0%} leave the field empty. Where a document is
-present, the name printed on it follows the rule:
+document** and the remaining ~{1 - ID_UPLOAD_RATE:.0%} leave the field empty.
+
+One archetype departs from that base rate. `identity_inconsistency` cases
+upload at **{ID_UPLOAD_RATE_IDENTITY_FRAUD:.0%}**, because presenting a stolen or altered document *is* the
+mechanism of that attack — an identity fabricator has a reason to attach an ID
+that an ordinary applicant does not. Every other row, legitimate or fraudulent,
+stays at the {ID_UPLOAD_RATE:.0%} base rate, so the realistic "most people skip the optional
+upload" distribution is preserved for the bulk of traffic. The practical effect
+is that the ID-check feature has enough positive examples to demonstrate and
+evaluate rather than a handful.
+
+Where a document is present, the name printed on it follows the rule:
 
 | Application type | Name on ID |
 |---|---|
