@@ -22,6 +22,7 @@ pytesseract==0.3.13
 pillow==11.0.0
 imagehash==4.3.2
 langgraph==1.2.11
+easyocr==1.7.2
 google-generativeai==0.8.3
 pytest==8.3.3
 faker==33.1.0

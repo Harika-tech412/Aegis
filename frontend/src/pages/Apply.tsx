@@ -583,8 +583,10 @@ export function Apply() {
                         </>
                       ) : (
                         <>
-                          We couldn't automatically read this document format. For the live demo,
-                          use the sample ID buttons above for guaranteed extraction.
+                          Extraction uses a deep-learning OCR model calibrated for real-world
+                          document conditions, but this document could not be read. Very heavy
+                          glare, extreme angles, or non-English-only text may still fail — for
+                          guaranteed results, use the sample ID buttons above.
                         </>
                       )}
                     </div>

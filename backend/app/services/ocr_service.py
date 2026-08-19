@@ -26,13 +26,37 @@ layouts may still return "failed".
 from __future__ import annotations
 
 import logging
+import math
 import re
+import statistics
 from io import BytesIO
 
+import numpy as np
 import pytesseract
 from PIL import Image, ImageOps
 
 logger = logging.getLogger("aegis.ocr")
+
+# --- EasyOCR (generalized / real-world path) --------------------------------
+# Weights are baked into the image at build time; download_enabled=False makes
+# a missing cache fail loudly rather than silently reaching for the network.
+_easyocr_reader = None
+_easyocr_lock = __import__("threading").Lock()
+EASYOCR_MIN_CONFIDENCE = 0.30
+
+
+def get_easyocr_reader():
+    """Process-wide EasyOCR reader. Loads once; never downloads at runtime."""
+    global _easyocr_reader
+    if _easyocr_reader is None:
+        with _easyocr_lock:
+            if _easyocr_reader is None:
+                import easyocr
+
+                _easyocr_reader = easyocr.Reader(
+                    ["en"], gpu=False, verbose=False, download_enabled=False
+                )
+    return _easyocr_reader
 
 # --- synthetic template patterns -------------------------------------------
 _DATE_RE = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
@@ -123,6 +147,112 @@ def _ocr_lines(image: Image.Image, config: str = "--psm 6") -> tuple[list[str], 
 
     lines = [" ".join(words) for _, words in sorted(grouped.items())]
     return lines, "\n".join(lines)
+
+
+def _prepare_for_easyocr(image: Image.Image) -> Image.Image:
+    """Light touch only — EasyOCR's detector handles noise Tesseract could not.
+
+    EXIF auto-orient (phone photos carry rotation metadata) and a modest
+    upscale for small images. No thresholding: destroying the greyscale
+    gradient is exactly what hurt the Tesseract path on real documents.
+    """
+    oriented = ImageOps.exif_transpose(image).convert("RGB")
+    if max(oriented.size) < 900:
+        scale = 900 / max(oriented.size)
+        oriented = oriented.resize(
+            (int(oriented.width * scale), int(oriented.height * scale)), Image.LANCZOS
+        )
+    return oriented
+
+
+def _easyocr_lines(image: Image.Image) -> tuple[list[dict], str]:
+    """Read with EasyOCR and rebuild reading order (top-to-bottom, left-to-right).
+
+    EasyOCR returns detached (bbox, text, confidence) boxes with no line
+    structure, so boxes whose vertical centres are within ~60% of a box height
+    are grouped into one line and ordered by x.
+    """
+    prepared = _prepare_for_easyocr(image)
+    raw = get_easyocr_reader().readtext(np.array(prepared))
+
+    boxes = []
+    skew_angles = []
+    for bbox, text, confidence in raw:
+        value = (text or "").strip()
+        if not value or float(confidence) < EASYOCR_MIN_CONFIDENCE:
+            continue
+        ys = [float(point[1]) for point in bbox]
+        xs = [float(point[0]) for point in bbox]
+        # Each detection is a quadrilateral, so its top edge reveals the local
+        # text angle. The median across all boxes is the document's skew.
+        (x0, y0), (x1, y1) = bbox[0], bbox[1]
+        if abs(float(x1) - float(x0)) > 5:
+            skew_angles.append(math.atan2(float(y1) - float(y0), float(x1) - float(x0)))
+        boxes.append(
+            {
+                "text": value,
+                "conf": float(confidence),
+                "cy": sum(ys) / len(ys),
+                "cx": sum(xs) / len(xs),
+                "x": min(xs),
+                "h": max(ys) - min(ys),
+            }
+        )
+
+    # Group along the SKEWED baseline, not a horizontal one. On a 7-degree
+    # scan a word 200px to the right sits ~25px lower on the same logical
+    # line, which naive y-grouping shreds into cross-row gibberish.
+    skew = statistics.median(skew_angles) if skew_angles else 0.0
+    if abs(skew) > math.radians(20):  # implausible for a document scan
+        skew = 0.0
+    slope = math.tan(skew)
+    for box in boxes:
+        box["baseline_y"] = box["cy"] - box["cx"] * slope
+
+    boxes.sort(key=lambda b: b["baseline_y"])
+    grouped: list[list[dict]] = []
+    for box in boxes:
+        if grouped:
+            previous = grouped[-1][-1]
+            tolerance = max(10.0, previous["h"] * 0.6)
+            if abs(box["baseline_y"] - previous["baseline_y"]) <= tolerance:
+                grouped[-1].append(box)
+                continue
+        grouped.append([box])
+
+    lines = []
+    height = prepared.height or 1
+    for group in grouped:
+        group.sort(key=lambda b: b["x"])
+        lines.append(
+            {
+                "text": " ".join(b["text"] for b in group),
+                "conf": min(b["conf"] for b in group),
+                "rel_y": (sum(b["cy"] for b in group) / len(group)) / height,
+            }
+        )
+    return lines, "\n".join(line["text"] for line in lines)
+
+
+_HEURISTIC_NAME_RE = re.compile(r"^[A-Za-z][A-Za-z.'-]*(?: [A-Za-z][A-Za-z.'-]*){1,3}$")
+
+
+def _heuristic_name(lines: list[dict]) -> str | None:
+    """Last-resort name guess when no 'Name' label was found.
+
+    Deliberately narrow: a short, alphabetic, 2-4 word, confidently-read block
+    in the top third of the document. Reported as heuristic_fallback so the
+    lower confidence is never presented as a labelled read.
+    """
+    for line in lines:
+        if line["rel_y"] > 0.34 or line["conf"] < 0.5:
+            continue
+        text = " ".join(line["text"].split())
+        if any(c.isdigit() for c in text) or not _HEURISTIC_NAME_RE.match(text):
+            continue
+        if _plausible_name(text):
+            return _plausible_name(text)
+    return None
 
 
 def _english_lines(lines: list[str]) -> list[str]:
@@ -326,16 +456,43 @@ def extract_id_fields(image_bytes: bytes) -> dict:
         return {**_EMPTY, "raw_text": "", "extraction_method": "failed"}
 
     # ---- Strategy 1: our own demo cards never leave this branch -------------
+    # UNCHANGED. Tesseract template matching, gated by the SYN- marker.
     if _is_synthetic_card(raw_text, lines):
         fields = _extract_synthetic(lines, raw_text)
         if any(fields.values()):
             return {**fields, "raw_text": raw_text, "extraction_method": "synthetic_template"}
 
-    # ---- Strategy 2: real-world layouts -------------------------------------
-    fields = _extract_generalized(lines, raw_text)
+    # ---- Strategy 2: real-world layouts, read by EasyOCR --------------------
+    # A deep-learning detector/recogniser copes with security patterns, uneven
+    # lighting and slight rotation that defeated Tesseract's global threshold.
+    # The label-matching parser below is shared with the Tesseract path, so
+    # only the text-acquisition step changed.
+    try:
+        easy_lines, easy_raw = _easyocr_lines(image)
+    except Exception as exc:  # noqa: BLE001 - fall back rather than fail the upload
+        logger.warning("EasyOCR unavailable, falling back to Tesseract lines: %s", exc)
+        easy_lines, easy_raw = [], ""
 
-    # Photographed documents lose too much under the hard threshold; retry the
-    # read on a gentler render before giving up.
+    if easy_lines:
+        texts = [line["text"] for line in easy_lines]
+        fields = _extract_generalized(texts, easy_raw)
+        if any(fields.values()):
+            return {**fields, "raw_text": easy_raw, "extraction_method": "generalized_layout"}
+
+        # No labelled field found — try the narrow positional name guess.
+        guess = _heuristic_name(easy_lines)
+        if guess:
+            return {
+                **_EMPTY,
+                "name": guess,
+                "dob": _generalized_dob(texts),
+                "id_number": _generalized_id_number(texts, easy_raw),
+                "raw_text": easy_raw,
+                "extraction_method": "heuristic_fallback",
+            }
+
+    # ---- Strategy 3: Tesseract as a safety net ------------------------------
+    fields = _extract_generalized(lines, raw_text)
     if not any(fields.values()):
         try:
             retry_lines, retry_raw = _ocr_lines(_preprocess_gentle(image), config="--psm 4")
@@ -347,7 +504,7 @@ def extract_id_fields(image_bytes: bytes) -> dict:
 
     if any(fields.values()):
         return {**fields, "raw_text": raw_text, "extraction_method": "generalized_layout"}
-    return {**_EMPTY, "raw_text": raw_text, "extraction_method": "failed"}
+    return {**_EMPTY, "raw_text": easy_raw or raw_text, "extraction_method": "failed"}
 
 
 # ---------------------------------------------------------------------------

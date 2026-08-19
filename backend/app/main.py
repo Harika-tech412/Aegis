@@ -25,6 +25,18 @@ async def lifespan(app: FastAPI):
     init_db()
     get_scoring_service()  # load ML artifacts once, fail fast if missing
     load_reference()  # drift reference distributions, loaded once
+
+    # Prove the EasyOCR weights are cached in the image: download_enabled is
+    # False, so this raises if anything is missing rather than reaching for
+    # the network mid-demo.
+    try:
+        from app.services.ocr_service import get_easyocr_reader
+
+        get_easyocr_reader()
+        logger.info("EasyOCR reader initialised from cached weights (no network access)")
+    except Exception as exc:  # noqa: BLE001 - degrade to Tesseract, never block startup
+        logger.warning("EasyOCR unavailable (%s) - generalized OCR falls back to Tesseract", exc)
+
     logger.info("Aegis API ready: database initialised, scoring artifacts loaded")
     yield
 

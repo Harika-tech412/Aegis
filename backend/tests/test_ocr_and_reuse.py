@@ -142,51 +142,11 @@ def test_ring_device_endpoint_is_public(client):
 # or PII is used, stored, or committed anywhere in these tests.
 # ---------------------------------------------------------------------------
 
-FAKE_PAN = {
-    "name": "TESTUSER SPECIMEN",
-    "father": "SPECIMEN GUARDIAN",
-    "number": "ABCDE1234F",
-    "dob_printed": "15/08/1990",
-    "dob_iso": "1990-08-15",
-}
+from tests.fixtures_id_cards import FAKE_PAN, fake_pan_card
 
 
 def _fake_pan_card() -> bytes:
-    """Render a fake PAN-style card: English labels, value on the next line."""
-    from io import BytesIO
-
-    from PIL import Image, ImageDraw, ImageFont
-
-    def font(size: int, bold: bool = False):
-        path = (
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-            if bold
-            else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-        )
-        try:
-            return ImageFont.truetype(path, size)
-        except OSError:
-            return ImageFont.load_default(size=size)
-
-    image = Image.new("RGB", (860, 540), "white")
-    draw = ImageDraw.Draw(image)
-    draw.text((30, 24), "INCOME TAX DEPARTMENT", font=font(26, True), fill="black")
-    draw.text((30, 60), "GOVT. OF INDIA", font=font(22), fill="black")
-
-    y = 130
-    for label, value in [
-        ("Permanent Account Number", FAKE_PAN["number"]),
-        ("Name", FAKE_PAN["name"]),
-        ("Father's Name", FAKE_PAN["father"]),
-        ("Date of Birth", FAKE_PAN["dob_printed"]),
-    ]:
-        draw.text((30, y), label, font=font(22), fill="black")
-        draw.text((30, y + 34), value, font=font(30, True), fill="black")
-        y += 95
-
-    buffer = BytesIO()
-    image.save(buffer, "PNG")
-    return buffer.getvalue()
+    return fake_pan_card("clean")
 
 
 def test_synthetic_card_still_uses_template_path(sample_card):
@@ -207,3 +167,20 @@ def test_generalized_layout_reads_pan_style_card():
     # DD/MM/YYYY on the card is normalised to the ISO form used everywhere else.
     assert fields["dob"] == FAKE_PAN["dob_iso"]
     assert fields["id_number"] == FAKE_PAN["number"]
+
+
+@pytest.mark.parametrize("variant", ["textured", "rotated", "lowcontrast"])
+def test_generalized_path_handles_real_world_conditions(variant):
+    """Security pattern, 7-degree skew, and uneven lighting.
+
+    The name is the field the ID-mismatch rule depends on, so that is the
+    assertion that matters; DOB/number are reported separately in the
+    comparison harness rather than asserted here.
+    """
+    fields = extract_id_fields(fake_pan_card(variant))
+    assert fields["extraction_method"] in {"generalized_layout", "heuristic_fallback"}, (
+        f"{variant}: {fields['extraction_method']} / {fields['raw_text']!r}"
+    )
+    assert names_match(fields["name"], FAKE_PAN["name"]), (
+        f"{variant}: got {fields['name']!r}"
+    )
