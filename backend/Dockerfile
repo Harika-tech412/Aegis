@@ -12,6 +12,11 @@ RUN apt-get update \
 
 WORKDIR /app
 
+# Install CPU-only torch first: sentence-transformers pulls torch, and the
+# default PyPI linux wheel bundles CUDA (~2.5GB). The CPU wheel is ~10x smaller
+# and is all we need for MiniLM embeddings.
+RUN pip install --no-cache-dir torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

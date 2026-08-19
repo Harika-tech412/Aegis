@@ -1,11 +1,18 @@
 """Application settings loaded from environment / .env."""
 
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Resolve the project-root .env regardless of the working directory. Inside
+# the container this path doesn't exist and settings come from injected env
+# vars (docker-compose `env_file`), which take precedence anyway.
+_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(_ENV_FILE),
         env_file_encoding="utf-8",
         extra="ignore",
     )
