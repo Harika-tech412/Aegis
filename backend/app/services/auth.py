@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException, status
@@ -26,12 +27,50 @@ def assert_jwt_secret_configured() -> None:
     This is a security-relevant setting: a known secret means anyone can mint
     valid tokens. Refusing to start beats running silently insecure.
     """
-    if settings.JWT_SECRET == PLACEHOLDER_SECRET or not settings.JWT_SECRET:
+    problems = check_runtime_config()
+    if problems:
         raise RuntimeError(
-            "JWT_SECRET is unset or still the placeholder value. "
-            "Set a random secret in .env (e.g. `python -c \"import secrets; "
-            "print(secrets.token_urlsafe(48))\"`) and restart."
+            "Startup configuration is incomplete:\n  - " + "\n  - ".join(problems)
         )
+
+
+def check_runtime_config() -> list[str]:
+    """Every misconfigured setting at once, rather than one per restart.
+
+    Reporting these together matters on a hosted platform: each redeploy costs
+    minutes, and discovering JWT_SECRET, then DATABASE_URL, then the next one on
+    separate cycles is the slowest possible way to find out.
+    """
+    problems: list[str] = []
+
+    # Render sets both of these on every service; they are how we tell a hosted
+    # deployment from a laptop without guessing.
+    hosted = bool(os.getenv("RENDER") or os.getenv("RENDER_SERVICE_ID"))
+    where = (
+        "the service's Environment settings"
+        if hosted
+        else "your .env file"
+    )
+
+    if not settings.JWT_SECRET or settings.JWT_SECRET == PLACEHOLDER_SECRET:
+        problems.append(
+            f"JWT_SECRET is unset or still the placeholder. Set it in {where} to a "
+            'random string, e.g. `python -c "import secrets; '
+            'print(secrets.token_urlsafe(48))"`. A known signing key lets anyone '
+            "mint valid tokens, so the app will not start without it."
+        )
+
+    # The default DATABASE_URL points at docker-compose's `db` service, which
+    # cannot resolve anywhere else. Only flagged when we know we are hosted, so
+    # local compose runs are unaffected.
+    if hosted and "@db:" in settings.DATABASE_URL:
+        problems.append(
+            "DATABASE_URL is still the docker-compose default (host `db`), which "
+            f"does not resolve here. Set it in {where} to the managed Postgres "
+            "connection string."
+        )
+
+    return problems
 
 
 def hash_password(password: str) -> str:
