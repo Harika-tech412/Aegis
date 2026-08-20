@@ -57,7 +57,15 @@ export function Dashboard() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <main className="mx-auto w-full max-w-7xl flex-1 space-y-4 px-4 py-5 sm:px-6">
+      {/* Vertical rhythm tightens in the split-screen pane. Everything below —
+          four stat cards, the live feed and Model Health — has to fit inside an
+          iframe roughly 548px wide and ~560px tall, so the gaps that read as
+          calm at full width read as wasted space there. */}
+      <main
+        className={`mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 ${
+          demoMode ? "space-y-3 py-3" : "space-y-4 py-5"
+        }`}
+      >
         {/* Primary CTA. Hidden inside the split-screen demo itself (?demo=1),
             where this dashboard IS the right-hand pane. */}
         {!demoMode && (
@@ -87,19 +95,25 @@ export function Dashboard() {
         <div className="aegis-enter flex flex-wrap items-end justify-between gap-3" style={stagger(1)}>
           <div>
             <p className="aegis-overline">{institutionName} · {today}</p>
-            <h1 className="aegis-title mt-1">Fraud operations</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Live application scoring
-            </p>
+            <h1 className={`aegis-title ${demoMode ? "" : "mt-1"}`}>Fraud operations</h1>
+            {!demoMode && (
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Live application scoring
+              </p>
+            )}
           </div>
           <ScoreDialog onScored={loadStats} />
         </div>
 
-        <StatCards stats={stats} />
+        <StatCards stats={stats} compact={demoMode} />
 
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className={`grid grid-cols-1 xl:grid-cols-3 ${demoMode ? "gap-3" : "gap-4"}`}>
           <div className="aegis-enter xl:col-span-2" style={stagger(6)}>
-            <LiveFeed pollMs={demoMode ? 2000 : 3500} institutionCode={institutionCode} />
+            <LiveFeed
+              pollMs={demoMode ? 2000 : 3500}
+              institutionCode={institutionCode}
+              compact={demoMode}
+            />
           </div>
           <div className="aegis-enter space-y-4" style={stagger(7)}>
             <ModelHealthCard />

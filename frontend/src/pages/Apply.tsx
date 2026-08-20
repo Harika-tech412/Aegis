@@ -7,7 +7,7 @@
  * the model was trained on are measured live from the person filling it in.
  */
 
-import { CheckCircle2, FileText, Landmark, Loader2, UploadCloud, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileText, Landmark, Loader2, UploadCloud, X } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 
@@ -77,9 +77,10 @@ const NEW_FIRST = ["Priya", "Arjun", "Meera", "Kabir", "Divya", "Nikhil", "Sneha
 const NEW_LAST = ["Nandakumar", "Deshpande", "Chatterjee", "Pillai", "Grewal", "Bhatt"];
 
 /**
- * Human-realistic behavioural values for the presets whose whole narrative
- * purpose is an HONEST applicant — "Legitimate applicant", "Returning customer
- * (life change)", "Brand new identity".
+ * Human-realistic behavioural values for the three Layer 5 presets — "Returning
+ * customer (life change)", "Identity theft (stolen details)" and "Brand new
+ * identity". None of them should look like a bot: two are honest applicants,
+ * and the third is an impersonator whose whole premise is behaving normally.
  *
  * WHY THIS OVERRIDE EXISTS. This page measures behaviour for real: session
  * duration from first paint, mouse events from actual pointer movement, paste
@@ -101,6 +102,9 @@ const NEW_LAST = ["Nandakumar", "Deshpande", "Chatterjee", "Pillai", "Grewal", "
  * Their fraud signal is the ID mismatch and the shared device — behaviour is
  * not what convicts them, so leaving their measured values alone costs nothing
  * and keeps more of the page's real instrumentation in play.
+ *
+ * The former "Legitimate applicant" preset, which also carried this override,
+ * has been removed.
  */
 function humanBehaviour(): {
   session_duration_seconds: number;
@@ -162,6 +166,10 @@ function randomId(prefix: string) {
 const inputCls =
   "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/25";
 const labelCls = "mb-1.5 block text-xs font-medium tracking-wide text-slate-600";
+
+// True when this page is the /demo split-screen's left iframe rather than a
+// standalone tab. Same-origin, so this read never throws.
+const embedded = typeof window !== "undefined" && window.self !== window.top;
 
 export function Apply() {
   const [form, setForm] = useState<FormState>({ ...EMPTY });
@@ -319,21 +327,17 @@ export function Apply() {
     return sample;
   }
 
-  async function preset(kind: "legit" | "idfraud" | "ring") {
+  async function preset(kind: "idfraud" | "ring") {
     setError(null);
     setScenario(kind);
     velocityOverride.current = null;
-    // Only the honest-outcome preset gets human behavioural values. The two
-    // fraud presets are convicted by their document and their device, so they
-    // keep whatever this page actually measured.
-    behaviourOverride.current = kind === "legit" ? humanBehaviour() : null;
+    // Neither of these two gets a human behavioural profile: they are convicted
+    // by their document and their device, so their measured values stand.
+    behaviourOverride.current = null;
     deviceRef.current = randomId("web_device");
     ipRef.current = randomId("web_ip");
 
-    if (kind === "legit") {
-      const sample = await attachSampleId(false);
-      setForm({ ...EMPTY, ...LEGIT_BASE, full_name: sample.applicant_name } as FormState);
-    } else if (kind === "idfraud") {
+    if (kind === "idfraud") {
       const sample = await attachSampleId(true);
       // The fraudster claims identity X but presents a document printed for Y.
       setForm({
@@ -629,6 +633,21 @@ export function Apply() {
           <span className="text-lg font-semibold tracking-tight text-slate-900">
             QuickLend <span className="font-normal text-slate-500">Digital Loans</span>
           </span>
+
+          {/* Presenter's way out. Deliberately small, grey and unlabelled
+              beyond one word, so it reads as ordinary site chrome rather than
+              a seam in the "different bank" illusion. Hidden when this page is
+              embedded in the /demo split-screen, where following it would
+              replace the applicant pane with a second dashboard. */}
+          {!embedded && (
+            <Link
+              to="/dashboard"
+              className="ml-auto inline-flex items-center gap-1 text-xs text-slate-400 transition-colors hover:text-slate-700"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Dashboard
+            </Link>
+          )}
         </div>
       </header>
 
@@ -644,13 +663,10 @@ export function Apply() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <button
-                onClick={() => preset("legit")}
-                className="rounded-md border border-emerald-300 bg-white px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
-              >
-                Legitimate applicant
-              </button>
+            {/* Five presets on a fixed 3-column grid: an even 3+2 that cannot
+                leave a ragged gap the way flex-wrap did with mixed label
+                widths. */}
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
               <button
                 onClick={() => preset("idfraud")}
                 className="rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50"
@@ -684,10 +700,10 @@ export function Apply() {
               >
                 Brand new identity
               </button>
-              {scenario && (
-                <span className="self-center text-xs text-violet-600">loaded: {scenario}</span>
-              )}
             </div>
+            {scenario && (
+              <p className="mt-2 text-xs text-violet-600">loaded: {scenario}</p>
+            )}
           </div>
         )}
 

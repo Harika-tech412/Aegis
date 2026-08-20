@@ -21,14 +21,27 @@ import { formatMoney, formatTime } from "@/lib/utils";
 
 const POLL_MS = 3500;
 
+/**
+ * `compact` is for the /demo split-screen right pane (~548px wide on a 1097px
+ * screen). Two things change, both forced by that width:
+ *
+ *   1. The full table declares `min-w-[640px]`, which at 548px means the feed
+ *      scrolls sideways. Compact mode drops the two least load-bearing columns
+ *      (Requested, Purpose) so six columns become four and nothing needs
+ *      horizontal scrolling.
+ *   2. The scroll box shrinks from 430px to 190px, so Model Health sits within
+ *      a short flick of the fold instead of ~1000px down the page.
+ */
 export function LiveFeed({
   onData,
   pollMs = POLL_MS,
   institutionCode = "SYNC_DEMO",
+  compact = false,
 }: {
   onData?: (total: number) => void;
   pollMs?: number;
   institutionCode?: string;
+  compact?: boolean;
 }) {
   const [rows, setRows] = useState<ApplicationSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +63,7 @@ export function LiveFeed({
     async function poll() {
       try {
         const data = await api.listApplications({
-          limit: 14,
+          limit: compact ? 10 : 14,
           institution_code: institutionCode,
         });
         if (cancelled) return;
@@ -79,7 +92,7 @@ export function LiveFeed({
       cancelled = true;
       clearInterval(timer);
     };
-  }, [onData, pollMs, institutionCode]);
+  }, [onData, pollMs, institutionCode, compact]);
 
   return (
     <Card>
@@ -108,14 +121,18 @@ export function LiveFeed({
           </div>
         )}
         {!error && rows !== null && (
-          <div className="feed-scroll max-h-[430px] overflow-x-auto overflow-y-auto">
-            <Table className="min-w-[640px]">
+          <div
+            className={`feed-scroll overflow-x-auto overflow-y-auto ${
+              compact ? "max-h-[190px]" : "max-h-[430px]"
+            }`}
+          >
+            <Table className={compact ? "" : "min-w-[640px]"}>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead>Received</TableHead>
                   <TableHead>Applicant</TableHead>
-                  <TableHead>Requested</TableHead>
-                  <TableHead>Purpose</TableHead>
+                  {!compact && <TableHead>Requested</TableHead>}
+                  {!compact && <TableHead>Purpose</TableHead>}
                   <TableHead className="text-right">Risk</TableHead>
                   <TableHead>Decision</TableHead>
                 </TableRow>
@@ -147,10 +164,14 @@ export function LiveFeed({
                       {row.applicant_age}y · {formatMoney(row.annual_income)} ·{" "}
                       {row.employment_type.replace("_", " ")}
                     </TableCell>
-                    <TableCell>{formatMoney(row.requested_amount)}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {row.loan_purpose.replace("_", " ")}
-                    </TableCell>
+                    {!compact && (
+                      <TableCell>{formatMoney(row.requested_amount)}</TableCell>
+                    )}
+                    {!compact && (
+                      <TableCell className="text-muted-foreground">
+                        {row.loan_purpose.replace("_", " ")}
+                      </TableCell>
+                    )}
                     <TableCell className="text-right tabular-nums">
                       {row.calibrated_risk_score !== null
                         ? row.calibrated_risk_score.toFixed(3)

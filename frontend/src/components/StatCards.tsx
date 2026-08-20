@@ -37,6 +37,7 @@ function StatCard({
   icon: Icon,
   value,
   delta,
+  compact = false,
 }: {
   index: number;
   label: string;
@@ -45,12 +46,13 @@ function StatCard({
   icon: typeof Inbox;
   value: number | null;
   delta: number;
+  compact?: boolean;
 }) {
   const shown = useCountUp(value);
 
   return (
     <Card className="aegis-enter aegis-surface-hover" style={stagger(index)}>
-      <CardContent className="p-4 sm:p-5">
+      <CardContent className={compact ? "p-3" : "p-4 sm:p-5"}>
         <div className="flex items-start justify-between gap-2">
           <p className="aegis-label leading-tight">{label}</p>
           <span className={`icon-chip ${chip}`}>
@@ -59,7 +61,13 @@ function StatCard({
         </div>
         {value !== null ? (
           <>
-            <p className={`aegis-metric mt-2 ${accent}`}>{shown.toLocaleString()}</p>
+            <p
+              className={`aegis-metric ${accent} ${
+                compact ? "mt-1 !text-2xl" : "mt-2"
+              }`}
+            >
+              {shown.toLocaleString()}
+            </p>
             <p className="mt-1 text-xs tabular-nums text-muted-foreground">
               {delta >= 0 ? "+" : ""}
               {delta.toLocaleString()} vs 7d avg
@@ -73,9 +81,29 @@ function StatCard({
   );
 }
 
-export function StatCards({ stats }: { stats: Stats | null }) {
+/**
+ * `compact` is for the /demo split-screen, whose right pane is roughly half the
+ * viewport — about 548px on a 1097px-wide screen. That is BELOW Tailwind's `sm`
+ * breakpoint (640px), so the default responsive rules put all four cards in a
+ * single column and consume ~380px of vertical space before the live feed even
+ * starts. Compact mode fixes two columns regardless of width, because the pane
+ * width is a property of the layout, not of the viewport.
+ */
+export function StatCards({
+  stats,
+  compact = false,
+}: {
+  stats: Stats | null;
+  compact?: boolean;
+}) {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div
+      className={
+        compact
+          ? "grid grid-cols-2 gap-2"
+          : "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      }
+    >
       {CARDS.map((card, i) => (
         <StatCard
           key={card.key}
@@ -86,6 +114,7 @@ export function StatCards({ stats }: { stats: Stats | null }) {
           icon={card.icon}
           value={stats ? stats[card.key] : null}
           delta={stats ? stats[card.key] - BASELINE_7D[card.key] : 0}
+          compact={compact}
         />
       ))}
     </div>
