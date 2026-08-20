@@ -119,6 +119,29 @@ function humanBehaviour(): {
   };
 }
 
+/**
+ * Per-click variation for the demo presets.
+ *
+ * WHY. Every preset used to submit LEGIT_BASE's fixed figures, so a dozen demo
+ * clicks produced a dozen applicants with identical age, income and loan amount
+ * — visible in the live feed as the same "$5,422 · home improvement" row over
+ * and over. It also collapsed the monitoring window: PSI compares the recent
+ * distribution against training, and a spike of clones reads as severe drift on
+ * applicant_age and annual_income, which is exactly what drove Model Health to
+ * 0%. Varying the figures keeps repeated demo use looking like a book of
+ * applications rather than one applicant submitted repeatedly.
+ */
+function jitter(lo: number, hi: number, step = 1): number {
+  const span = Math.floor((hi - lo) / step);
+  return lo + Math.floor(Math.random() * (span + 1)) * step;
+}
+
+/** A random DOB in a plausible borrower age range (25-55 at the demo date). */
+function jitterDob(): string {
+  const year = jitter(1971, 2001);
+  return `${year}-${String(jitter(1, 12)).padStart(2, "0")}-${String(jitter(1, 28)).padStart(2, "0")}`;
+}
+
 function freshIdentity(): { full_name: string; date_of_birth: string } {
   const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
   const year = 1985 + Math.floor(Math.random() * 15);
@@ -132,14 +155,19 @@ function freshIdentity(): { full_name: string; date_of_birth: string } {
 
 // The changed side: new city, new device type, income up ~40%. Three signals
 // moving at once is what makes the identity check ask for a step-up.
-const LIFE_CHANGE: Partial<FormState> = {
+// The income is varied but stays comfortably above the +30% change threshold
+// against this identity's ~69,360 baseline, so the continuity check still
+// reports INCONSISTENT on every click. DOB is NOT varied here: name+DOB is the
+// identity key, so changing it would make the seeded history unreachable.
+const LIFE_CHANGE = (): Partial<FormState> => ({
   city: "Bengaluru",
   state: "Karnataka",
   pin_code: "560038",
-  monthly_income_inr: "96000",
+  monthly_income_inr: String(jitter(94_000, 118_000, 2_000)),
+  loan_amount_inr: String(jitter(350_000, 600_000, 25_000)),
   employer_name: "Northline Freight",
   purpose_text: "Relocated for a new role; consolidating two cards.",
-};
+});
 
 const LEGIT_BASE: Partial<FormState> = {
   date_of_birth: "1988-06-14",
@@ -344,8 +372,9 @@ export function Apply() {
         ...EMPTY,
         ...LEGIT_BASE,
         full_name: sample.applicant_name,
-        monthly_income_inr: "180000",
-        loan_amount_inr: "1500000",
+        date_of_birth: jitterDob(),
+        monthly_income_inr: String(jitter(150_000, 210_000, 5_000)),
+        loan_amount_inr: String(jitter(1_200_000, 1_800_000, 50_000)),
         purpose_text: "Personal use of funds.",
       } as FormState);
     } else {
@@ -360,9 +389,10 @@ export function Apply() {
         ...EMPTY,
         ...LEGIT_BASE,
         full_name: "Rohan Malhotra",
+        date_of_birth: jitterDob(),
         employment_type: "gig_worker",
-        monthly_income_inr: "140000",
-        loan_amount_inr: "1200000",
+        monthly_income_inr: String(jitter(110_000, 160_000, 5_000)),
+        loan_amount_inr: String(jitter(900_000, 1_400_000, 50_000)),
         loan_purpose: "business",
         purpose_text: "Working capital for a new venture.",
       } as FormState);
@@ -487,9 +517,10 @@ export function Apply() {
             city: "Kochi",
             state: "Kerala",
             pin_code: "682024",
-            monthly_income_inr: "47000",
+            monthly_income_inr: String(jitter(38_000, 62_000, 1_000)),
+            loan_amount_inr: String(jitter(250_000, 500_000, 25_000)),
           } as FormState)
-        : ({ ...EMPTY, ...LEGIT_BASE, ...SEEDED_IDENTITY, ...LIFE_CHANGE } as FormState);
+        : ({ ...EMPTY, ...LEGIT_BASE, ...SEEDED_IDENTITY, ...LIFE_CHANGE() } as FormState);
     setForm(filled);
 
     try {

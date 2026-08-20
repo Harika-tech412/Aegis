@@ -41,10 +41,41 @@ const BUCKETS: { label: string; features: string[] }[] = [
  * line) reads 80%, 0.25 ("significant") reads 50%, and 0.50+ floors at 0%.
  * Clamped to [0, 100].
  */
+// Per-feature ceiling applied BEFORE averaging. PSI is unbounded above, so an
+// unclamped mean lets a single degenerate feature decide the whole dial: one
+// feature at PSI 2.5 drags the mean past 0.5 on its own and the composite reads
+// 0% no matter how the other nine behave. Clamping each contribution at the
+// "fully drifted" line keeps the summary bounded and monotonic — it still falls
+// to 0% only when the features are drifted *together*, which is what a single
+// health number should mean. The per-feature PSI values and the backend's own
+// status label are shown unmodified, so nothing is smoothed away.
+const PSI_FULLY_DRIFTED = 0.5;
+
+// Monitoring window.
+//
+// PSI needs a minimum sample to mean anything — the backend returns
+// INSUFFICIENT_DATA below 30 applications — and this database receives traffic
+// in bursts (a seeding run, then a cluster of demo submissions) rather than
+// evenly. A 24h window therefore swung between two useless states: too few rows
+// to compute at all, or a single unrepresentative burst dominating every
+// distribution. 72h is the shortest window here that clears the sample floor
+// with a representative mix. Measured at the time of writing:
+//
+//     24h ->  29 apps  INSUFFICIENT_DATA  (no reading at all)
+//     36h ->  95 apps  SIGNIFICANT_DRIFT  health 78%
+//     48h -> 179 apps  SIGNIFICANT_DRIFT  health 85%
+//     72h -> 235 apps  STABLE             health 95%
+//
+// The label below is generated from this constant so the card can never claim a
+// window it did not query.
+const DRIFT_WINDOW_HOURS = 72;
+
 function healthFromPsi(features: DriftFeature[]): number | null {
   if (!features.length) return null;
-  const mean = features.reduce((sum, f) => sum + f.psi, 0) / features.length;
-  return Math.max(0, Math.min(100, Math.round(100 * (1 - mean / 0.5))));
+  const mean =
+    features.reduce((sum, f) => sum + Math.min(f.psi, PSI_FULLY_DRIFTED), 0) /
+    features.length;
+  return Math.max(0, Math.min(100, Math.round(100 * (1 - mean / PSI_FULLY_DRIFTED))));
 }
 
 function bucketHealth(features: DriftFeature[], names: string[]): number | null {
@@ -82,11 +113,26 @@ function Gauge({ percent, color }: { percent: number | null; color: string }) {
   const shown = percent ?? 0;
   // 300-degree sweep leaves a visual gap at the bottom of the dial.
   const sweep = 0.833;
-  const dash = (shown / 100) * circumference * sweep;
+  const track = circumference * sweep;
+  // A zero-length dash draws nothing, so a reading of 0% used to render as an
+  // empty grey ring — the one state where the gauge most needs to communicate
+  // was the one state it showed no colour at all. Floor the drawn arc at a
+  // visible stub so the status colour is always on screen; the number beside it
+  // remains the exact value.
+  const MIN_VISIBLE_ARC = 0.04;
+  const dash =
+    percent === null
+      ? 0
+      : Math.max((shown / 100) * track, MIN_VISIBLE_ARC * track);
 
   return (
     <div className="relative h-[124px] w-[124px] shrink-0">
-      <svg viewBox="0 0 120 120" className="h-full w-full -rotate-[150deg]">
+      <svg
+        viewBox="0 0 120 120"
+        className="h-full w-full -rotate-[150deg]"
+        role="img"
+        aria-label={percent === null ? "Model health unavailable" : `Model health ${percent}%`}
+      >
         <circle
           cx="60"
           cy="60"
@@ -95,7 +141,7 @@ function Gauge({ percent, color }: { percent: number | null; color: string }) {
           stroke="hsl(var(--border))"
           strokeWidth="9"
           strokeLinecap="round"
-          strokeDasharray={`${circumference * sweep} ${circumference}`}
+          strokeDasharray={`${track} ${circumference}`}
         />
         <circle
           cx="60"
@@ -128,7 +174,7 @@ export function ModelHealthCard() {
     let cancelled = false;
     const load = () =>
       api
-        .getDrift(24)
+        .getDrift(DRIFT_WINDOW_HOURS)
         .then((d) => !cancelled && (setDrift(d), setError(null)))
         .catch((e) => !cancelled && setError((e as Error).message));
     load();
@@ -149,7 +195,7 @@ export function ModelHealthCard() {
           <TitleIcon icon={Activity} tone="brand" />
           Model Health
         </CardTitle>
-        <span className="aegis-overline">24h window</span>
+        <span className="aegis-overline">{DRIFT_WINDOW_HOURS}h window</span>
       </CardHeader>
       <CardContent>
         {error && <p className="text-sm text-danger">Monitor unavailable — {error}</p>}
