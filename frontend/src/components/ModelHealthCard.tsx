@@ -52,17 +52,17 @@ function bucketHealth(features: DriftFeature[], names: string[]): number | null 
 }
 
 const STATUS = {
-  STABLE: { label: "Healthy", ring: "#22C55E", text: "text-success", dot: "bg-success" },
-  MILD_DRIFT: { label: "Monitor", ring: "#F59E0B", text: "text-warning", dot: "bg-warning" },
+  STABLE: { label: "Healthy", ring: "#6EA335", text: "text-success", dot: "bg-success" },
+  MILD_DRIFT: { label: "Monitor", ring: "#FEB12B", text: "text-warning", dot: "bg-warning" },
   SIGNIFICANT_DRIFT: {
     label: "Significant Drift",
-    ring: "#EF4444",
+    ring: "#B81514",
     text: "text-danger",
     dot: "bg-danger",
   },
   INSUFFICIENT_DATA: {
     label: "Awaiting data",
-    ring: "#64748B",
+    ring: "#B3B3B3",
     text: "text-muted-foreground",
     dot: "bg-subtle",
   },
@@ -211,7 +211,7 @@ export function ModelHealthCard() {
                       >
                         <XAxis
                           type="number"
-                          tick={{ fill: "#64748b", fontSize: 10 }}
+                          tick={{ fill: "#757575", fontSize: 10 }}
                           axisLine={false}
                           tickLine={false}
                         />
@@ -219,16 +219,16 @@ export function ModelHealthCard() {
                           type="category"
                           dataKey="name"
                           width={130}
-                          tick={{ fill: "#94a3b8", fontSize: 10 }}
+                          tick={{ fill: "#3D3D3D", fontSize: 10 }}
                           axisLine={false}
                           tickLine={false}
                         />
-                        <ReferenceLine x={0.25} stroke="#7f1d1d" strokeDasharray="3 3" />
+                        <ReferenceLine x={0.25} stroke="#EBA18F" strokeDasharray="3 3" />
                         <Tooltip
-                          cursor={{ fill: "rgba(148,163,184,0.06)" }}
+                          cursor={{ fill: "rgba(0,0,0,0.04)" }}
                           contentStyle={{
-                            background: "#0f172a",
-                            border: "1px solid #1e293b",
+                            background: "#FFFFFF",
+                            border: "1px solid #E6E6E6",
                             borderRadius: 8,
                             fontSize: 11,
                           }}
@@ -238,7 +238,7 @@ export function ModelHealthCard() {
                           {drift.features.slice(0, 6).map((f) => (
                             <Cell
                               key={f.feature}
-                              fill={f.psi > 0.25 ? "#EF4444" : f.psi > 0.1 ? "#F59E0B" : "#22C55E"}
+                              fill={f.psi > 0.25 ? "#B81514" : f.psi > 0.1 ? "#FEB12B" : "#6EA335"}
                             />
                           ))}
                         </Bar>

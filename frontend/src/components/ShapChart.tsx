@@ -11,8 +11,8 @@ import {
 
 import type { ShapFeature } from "@/lib/types";
 
-const FRAUD_RED = "#ef4444";
-const LEGIT_GREEN = "#10b981";
+const FRAUD_RED = "#B81514"; // ct-danger-primary
+const LEGIT_GREEN = "#6EA335"; // sr-green-600
 
 export function ShapChart({ features }: { features: ShapFeature[] }) {
   const data = [...features]
@@ -26,24 +26,24 @@ export function ShapChart({ features }: { features: ShapFeature[] }) {
           <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24 }}>
             <XAxis
               type="number"
-              tick={{ fill: "#94a3b8", fontSize: 11 }}
-              axisLine={{ stroke: "#1e293b" }}
+              tick={{ fill: "#757575", fontSize: 11 }}
+              axisLine={{ stroke: "#E6E6E6" }}
               tickLine={false}
             />
             <YAxis
               type="category"
               dataKey="name"
               width={190}
-              tick={{ fill: "#cbd5e1", fontSize: 12 }}
+              tick={{ fill: "#3D3D3D", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
             />
-            <ReferenceLine x={0} stroke="#334155" />
+            <ReferenceLine x={0} stroke="#CCCCCC" />
             <Tooltip
-              cursor={{ fill: "rgba(148,163,184,0.06)" }}
+              cursor={{ fill: "rgba(0,0,0,0.04)" }}
               contentStyle={{
-                background: "#0f172a",
-                border: "1px solid #1e293b",
+                background: "#FFFFFF",
+                border: "1px solid #E6E6E6",
                 borderRadius: 6,
                 fontSize: 12,
               }}

@@ -103,9 +103,8 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
         {!data && !error && (
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              Run a multi-step agent that decides for itself which checks this case warrants —
-              ring links, prior verdicts on connected applications, this institution&rsquo;s
-              memory of similar past decisions, similar cases, and drift.
+              An agent that chooses its own checks for this case — ring links, past
+              investigator verdicts, similar cases, model drift.
             </p>
             <Button onClick={() => run(false)} disabled={busy}>
               {busy ? (
@@ -131,7 +130,7 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
               {data.investigation_log.slice(0, visibleSteps).map((entry, i) => (
                 <li
                   key={`${entry.step}-${i}`}
-                  className="flex animate-feed-in items-start gap-3 rounded-lg border border-border bg-background/40 p-3"
+                  className="flex animate-feed-in items-start gap-3 rounded-lg border border-border bg-secondary p-3"
                 >
                   <CheckCircle2
                     className="mt-0.5 h-5 w-5 shrink-0 text-agent"
@@ -159,7 +158,7 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
             </ol>
 
             {allRevealed && (
-              <div className="animate-feed-in rounded-lg border border-agent/40 border-l-4 border-l-agent bg-agent/5 p-4">
+              <div className="animate-feed-in rounded-lg border border-agent/40 border-l-4 border-l-agent bg-agent/[0.06] p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     <Sparkles className="h-4 w-4 text-agent" strokeWidth={2} />

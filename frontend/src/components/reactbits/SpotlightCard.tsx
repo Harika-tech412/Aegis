@@ -15,7 +15,7 @@ import "./SpotlightCard.css";
 export default function SpotlightCard({
   children,
   className = "",
-  spotlightColor = "rgba(219, 234, 254, 0.10)",
+  spotlightColor = "rgba(51, 51, 204, 0.07)",
 }: {
   children: ReactNode;
   className?: string;

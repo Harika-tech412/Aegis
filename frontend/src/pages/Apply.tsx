@@ -620,7 +620,7 @@ export function Apply() {
         </form>
 
         <p className="mt-8 text-center text-xs text-slate-400">
-          QuickLend Digital Loans · Demonstration environment · all data is synthetic ·{" "}
+          QuickLend Digital Loans · Demo environment · synthetic data ·{" "}
           <Link to="/" className="underline">staff sign-in</Link>
         </p>
       </main>

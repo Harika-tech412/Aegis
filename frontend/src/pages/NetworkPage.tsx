@@ -20,7 +20,7 @@ import { stagger } from "@/lib/motion";
 import type { NetworkGraph, NetworkSignalsResponse, NetworkStats } from "@/lib/types";
 import { formatTime } from "@/lib/utils";
 
-const CYAN = "#22D3EE";
+const CYAN = "#0E7490"; // cyan-700 — legible on paper
 
 const HOW_IT_WORKS = [
   "Each institution scores applications independently, on its own data and its own models.",
@@ -48,7 +48,7 @@ function StatTile({
           <p className="aegis-label leading-tight">{label}</p>
           <span
             className="icon-chip"
-            style={{ background: "rgba(34,211,238,0.10)", color: CYAN }}
+            style={{ background: "rgba(14,116,144,0.08)", color: CYAN }}
           >
             <Icon className="h-4 w-4" strokeWidth={2} />
           </span>
@@ -115,8 +115,8 @@ export function NetworkPage() {
           </p>
           <h1 className="aegis-title mt-1">Aegis Network</h1>
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-            Confirmed fraud signals shared across member institutions. No customer identity data
-            is ever transmitted — only one-way cryptographic hashes.
+            Confirmed fraud signals shared across member institutions as one-way
+            cryptographic hashes. No customer identity data leaves any bank.
           </p>
         </div>
 
@@ -162,7 +162,7 @@ export function NetworkPage() {
                       nodeLabel="label"
                       nodeVal={(n: any) => 6 + Math.min(n.published, 40) / 4}
                       nodeColor={() => CYAN}
-                      linkColor={() => "rgba(34,211,238,0.5)"}
+                      linkColor={() => "rgba(14,116,144,0.45)"}
                       linkWidth={(l: any) => 1 + Math.min(l.hits, 20) * 0.6}
                       linkDirectionalParticles={2}
                       linkDirectionalParticleWidth={2}
@@ -172,9 +172,8 @@ export function NetworkPage() {
                   </div>
                   {graphData.links.length === 0 && (
                     <p className="mt-2 text-xs text-muted-foreground">
-                      No cross-institution match has occurred yet — members are connected but no
-                      partner signal has influenced a decision so far. Submit a fraud-ring
-                      application to see an edge appear.
+                      No cross-institution match yet. Submit a fraud-ring application to see
+                      an edge appear.
                     </p>
                   )}
                   <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
@@ -196,7 +195,7 @@ export function NetworkPage() {
           {/* ---- How it works ---- */}
           <Card
             className="aegis-enter"
-            style={{ ...stagger(5), borderColor: "rgba(34,211,238,0.35)" }}
+            style={{ ...stagger(5), borderColor: "rgba(14,116,144,0.30)" }}
           >
             <CardHeader>
               <CardTitle>
@@ -210,7 +209,7 @@ export function NetworkPage() {
                   <li key={line} className="flex gap-2.5 text-[13px] leading-relaxed">
                     <span
                       className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
-                      style={{ background: "rgba(34,211,238,0.12)", color: CYAN }}
+                      style={{ background: "rgba(14,116,144,0.10)", color: CYAN }}
                     >
                       {i + 1}
                     </span>

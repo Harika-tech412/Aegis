@@ -9,12 +9,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { RingInfo } from "@/lib/types";
 
 const BAND_COLORS: Record<string, string> = {
-  AUTO_APPROVE: "#10b981",
-  HUMAN_REVIEW: "#f59e0b",
-  AUTO_FLAG: "#ef4444",
+  AUTO_APPROVE: "#6EA335",
+  HUMAN_REVIEW: "#FEB12B",
+  AUTO_FLAG: "#B81514",
 };
-const SELF_COLOR = "#7dd3fc";
-const HISTORICAL_COLOR = "#64748b";
+const SELF_COLOR = "#3333CC";
+const HISTORICAL_COLOR = "#B3B3B3";
 
 export function RingPanel({
   ring,
@@ -92,7 +92,7 @@ export function RingPanel({
                 nodeLabel="label"
                 nodeColor={(n: any) => n.color}
                 nodeVal={(n: any) => n.val}
-                linkColor={() => "#334155"}
+                linkColor={() => "#CCCCCC"}
                 linkWidth={1.2}
                 enableZoomInteraction={false}
                 cooldownTicks={60}

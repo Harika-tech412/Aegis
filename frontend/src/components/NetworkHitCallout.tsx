@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { NetworkHit } from "@/lib/types";
 import { formatTime } from "@/lib/utils";
 
-const CYAN = "#22D3EE";
+const CYAN = "#0E7490"; // cyan-700 — legible on paper
 
 const SIGNAL_LABEL: Record<string, string> = {
   DEVICE_HASH: "device fingerprint",
@@ -26,15 +26,15 @@ export function NetworkHitCallout({ hits }: { hits: NetworkHit[] | null | undefi
   return (
     <Card
       style={{
-        borderColor: "rgba(34,211,238,0.45)",
+        borderColor: "rgba(14,116,144,0.35)",
         background:
-          "linear-gradient(90deg, rgba(34,211,238,0.10) 0%, rgba(34,211,238,0.02) 60%, transparent 100%)",
+          "linear-gradient(90deg, rgba(14,116,144,0.07) 0%, transparent 70%)",
       }}
     >
       <CardContent className="flex gap-3.5 p-5">
         <span
           className="icon-chip mt-0.5 shrink-0"
-          style={{ background: "rgba(34,211,238,0.14)", color: CYAN }}
+          style={{ background: "rgba(14,116,144,0.10)", color: CYAN }}
         >
           <Share2 className="h-4 w-4" strokeWidth={2} />
         </span>
@@ -64,7 +64,7 @@ export function NetworkHitCallout({ hits }: { hits: NetworkHit[] | null | undefi
             {hits.map((h) => `${h.signal_type} ${h.matched_hash_prefix}…`).join("   ")}
           </p>
           <p className="text-xs text-muted-foreground">
-            Each match added +0.30 to the risk score at the rules layer, above the model output.
+            +0.30 risk per match, applied above the model score.
           </p>
         </div>
       </CardContent>

@@ -79,15 +79,15 @@ export default function BorderGlow({
   children,
   className = "",
   edgeSensitivity = 30,
-  // Aegis danger red (#EF4444) as "H S L" — the glow means high risk.
-  glowColor = "0 84 60",
-  backgroundColor = "hsl(218 49% 10%)",
+  // Sarvam danger red (#B81514) as "H S L" — the glow means high risk.
+  glowColor = "0 80 40",
+  backgroundColor = "hsl(0 0% 100%)",
   borderRadius = 14,
   glowRadius = 34,
   glowIntensity = 0.75,
   coneSpread = 25,
   animated = false,
-  colors = ["#EF4444", "#F87171", "#B91C1C"],
+  colors = ["#B81514", "#DB715C", "#781A11"],
   fillOpacity = 0.28,
 }: {
   children: ReactNode;

@@ -71,11 +71,10 @@ export function Dashboard() {
               </span>
               <div>
                 <p className="text-base font-semibold tracking-tight text-brand sm:text-lg">
-                  Open Live Demo (Applicant + Fraud Console)
+                  Live demo
                 </p>
-                <p className="mt-0.5 text-sm leading-relaxed text-brand/70">
-                  Split-screen: submit an application as a fraudster on the left, watch Aegis
-                  catch it on the right — with real OCR ID verification.
+                <p className="mt-0.5 text-sm text-brand/80">
+                  Submit as a fraudster on the left, watch Aegis catch it on the right.
                 </p>
               </div>
             </div>
@@ -90,7 +89,7 @@ export function Dashboard() {
             <p className="aegis-overline">{institutionName} · {today}</p>
             <h1 className="aegis-title mt-1">Fraud operations</h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              Live scoring across the application pipeline
+              Live application scoring
             </p>
           </div>
           <ScoreDialog onScored={loadStats} />

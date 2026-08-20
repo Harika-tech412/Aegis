@@ -1,4 +1,4 @@
-import { AlertCircle, Gauge, Layers, Network, ShieldCheck, Target } from "lucide-react";
+import { AlertCircle, ShieldCheck } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import GradientWaves from "@/components/reactbits/GradientWaves";
@@ -8,15 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
-
-// Representative metrics from the model report — talking points that plant
-// credibility while the presenter signs in.
-const GLANCE_STATS = [
-  { icon: Layers, value: "18,000+", label: "synthetic applications analyzed" },
-  { icon: Gauge, value: "126ms", label: "average scoring latency" },
-  { icon: Network, value: "6", label: "signal modalities fused" },
-  { icon: Target, value: "0.97", label: "PR-AUC on shifted holdout" },
-];
 
 export function Login() {
   const { login } = useAuth();
@@ -45,16 +36,17 @@ export function Login() {
   return (
     <div className="flex min-h-screen bg-background">
       {/* ---- Left brand panel (hidden under 768px) ---- */}
-      <div className="relative hidden w-3/5 flex-col justify-center overflow-hidden border-r border-border bg-[#070E1A] p-10 lg:p-14 md:flex">
+      <div className="relative hidden w-3/5 flex-col justify-center overflow-hidden border-r border-border bg-secondary p-10 lg:p-14 md:flex">
         {/* Animated background, hero panel only — never the form panel, never
             full-page. Falls back to a CSS gradient if WebGL is unavailable. */}
         <div className="absolute inset-0 z-0">
           <GradientWaves />
         </div>
-        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[#070E1A]/70 via-[#070E1A]/40 to-[#070E1A]/75" />
+        {/* Paper-side scrim: keeps text contrast without dimming to grey. */}
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-secondary/80 via-secondary/55 to-secondary/85" />
         <div className="relative z-10 flex items-center gap-2.5">
           <ShieldCheck className="h-6 w-6 text-brand" />
-          <span className="text-lg font-semibold tracking-tight text-slate-100">Aegis</span>
+          <span className="text-lg font-semibold tracking-tight text-foreground">Aegis</span>
         </div>
 
         <div className="relative z-10 max-w-xl">
@@ -63,33 +55,8 @@ export function Login() {
             <br />
             Aegis makes sure it&rsquo;s the true one.
           </h1>
-          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
-            Real-time trust intelligence for digital lending
-          </p>
-          <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-            Multi-signal fraud detection with explainable decisioning, fraud-ring graph
-            analysis, and a human investigator always in the loop.
-          </p>
-
-          <div className="mt-8 grid grid-cols-4 gap-2">
-            {GLANCE_STATS.map(({ icon: Icon, value, label }) => (
-              <div
-                key={label}
-                className="rounded-lg border border-border bg-card/50 px-3 py-2.5"
-              >
-                <Icon className="mb-1.5 h-3.5 w-3.5 text-brand/70" strokeWidth={2} />
-                <p className="text-base font-bold tabular-nums leading-none text-foreground">
-                  {value}
-                </p>
-                <p className="mt-1 text-[10px] leading-tight text-subtle">{label}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
-        <p className="absolute bottom-8 left-10 z-10 text-[11px] text-slate-400/80 lg:left-14">
-          Demonstration environment · all data is synthetic · Synchrony Hackathon 2026
-        </p>
       </div>
 
       {/* ---- Right login panel ---- */}
@@ -105,14 +72,8 @@ export function Login() {
 
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <div className="icon-chip icon-chip-brand mb-4 !p-3">
-              <ShieldCheck className="h-6 w-6" strokeWidth={2} />
-            </div>
-            <h2 className="text-2xl font-bold tracking-tight">AEGIS</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Investigator Console</p>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:hidden">
-              Every application has a story. Aegis makes sure it&rsquo;s the true one.
-            </p>
+            <h2 className="text-2xl font-bold tracking-tight">Sign in</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Investigator console</p>
           </div>
 
           <form onSubmit={onSubmit} className="space-y-4">
@@ -151,13 +112,11 @@ export function Login() {
           </form>
 
           <p className="mt-3 text-center text-xs text-subtle">
-            Demo credentials pre-filled — click <span className="font-medium text-muted-foreground">Sign in</span> to continue.
+            Demo credentials pre-filled — just sign in.
           </p>
 
-          <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
-            Not an investigator? Access is provisioned by your IT administrator.
-            <br />
-            <a href="/apply" className="mt-1 inline-block text-brand/90 hover:underline">
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            <a href="/apply" className="text-brand hover:underline">
               Apply for a loan →
             </a>
           </p>

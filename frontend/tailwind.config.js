@@ -4,6 +4,12 @@ export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      /* One source of truth for the type stack: --font-sans in index.css.
+         Preflight applies fontFamily.sans to html, so this switches the whole
+         app, not just elements carrying an explicit font utility. */
+      fontFamily: {
+        sans: ["var(--font-sans)"],
+      },
       colors: {
         border: "hsl(var(--border))",
         "border-emphasis": "hsl(var(--border-emphasis))",
@@ -23,6 +29,10 @@ export default {
         warning: "hsl(var(--warning))",
         danger: "hsl(var(--danger))",
         agent: "hsl(var(--agent))",
+        network: "hsl(var(--network))",
+        "success-fill": "hsl(var(--success-fill))",
+        "warning-fill": "hsl(var(--warning-fill))",
+        "danger-fill": "hsl(var(--danger-fill))",
 
         primary: {
           DEFAULT: "hsl(var(--primary))",

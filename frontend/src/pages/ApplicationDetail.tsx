@@ -52,7 +52,7 @@ function DecisionSummaryFrame({
   const spotlight = (
     <SpotlightCard
       className="aegis-surface overflow-hidden rounded-xl"
-      spotlightColor="rgba(219, 234, 254, 0.10)"
+      spotlightColor="rgba(51, 51, 204, 0.07)"
     >
       {children}
     </SpotlightCard>
@@ -68,7 +68,7 @@ function DecisionSummaryFrame({
       borderRadius={14}
       glowRadius={30}
       animated={false}
-      colors={["#EF4444", "#F87171", "#B91C1C"]}
+      colors={["#B81514", "#DB715C", "#781A11"]}
       backgroundColor="hsl(218 49% 10%)"
     >
       {spotlight}

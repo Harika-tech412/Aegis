@@ -58,7 +58,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </InstitutionProvider>
-      <Toaster theme="dark" position="bottom-right" richColors />
+      <Toaster theme="light" position="bottom-right" richColors />
     </AuthProvider>
   );
 }

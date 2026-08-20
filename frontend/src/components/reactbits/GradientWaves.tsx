@@ -190,10 +190,12 @@ function prefersReducedMotion(): boolean {
 }
 
 export default function GradientWaves({
-  // Aegis palette: deep navy horizon, navy-blue waves, soft blue-white crests.
-  horizonColor = "#070E1A",
-  waveColor = "#16305C",
-  crestColor = "#CFE0FF",
+  // Sarvam palette on paper: near-white horizon, pale indigo waves, white
+  // crests. The hero is a light surface now, so the shader tints rather than
+  // dominates — dark values here would reintroduce the black panel.
+  horizonColor = "#FAFAFA",
+  waveColor = "#D2DFF9",
+  crestColor = "#FFFFFF",
   speed = 0.22,
   amplitude = 1.7,
   waveScale = 0.55,
@@ -205,8 +207,8 @@ export default function GradientWaves({
   height = 5.5,
   fogDepth = 15,
   detail = "low",
-  brightness = 0.9,
-  opacity = 0.75,
+  brightness = 1.0,
+  opacity = 0.9,
   mouseInteraction = false,
   parallaxStrength = 0.35,
   grain = true,

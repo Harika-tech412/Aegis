@@ -26,11 +26,11 @@ function Box({ x, y, w, h, title, sub, accent = false }: {
   return (
     <g>
       <rect x={x} y={y} width={w} height={h} rx={6}
-        fill={accent ? "#121D30" : "#0D1626"} stroke={accent ? "#3B82F6" : "#223047"} strokeWidth={1} />
+        fill={accent ? "#E8EFFC" : "#FFFFFF"} stroke={accent ? "#3333CC" : "#E6E6E6"} strokeWidth={1} />
       <text x={x + w / 2} y={y + (sub ? h / 2 - 4 : h / 2 + 4)} textAnchor="middle"
-        fill="#F1F5F9" fontSize="11" fontWeight="600">{title}</text>
+        fill="#1F1F1F" fontSize="11" fontWeight="600">{title}</text>
       {sub && (
-        <text x={x + w / 2} y={y + h / 2 + 12} textAnchor="middle" fill="#94A3B8" fontSize="9">
+        <text x={x + w / 2} y={y + h / 2 + 12} textAnchor="middle" fill="#666666" fontSize="9">
           {sub}
         </text>
       )}
@@ -40,7 +40,7 @@ function Box({ x, y, w, h, title, sub, accent = false }: {
 
 function Arrow({ x1, y1, x2, y2 }: { x1: number; y1: number; x2: number; y2: number }) {
   return (
-    <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#2C3E58" strokeWidth={1.5}
+    <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#CCCCCC" strokeWidth={1.5}
       markerEnd="url(#arrowhead)" />
   );
 }
@@ -66,7 +66,7 @@ export function ArchitectureDialog() {
             aria-label="Aegis pipeline diagram">
             <defs>
               <marker id="arrowhead" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                <polygon points="0 0, 7 3.5, 0 7" fill="#2C3E58" />
+                <polygon points="0 0, 7 3.5, 0 7" fill="#CCCCCC" />
               </marker>
             </defs>
 
@@ -85,12 +85,12 @@ export function ArchitectureDialog() {
 
             {/* Row 2: intelligence layers fanning out of the decision */}
             <Arrow x1={682} y1={64} x2={682} y2={98} />
-            <line x1={92} y1={120} x2={682} y2={120} stroke="#2C3E58" strokeWidth={1} strokeDasharray="3 3" />
-            <line x1={92} y1={120} x2={92} y2={138} stroke="#2C3E58" strokeWidth={1} />
-            <line x1={260} y1={120} x2={260} y2={138} stroke="#2C3E58" strokeWidth={1} />
-            <line x1={430} y1={120} x2={430} y2={138} stroke="#2C3E58" strokeWidth={1} />
-            <line x1={600} y1={120} x2={600} y2={138} stroke="#2C3E58" strokeWidth={1} />
-            <line x1={682} y1={98} x2={682} y2={120} stroke="#2C3E58" strokeWidth={1} />
+            <line x1={92} y1={120} x2={682} y2={120} stroke="#CCCCCC" strokeWidth={1} strokeDasharray="3 3" />
+            <line x1={92} y1={120} x2={92} y2={138} stroke="#CCCCCC" strokeWidth={1} />
+            <line x1={260} y1={120} x2={260} y2={138} stroke="#CCCCCC" strokeWidth={1} />
+            <line x1={430} y1={120} x2={430} y2={138} stroke="#CCCCCC" strokeWidth={1} />
+            <line x1={600} y1={120} x2={600} y2={138} stroke="#CCCCCC" strokeWidth={1} />
+            <line x1={682} y1={98} x2={682} y2={120} stroke="#CCCCCC" strokeWidth={1} />
 
             <Box x={22} y={140} w={140} h={44} title="SHAP → LLM explanation" sub="template fallback, never down" />
             <Box x={190} y={140} w={140} h={44} title="Fraud ring detection" sub="device / IP graph" />
@@ -106,16 +106,16 @@ export function ArchitectureDialog() {
 
             {/* Feedback loop back to the model */}
             <path d="M 480 253 C 640 253, 700 200, 700 120 C 700 90, 620 74, 605 60"
-              fill="none" stroke="#8B5CF6" strokeWidth={1.4} strokeDasharray="5 4"
+              fill="none" stroke="#6D28D9" strokeWidth={1.4} strokeDasharray="5 4"
               markerEnd="url(#arrowhead)" />
-            <text x={640} y={272} fill="#8B5CF6" fontSize="10">
+            <text x={640} y={272} fill="#6D28D9" fontSize="10">
               verdicts → retraining
             </text>
 
             {/* Drift monitor note */}
             <Box x={22} y={288} w={200} h={32} title="Drift monitor (PSI)" sub="" />
-            <line x1={222} y1={304} x2={330} y2={304} stroke="#2C3E58" strokeWidth={1} strokeDasharray="3 3" />
-            <text x={340} y={308} fill="#94A3B8" fontSize="10">
+            <line x1={222} y1={304} x2={330} y2={304} stroke="#CCCCCC" strokeWidth={1} strokeDasharray="3 3" />
+            <text x={340} y={308} fill="#666666" fontSize="10">
               watches live traffic vs training distribution
             </text>
           </svg>
