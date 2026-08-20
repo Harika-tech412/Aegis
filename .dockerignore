@@ -21,13 +21,16 @@ frontend
 # Tests run against the working tree, not the deployed image.
 backend/tests
 
-# Training/eval-only data. applications_train.csv and id_documents/ ARE needed
-# at runtime by the /demo endpoints, so they are deliberately not listed here.
-data/applications_holdout.csv
+# Both CSVs are needed: the /demo endpoints read applications_train.csv, and the
+# build regenerates the ID cards from both of them.
 
 # Applicant uploads are runtime state, written into the container at /app/data/
 # uploads; baking a local copy in would ship one machine's submissions.
 data/uploads
+
+# Generated inside the image by ml/generate_id_documents.py, so a local copy
+# would only slow the context transfer.
+data/id_documents
 
 # Local scratch
 docs/_build

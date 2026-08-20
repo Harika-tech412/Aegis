@@ -1,0 +1,722 @@
+[
+  {
+    "case_id": "AEG-CASE-0001",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Linked eight applications within a 40‑hour window, all from a single device fingerprint and IP address. Seven distinct declared identities appeared, each with mean session lengths of 74 seconds, while the cumulative requested amount totaled $181,000. The risk score spiked to 0.94. These signals align with a device‑recycling pattern: rapid, high‑volume, low‑time‑per‑session activity across multiple identities using the same hardware and network. We confirmed fraud, declined all applications, and placed the device fingerprint and IP on the shared‑signal watchlist.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0002",
+    "fraud_type": "device_recycling",
+    "narrative_text": "We observed three linked applications submitted within a 31‑hour window, all originating from a shared device fingerprint and the same IP address. The applicant pool encompassed eight distinct declared identities, with a mean session duration of only 103 seconds. The total requested amount summed to $197,000, and the risk score calculated at 0.81 flagged a high likelihood of device recycling. The evidence confirmed fraudulent activity. We marked the case as confirmed fraud and routed the ring to the SAR filing queue.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0003",
+    "fraud_type": "device_recycling",
+    "narrative_text": "We observed 6 linked applications within a 43‑hour window, all originating from the same shared device fingerprint and shared IP. Six distinct declared identities were used, with a mean session duration of 100 seconds and a total requested amount of $26,000. The calculated risk score of 0.87 aligns with high‑severity patterns. These signals collectively indicate device recycling. Consequently, we declined all applications and added the device fingerprint and IP address to the shared‑signal watchlist.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0004",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0004 was escalated on a device recycling pattern. Recorded signals: linked applications: 5; window hours: 46; shared device fingerprint: True; shared ip: True; distinct declared identities: 7; mean session seconds: 69; total requested amount: 69000; risk score: 0.97. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Ring escalated to the SAR filing queue.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0005",
+    "fraud_type": "device_recycling",
+    "narrative_text": "We observed four linked applications filed within a 32‑hour window, all originating from the same device fingerprint and IP address, indicating a shared device. Eight distinct declared identities were used across the applications. Average session length was 133 seconds, far below typical user behavior, and the total requested amount summed to $153,000. The risk score was 0.92, well above our fraud threshold. These signals collectively indicated a device‑recycling scheme. We confirmed the fraud, marked the case as AEG‑CASE‑0005, and escalated it to the SAR filing queue.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0006",
+    "fraud_type": "device_recycling",
+    "narrative_text": "We observed seven linked applications within a 48‑hour window, all originating from a shared device fingerprint and a shared IP address. Five distinct declared identities were used, yet each session averaged only 62 seconds, indicating rapid, automated activity. The cumulative requested amount totaled $114,000, while our risk scoring algorithm assigned a 0.85 risk score. These signals, combined with the known device recycling pattern, confirmed fraud. We declined all applications, removed the device and IP from active use, and added them to the shared‑signal watchlist for future monitoring.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0007",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0007 was escalated on a device recycling pattern. Recorded signals: linked applications: 4; window hours: 32; shared device fingerprint: True; shared ip: False; distinct declared identities: 8; mean session seconds: 107; total requested amount: 119000; risk score: 0.81. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Applications declined, device and IP added to the shared-signal watchlist.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0008",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0008 was escalated on a device recycling pattern. Recorded signals: linked applications: 6; window hours: 30; shared device fingerprint: True; shared ip: True; distinct declared identities: 3; mean session seconds: 133; total requested amount: 116000; risk score: 0.82. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Applications declined, device and IP added to the shared-signal watchlist.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0009",
+    "fraud_type": "device_recycling",
+    "narrative_text": "We noted five linked applications within a 36‑hour window, all originating from a shared device fingerprint and four distinct declared identities, yet no shared IP. The mean session length was only 89 seconds, suggesting automated or rapid access. Total requested amount reached $154,000, and the risk score calculated at 0.82 exceeded our fraud threshold. These patterns align with device‑recycling tactics, where a single compromised device is used across multiple accounts to extract high‑value loans. Consequently, we declined all pending applications, and placed the device",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0010",
+    "fraud_type": "device_recycling",
+    "narrative_text": "We observed six linked applications within a 45‑hour window, all sharing the same device fingerprint and IP. Eight distinct declared identities contributed to a mean session of 126 seconds. The total requested amount summed to $193,000 and risk score hit 0.89. These signals matched our device‑recycling profile. We declined all linked applications and",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0011",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0011 was escalated on a device recycling pattern. Recorded signals: linked applications: 3; window hours: 24; shared device fingerprint: True; shared ip: False; distinct declared identities: 3; mean session seconds: 71; total requested amount: 162000; risk score: 0.85. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Ring escalated to the SAR filing queue.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0012",
+    "fraud_type": "device_recycling",
+    "narrative_text": "We observed four linked applications submitted within a 44‑hour window, all from a device with a shared fingerprint and a shared IP, indicating a single device was used for multiple identities. The application set contained four distinct declared identities, each with a mean session time of 83 seconds, and a cumulative requested amount of $44,000. The risk score calculated at 0.94 flagged the activity as high risk. These signals converged to confirm device recycling fraud. Accordingly, we declined the applications, added the device fingerprint and IP to the shared‑signal watchlist, and recorded the case as confirmed fraud.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0013",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0013 was escalated on a device recycling pattern. Recorded signals: linked applications: 3; window hours: 41; shared device fingerprint: True; shared ip: True; distinct declared identities: 6; mean session seconds: 89; total requested amount: 39000; risk score: 0.83. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Applications declined, device and IP added to the shared-signal watchlist.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0014",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0014 was escalated on a device recycling pattern. Recorded signals: linked applications: 7; window hours: 37; shared device fingerprint: True; shared ip: True; distinct declared identities: 3; mean session seconds: 134; total requested amount: 202000; risk score: 0.95. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Ring escalated to the SAR filing queue.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0015",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0015 was escalated on a device recycling pattern. Recorded signals: linked applications: 4; window hours: 29; shared device fingerprint: True; shared ip: True; distinct declared identities: 7; mean session seconds: 117; total requested amount: 153000; risk score: 0.91. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Applications declined, device and IP added to the shared-signal watchlist.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0016",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0016 was escalated on a device recycling pattern. Recorded signals: linked applications: 3; window hours: 36; shared device fingerprint: True; shared ip: True; distinct declared identities: 8; mean session seconds: 73; total requested amount: 198000; risk score: 0.93. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Applications declined, device and IP added to the shared-signal watchlist.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0017",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0017 was escalated on a device recycling pattern. Recorded signals: linked applications: 4; window hours: 26; shared device fingerprint: True; shared ip: True; distinct declared identities: 8; mean session seconds: 127; total requested amount: 165000; risk score: 0.78. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud ring. All linked applications declined and the device fingerprint blocklisted.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0018",
+    "fraud_type": "device_recycling",
+    "narrative_text": "We logged six linked applications within a 25‑hour window, all originating from the same device fingerprint and IP address, indicating a single device reused across accounts. The five distinct declared identities used these accounts, each session averaging 75 seconds—below typical user engagement thresholds. Total requested amount summed to $133,000, far exceeding the average loan size for this profile. Combined with a risk score of 0.89, the pattern matches known device‑recycling fraud. We confirmed the fraud, escalated the ring to the SAR filing queue, and blocked the device fingerprint for all future applications.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0019",
+    "fraud_type": "device_recycling",
+    "narrative_text": "We observed 8 linked applications submitted within a 25‑hour window. All used the same device fingerprint and IP address. The 8 distinct declared identities had an average session length of 85 seconds. The aggregate requested amount was $128,000 and the system risk score was 0.87.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0020",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0020 was escalated on a device recycling pattern. Recorded signals: linked applications: 4; window hours: 35; shared device fingerprint: True; shared ip: True; distinct declared identities: 8; mean session seconds: 85; total requested amount: 139000; risk score: 0.9. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Ring escalated to the SAR filing queue.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0021",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0021 was escalated on a device recycling pattern. Recorded signals: linked applications: 3; window hours: 41; shared device fingerprint: True; shared ip: True; distinct declared identities: 5; mean session seconds: 64; total requested amount: 199000; risk score: 0.84. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud ring. All linked applications declined and the device fingerprint blocklisted.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0022",
+    "fraud_type": "device_recycling",
+    "narrative_text": "Case AEG-CASE-0022 was escalated on a device recycling pattern. Recorded signals: linked applications: 7; window hours: 44; shared device fingerprint: True; shared ip: False; distinct declared identities: 6; mean session seconds: 75; total requested amount: 150000; risk score: 0.82. Taken together these are inconsistent with genuine applicant behaviour and align with the established device recycling typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Applications declined, device and IP added to the shared-signal watchlist.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0023",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0023 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 5; burst duration minutes: 119; shared ip: True; rotating device fingerprints: 5; employer declared identically: True; income variance pct: 5.9; risk score: 0.88. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed automated attack. Burst declined in full and the source IP rate-limited.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0024",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0024 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 5; burst duration minutes: 98; shared ip: True; rotating device fingerprints: 6; employer declared identically: True; income variance pct: 3.8; risk score: 0.79. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Escalated to the bot-mitigation team for signature capture.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0025",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0025 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 9; burst duration minutes: 84; shared ip: True; rotating device fingerprints: 9; employer declared identically: True; income variance pct: 5.5; risk score: 0.86. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Applications declined and the originating subnet throttled at the edge.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0026",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0026 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 5; burst duration minutes: 135; shared ip: True; rotating device fingerprints: 5; employer declared identically: True; income variance pct: 4.6; risk score: 0.93. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Applications declined and the originating subnet throttled at the edge.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0027",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0027 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 5; burst duration minutes: 155; shared ip: True; rotating device fingerprints: 8; employer declared identically: True; income variance pct: 4.7; risk score: 0.84. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Applications declined and the originating subnet throttled at the edge.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0028",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "We observed nine applications submitted within a 131‑minute burst from a shared IP, indicating a coordinated attack pattern. The device fingerprints rotated four times, while the applicant consistently listed the same employer, with an income variance of only 2.7 %. The risk score of 0.96 confirmed high suspicion. These signals combined with the shared IP flagged a velocity attack. Accordingly we declined all nine applications in the burst and imposed rate‑limiting on the source IP. The case was closed as a confirmed automated attack.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0029",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "We logged six applications in a 172‑minute burst from a single IP flagged as shared. Four device fingerprints rotated during the burst, yet all listed the same employer and had identical income variance at 3.9 %. Risk score 0.81 matched velocity‑attack thresholds. The pattern of high volume, shared IP, device rotation, employer consistency, and low income variance indicates an automated attack rather than legitimate multi‑application activity. We declined the entire burst and rate‑limited the source IP. The case is confirmed as a velocity attack,",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0030",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "We observed seven applications submitted within a 97‑minute burst from a shared IP, a signal that triggered our velocity engine. The source IP was flagged as shared, and four distinct device fingerprints rotated during the burst. All applicants listed the same employer",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0031",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "We observed 6 applications in a 153‑minute burst from the same IP. The IP was shared, and device fingerprints rotated 5 times. All applications declared the same employer, and income variance was only 5.0 %, while the risk score remained high at 0.79. These patterns indicate a velocity attack: rapid, identical submissions from a single subnet. We declined all applications and throttled the originating subnet at the edge. Disposition: fraud confirmed, all related applications cancelled.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0032",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0032 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 6; burst duration minutes: 137; shared ip: True; rotating device fingerprints: 5; employer declared identically: True; income variance pct: 5.7; risk score: 0.9. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Escalated to the bot-mitigation team for signature capture.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0033",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0033 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 5; burst duration minutes: 108; shared ip: True; rotating device fingerprints: 5; employer declared identically: True; income variance pct: 4.4; risk score: 0.8. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed automated attack. Burst declined in full and the source IP rate-limited.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0034",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0034 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 6; burst duration minutes: 71; shared ip: True; rotating device fingerprints: 6; employer declared identically: True; income variance pct: 5.9; risk score: 0.89. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed automated attack. Burst declined in full and the source IP rate-limited.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0035",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0035 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 9; burst duration minutes: 78; shared ip: True; rotating device fingerprints: 9; employer declared identically: True; income variance pct: 3.6; risk score: 0.92. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed automated attack. Burst declined in full and the source IP rate-limited.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0036",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "We observed five applications submitted within a 143‑minute burst, all originating from a shared IP. Four rotating device fingerprints and identical employer declarations across the applications raised suspicion; the income variance was only 3.8 %, yet the risk score hit 0.86. The pattern matched velocity‑attack criteria: rapid, repeated submissions from a single subnet, device churn, and minimal income disparity. We concluded fraud, declined all applications, and throttled the originating subnet",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0037",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "We observed four applications within a 67‑minute burst, all originating from a shared IP. The device fingerprints rotated five times during the burst, yet the employer field was identical across all submissions. Income variance stood at only 2.0 %, consistent with the declared employer, and the overall risk score was 0.91. These signals collectively indicated a velocity attack pattern. Consequently, we confirmed fraud and escalated the case to the bot‑mitigation team for signature capture.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0038",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0038 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 8; burst duration minutes: 129; shared ip: True; rotating device fingerprints: 4; employer declared identically: True; income variance pct: 5.8; risk score: 0.91. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Escalated to the bot-mitigation team for signature capture.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0039",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "We logged 4 applications within a 134‑minute burst originating from a shared IP. Device fingerprints rotated 8 times, all flagged as shared, and the employer field matched identically across all records. Income variance was a narrow 4.1 %, yet the risk score of 0.98 surpassed our velocity‑attack threshold. These signals collectively indicated a coordinated fraud attempt. Accordingly we declined",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0040",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "We logged eight applications submitted within a 68‑minute burst from a shared IP. Five distinct device fingerprints rotated during the same period, yet all applications declared the same employer and presented income figures that varied by only 5.5%. The aggregated risk score of 0.97 flagged the activity as high risk. The velocity pattern, coupled with uniform employer data, rotating fingerprints, and minimal income variance, confirmed a velocity attack. Accordingly we declined all applications and throttled the originating subnet at the edge to prevent further attempts.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0041",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0041 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 5; burst duration minutes: 143; shared ip: True; rotating device fingerprints: 5; employer declared identically: True; income variance pct: 5.2; risk score: 0.78. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Applications declined and the originating subnet throttled at the edge.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0042",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0042 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 6; burst duration minutes: 70; shared ip: True; rotating device fingerprints: 7; employer declared identically: True; income variance pct: 3.4; risk score: 0.84. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed automated attack. Burst declined in full and the source IP rate-limited.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0043",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "We observed seven applications submitted within a 93‑minute burst, all originating from the same IP, indicating a shared source. Six device fingerprints rotated during the burst, yet the employer field remained identical across all entries, while income figures varied by only 4.6 %. The overall risk score of 0.86 matched our velocity threshold. These patterns confirmed a velocity attack. We marked the case as confirmed fraud and escalated it to the bot‑mitigation team for signature capture and further investigation.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0044",
+    "fraud_type": "velocity_attack",
+    "narrative_text": "Case AEG-CASE-0044 was escalated on a velocity attack pattern. Recorded signals: applications in burst: 6; burst duration minutes: 183; shared ip: True; rotating device fingerprints: 8; employer declared identically: True; income variance pct: 2.3; risk score: 0.95. Taken together these are inconsistent with genuine applicant behaviour and align with the established velocity attack typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fraud. Escalated to the bot-mitigation team for signature capture.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0045",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "We observed only four mouse movement events during the 45‑second session, yet the form paste count was nine, indicating automated paste actions. Keystroke cadence was uniform with sub‑human interval variance, a classic sign of scripting. Nine matching sessions appeared within the same week, all with identical patterns. The overall risk score of 0.89 confirmed high suspicion. We concluded a scripted submission, declined the application, and added the session signature to detection rules. This action closed the case and updated our anomaly database.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0046",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0046 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 5; form paste count: 9; session duration seconds: 17; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 12; risk score: 0.9. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed scripted submission. Application declined and the session signature added to detection rules.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0047",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "We observed 8 mouse movement events, 10 form paste actions, a session lasting only 28 seconds, and keystroke cadence that was uniform with sub‑human interval variance. Five identical sessions occurred within the same week, and the aggregated risk score was 0.85. These signals combined—minimal mouse activity, excessive pasting, extremely rapid and regular typing, repeated identical sessions, and a",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0048",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0048 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 5; form paste count: 6; session duration seconds: 25; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 6; risk score: 0.85. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed bot traffic. Declined and challenged on re-attempt.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0049",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0049 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 4; form paste count: 10; session duration seconds: 50; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 7; risk score: 0.93. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed bot traffic. Declined and challenged on re-attempt.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0050",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0050 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 7; form paste count: 11; session duration seconds: 52; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 11; risk score: 0.85. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed scripted submission. Application declined and the session signature added to detection rules.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0051",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "We logged 4 mouse movement events and 9 form paste actions during a 19‑second session, with keystroke cadence uniformly spaced and sub‑human interval variance. Seven matching sessions occurred within the same week, and the risk score was 0.84. The low activity volume, high paste count, and uniform keystroke pattern are classic scripted behavior. We confirmed the session as a scripted submission, declined the application, and appended the session signature to our detection rules.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0052",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Observed 7 mouse movement events paired with 10 form paste events in a 42‑second session. Keystroke cadence was uniform with sub‑human interval variance, indicating automation. Four matching sessions appeared that same week, each with identical low‑activity patterns. The risk score calculated at 0.94 triggered a fraud alert. We concluded the submission was scripted, declined the application, and logged the session signature into detection rules.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0053",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0053 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 7; form paste count: 7; session duration seconds: 38; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 8; risk score: 0.98. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed bot traffic. Declined and challenged on re-attempt.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0054",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "We logged 6 mouse movement events and 10 form paste actions during a 22‑second session, which is unusually short. Keystroke cadence was uniform with sub‑human interval variance, a classic bot signature. Nine matching sessions appeared this week, each with the same anomaly profile, and the risk score was 0.97. These signals combined confirmed a scripted submission. We declined the application and flagged the session signature in detection rules. The case is closed with confirmation of fraud.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0055",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0055 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 1; form paste count: 9; session duration seconds: 27; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 4; risk score: 0.81. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed scripted submission. Application declined and the session signature added to detection rules.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0056",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0056 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 6; form paste count: 6; session duration seconds: 51; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 12; risk score: 0.79. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed bot traffic. Declined and challenged on re-attempt.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0057",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0057 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 1; form paste count: 9; session duration seconds: 34; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 6; risk score: 0.89. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed scripted submission. Application declined and the session signature added to detection rules.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0058",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0058 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 1; form paste count: 5; session duration seconds: 21; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 2; risk score: 0.85. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed scripted submission. Application declined and the session signature added to detection rules.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0059",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0059 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 4; form paste count: 10; session duration seconds: 34; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 13; risk score: 0.85. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed automation. Declined, with the timing fingerprint fed back into the model.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0060",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0060 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 8; form paste count: 5; session duration seconds: 29; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 5; risk score: 0.93. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed scripted submission. Application declined and the session signature added to detection rules.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0061",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Observed 7 mouse movement events and 6 form paste actions within a 44‑second session, both below typical user thresholds. Keystroke cadence exhibited uniform sub‑human interval variance, indicating automated timing. Two matching sessions occurred in the same week, reinforcing repetition. Combined, these signals produced a 0.97 risk score. Concluded bot traffic; we declined the transaction and issued a challenge for a re‑attempt. No further action required.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0062",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Case AEG-CASE-0062 was escalated on a session anomaly pattern. Recorded signals: mouse movement events: 2; form paste count: 5; session duration seconds: 58; keystroke cadence: uniform, sub-human interval variance; matching sessions same week: 2; risk score: 0.94. Taken together these are inconsistent with genuine applicant behaviour and align with the established session anomaly typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed scripted submission. Application declined and the session signature added to detection rules.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0063",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "We logged a single session with only five mouse‑movement events and a form paste count of nine, while the session lasted 17 seconds. Keystroke cadence was uniformly timed with sub‑human interval variance, suggesting automated input. Risk score calculated at 0.91. Seven matching sessions were recorded during the same week, all sharing identical signatures. The convergence of minimal user interaction, high paste frequency, short duration, uniform keystrokes, and multiple weekly matches confirmed a scripted submission. We declined the application and appended the session signature to our detection rules.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0064",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "We observed only six mouse‑movement events and seven form paste actions within a 50‑second session, with keystroke cadence uniform and sub‑human interval variance. Eight matching sessions occurred in the same week, and the risk score registered 0.92. These signals converge on automated, script‑driven activity rather than human interaction. We concluded the account was bot traffic, declined the application, and placed a challenge on any re‑attempt.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0065",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "We observed 0 mouse movement events while the form paste count reached 7 during a 36‑second session, indicating a lack of human interaction. Keystroke cadence was uniform with sub‑human interval variance, reinforcing automated input. The account had 14 matching sessions in the same week, all scoring 0.85 on our risk model. These signals collectively confirmed a scripted submission. Accordingly, we declined the application and appended the session signature to our detection rules. The case is closed with a confirmed fraud classification of session anomaly.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0066",
+    "fraud_type": "session_anomaly",
+    "narrative_text": "Observed mouse movement events totaled 2 while form paste count reached 8. Session duration was only 43 seconds, and keystroke cadence appeared uniform with sub‑human interval variance. Seven matching sessions were recorded in the same week, and the overall risk score calculated at 0.81. These signals matched our session‑anomaly profile, indicating likely automation. We confirmed the fraud, declined the application, and fed the timing fingerprint back into the model for future detection.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0067",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0067 was escalated on a income mismatch pattern. Recorded signals: declared income: 97000; employer band midpoint: 63000; income employer consistency score: 0.04; employment type: salaried; requested amount: 23000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.88. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed income misrepresentation. Application declined after employer verification failed.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0068",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Declared_income of $123,000 versus employer_band_midpoint of $44,000 yields a stark mismatch; income_employer_consistency_score of 0.12 confirms low alignment. Employment_type self_employed and requested_amount of $46,000 further strain credibility. Verification_outcome shows employer could not confirm stated role or compensation, and risk_score sits at 0.95. Together these signals indicate fabricated income. We declined the application and flagged the applicant for repeat-applicant monitoring.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0069",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "We noted declared_income of 107,000 against an employer_band_midpoint of 33,000 and an income_employer_consistency_score of 0.27. The applicant listed self_employed employment but the verification step found the employer could not confirm the stated role or compensation, giving a risk_score of 0.96. The requested_amount of 47,000 exceeded what our consistency metrics would support. These signals collectively indicated an income mismatch. We classified the submission as a confirmed misstatement, declined the loan, and invited the applicant to reapply only after submitting verified documentation.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0070",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "We flagged AEG‑CASE‑0070 for income mismatch after comparing declared_income of $97,000 against the employer_band_midpoint of $60,000 and noting an income_employer_consistency_score of 0.13. The applicant listed employment_type as gig_worker, which typically lacks stable salary data. Requested_amount was $40,000. Verification_outcome confirmed that the employer could not verify the stated role or compensation, corroborating the low consistency score. Risk_score of 0.89 further elevated suspicion. We concluded a misstatement, declined the loan, and invited the applicant to reapply only with verified documentation.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0071",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0071 was escalated on a income mismatch pattern. Recorded signals: declared income: 95000; employer band midpoint: 58000; income employer consistency score: 0.11; employment type: gig_worker; requested amount: 44000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.82. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed misstatement. Declined; applicant invited to reapply with verified documentation.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0072",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0072 was escalated on a income mismatch pattern. Recorded signals: declared income: 176000; employer band midpoint: 66000; income employer consistency score: 0.04; employment type: salaried; requested amount: 48000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.84. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed income misrepresentation. Application declined after employer verification failed.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0073",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "We noted declared_income of 197 000 versus employer_band_midpoint of 65 000, yielding an income_employer_consistency_score of 0.09. The applicant’s employment_type was salaried, yet requested_amount of 40 000 exceeded the band’s typical range. During employer verification, the employer could not confirm the stated role or compensation, and the risk_score had already risen to 0.94. These signals collectively indicated income misrepresentation. We declined the application after the verification failure, confirming fraud.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0074",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0074 was escalated on a income mismatch pattern. Recorded signals: declared income: 133000; employer band midpoint: 37000; income employer consistency score: 0.18; employment type: self_employed; requested amount: 24000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.88. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed misstatement. Declined; applicant invited to reapply with verified documentation.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0075",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "We noted declared_income of $146,000 versus employer_band_midpoint of $34,000, a discrepancy reflected in an income_employer_consistency_score of 0.2. The applicant listed employment_type as gig_worker, yet requested_amount of $33,000 exceeded the typical gig worker earning range. Verification_outcome confirmed that the employer could not verify the stated role or compensation. Combined with a risk_score of 0",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0076",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0076 was escalated on a income mismatch pattern. Recorded signals: declared income: 117000; employer band midpoint: 66000; income employer consistency score: 0.04; employment type: salaried; requested amount: 31000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.95. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed income misrepresentation. Application declined after employer verification failed.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0077",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0077 was escalated on a income mismatch pattern. Recorded signals: declared income: 169000; employer band midpoint: 36000; income employer consistency score: 0.11; employment type: salaried; requested amount: 15000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.89. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed misstatement. Declined; applicant invited to reapply with verified documentation.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0078",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0078 was escalated on a income mismatch pattern. Recorded signals: declared income: 223000; employer band midpoint: 63000; income employer consistency score: 0.17; employment type: salaried; requested amount: 27000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.94. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fabricated income. Declined and flagged for repeat-applicant monitoring.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0079",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0079 was escalated on a income mismatch pattern. Recorded signals: declared income: 156000; employer band midpoint: 45000; income employer consistency score: 0.07; employment type: salaried; requested amount: 45000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.8. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed misstatement. Declined; applicant invited to reapply with verified documentation.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0080",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "We noted declared_income of 126,000 against an employer_band_midpoint of 61,000, yielding an income_employer_consistency_score of 0.07. The applicant listed employment_type as self_employed yet requested 34,000, and verification_outcome revealed the employer could not confirm the stated role or compensation. Coupled with a risk_score of 0.96, the data indicated a significant income mismatch. We concluded the declared income was fabricated, declined the application, and flagged the applicant for repeat‑applicant monitoring.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0081",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0081 was escalated on a income mismatch pattern. Recorded signals: declared income: 229000; employer band midpoint: 44000; income employer consistency score: 0.17; employment type: self_employed; requested amount: 26000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.83. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed income misrepresentation. Application declined after employer verification failed.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0082",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "We reviewed the applicant’s declared_income of 231,000 versus the employer_band_midpoint of 35,000 and an income_employer_consistency_score of 0.14. The applicant’s employment_type was listed as self_employed, yet the requested_amount was 20,000. Verification_outcome indicated the employer could not confirm the stated role or compensation. With a risk_score of 0.97, we concluded that the income was fabricated. The application",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0083",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0083 was escalated on a income mismatch pattern. Recorded signals: declared income: 140000; employer band midpoint: 62000; income employer consistency score: 0.2; employment type: gig_worker; requested amount: 41000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.98. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed misstatement. Declined; applicant invited to reapply with verified documentation.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0084",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0084 was escalated on a income mismatch pattern. Recorded signals: declared income: 176000; employer band midpoint: 46000; income employer consistency score: 0.28; employment type: self_employed; requested amount: 19000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.78. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed fabricated income. Declined and flagged for repeat-applicant monitoring.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0085",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0085 was escalated on a income mismatch pattern. Recorded signals: declared income: 114000; employer band midpoint: 45000; income employer consistency score: 0.04; employment type: salaried; requested amount: 43000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.83. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed misstatement. Declined; applicant invited to reapply with verified documentation.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0086",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "Case AEG-CASE-0086 was escalated on a income mismatch pattern. Recorded signals: declared income: 204000; employer band midpoint: 42000; income employer consistency score: 0.26; employment type: gig_worker; requested amount: 45000; verification outcome: employer could not confirm stated role or compensation; risk score: 0.85. Taken together these are inconsistent with genuine applicant behaviour and align with the established income mismatch typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed income misrepresentation. Application declined after employer verification failed.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0087",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "We noted the applicant declared income of 159 000 while the employer band midpoint is 42 000, a 3.8× disparity. The income_employer_consistency_score sits at 0.09, indicating extreme inconsistency. Employment type is self‑employed, yet verification showed the employer could not confirm either the stated role or the compensation. The requested amount of 23 000, coupled with a risk_score of 0.86, heightened our suspicion. We concluded fabricated income, declined the application, and flagged the account for repeat‑applicant monitoring.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0088",
+    "fraud_type": "income_mismatch",
+    "narrative_text": "We noted declared_income of 117 000, far above the employer_band_midpoint of 45 000. The income_employer_consistency_score of 0.22 and employment_type salaried raised immediate red flags. The applicant requested 47 000, yet verification_outcome showed the employer could not confirm the stated role or compensation. Our risk_score of 0.94 corroborated a high risk assessment. The combination of inflated declared income, low consistency score, failed employer confirmation, and elevated risk score led us to conclude fabricated income. We declined the loan and flagged the applicant for repeat‑applicant monitoring.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0089",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "We logged the application and found an identity_consistency_score of 0.11, with mismatched_fields noted as ['surname spelling', 'email tenure']. The bureau file was only 17 days old and there were 2 prior applications using the same SSN pattern, raising flag. The overall risk_score sat at 0.93. These signals converged to indicate identity inconsistency and third‑party identity misuse. We declined the request, confirmed the fraud, and notified the true",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0090",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0090 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.13; mismatched fields: ['surname spelling', 'street address']; bureau file age days: 64; prior applications same ssn pattern: 2; risk score: 0.93. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed third-party identity misuse. Declined and the true identity holder notified.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0091",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "We noted an identity consistency score of 0.12, with mismatched fields in email tenure, date of birth, and street address. The bureau file was only 55 days old, yet it already reflected four prior applications under the same SSN pattern, and the overall risk score was 0.84. These signals jointly indicated a high likelihood of identity fabrication. We declined the application and immediately forwarded the case to the identity‑risk team for further review.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0092",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0092 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.16; mismatched fields: ['surname spelling', 'street address']; bureau file age days: 29; prior applications same ssn pattern: 0; risk score: 0.89. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed synthetic identity. Application declined and the identity cluster escalated.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0093",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "We observed an identity_consistency_score of 0.03, with mismatched_fields in street address and surname spelling. The bureau_file_age_days was 55 and there were zero prior_applications_same_ssn_pattern, yet the risk_score remained high at 0.85. These signals converged on a third‑party identity misuse hypothesis. The application was declined, and we notified the true identity holder. All relevant records were flagged for audit.",
+    "generated_by": "groq"
+  },
+  {
+    "case_id": "AEG-CASE-0094",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0094 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.24; mismatched fields: ['email tenure', 'date of birth']; bureau file age days: 25; prior applications same ssn pattern: 2; risk score: 0.79. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed synthetic identity. Application declined and the identity cluster escalated.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0095",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0095 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.16; mismatched fields: ['email tenure', 'surname spelling']; bureau file age days: 37; prior applications same ssn pattern: 3; risk score: 0.87. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed synthetic identity. Application declined and the identity cluster escalated.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0096",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0096 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.14; mismatched fields: ['street address', 'phone carrier record']; bureau file age days: 10; prior applications same ssn pattern: 0; risk score: 0.98. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed identity fabrication. Declined and referred to the identity-risk team.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0097",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0097 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.28; mismatched fields: ['email tenure', 'surname spelling', 'phone carrier record']; bureau file age days: 61; prior applications same ssn pattern: 1; risk score: 0.92. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed identity fabrication. Declined and referred to the identity-risk team.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0098",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0098 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.15; mismatched fields: ['email tenure', 'date of birth', 'street address']; bureau file age days: 54; prior applications same ssn pattern: 3; risk score: 0.84. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed identity fabrication. Declined and referred to the identity-risk team.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0099",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0099 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.17; mismatched fields: ['date of birth', 'email tenure']; bureau file age days: 6; prior applications same ssn pattern: 4; risk score: 0.82. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed synthetic identity. Application declined and the identity cluster escalated.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0100",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0100 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.16; mismatched fields: ['street address', 'phone carrier record']; bureau file age days: 35; prior applications same ssn pattern: 0; risk score: 0.86. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed third-party identity misuse. Declined and the true identity holder notified.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0101",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0101 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.24; mismatched fields: ['email tenure', 'surname spelling', 'date of birth']; bureau file age days: 8; prior applications same ssn pattern: 1; risk score: 0.96. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed third-party identity misuse. Declined and the true identity holder notified.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0102",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0102 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.25; mismatched fields: ['date of birth', 'surname spelling', 'phone carrier record']; bureau file age days: 44; prior applications same ssn pattern: 3; risk score: 0.84. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed third-party identity misuse. Declined and the true identity holder notified.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0103",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0103 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.24; mismatched fields: ['surname spelling', 'street address']; bureau file age days: 11; prior applications same ssn pattern: 2; risk score: 0.91. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed synthetic identity. Application declined and the identity cluster escalated.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0104",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0104 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.24; mismatched fields: ['date of birth', 'street address']; bureau file age days: 45; prior applications same ssn pattern: 3; risk score: 0.87. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed third-party identity misuse. Declined and the true identity holder notified.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0105",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0105 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.19; mismatched fields: ['surname spelling', 'street address', 'date of birth']; bureau file age days: 56; prior applications same ssn pattern: 2; risk score: 0.94. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed third-party identity misuse. Declined and the true identity holder notified.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0106",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0106 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.2; mismatched fields: ['date of birth', 'surname spelling', 'phone carrier record']; bureau file age days: 52; prior applications same ssn pattern: 2; risk score: 0.97. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed synthetic identity. Application declined and the identity cluster escalated.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0107",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0107 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.23; mismatched fields: ['date of birth', 'street address']; bureau file age days: 69; prior applications same ssn pattern: 2; risk score: 0.89. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed identity fabrication. Declined and referred to the identity-risk team.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0108",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0108 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.25; mismatched fields: ['email tenure', 'street address', 'date of birth']; bureau file age days: 21; prior applications same ssn pattern: 3; risk score: 0.94. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed third-party identity misuse. Declined and the true identity holder notified.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0109",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0109 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.05; mismatched fields: ['surname spelling', 'street address']; bureau file age days: 34; prior applications same ssn pattern: 0; risk score: 0.92. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed identity fabrication. Declined and referred to the identity-risk team.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0110",
+    "fraud_type": "identity_inconsistency",
+    "narrative_text": "Case AEG-CASE-0110 was escalated on a identity inconsistency pattern. Recorded signals: identity consistency score: 0.09; mismatched fields: ['phone carrier record', 'surname spelling', 'date of birth']; bureau file age days: 19; prior applications same ssn pattern: 2; risk score: 0.84. Taken together these are inconsistent with genuine applicant behaviour and align with the established identity inconsistency typology. Corroborating checks against linked applications and third-party records supported the assessment. Confirmed third-party identity misuse. Declined and the true identity holder notified.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0111",
+    "fraud_type": "false_alarm",
+    "narrative_text": "Case AEG-CASE-0111 entered the review queue on an automated flag. Recorded signals: initial trigger: Declared income implausible for stated employer; verification finding: applicant recently transitioned from salaried employment to self-employed consulting at a materially higher rate; two years of filed returns and signed client contracts supported the figure; review duration minutes: 76; risk score at flag: 0.54. On review, each flagged signal had a documented, innocent explanation, and supporting evidence was obtained directly from the applicant and third-party records. No indicators of misrepresentation, automation, or identity misuse were substantiated. Cleared. Review closed as a false positive and the case retained as a tuning example. Retained as a tuning reference for threshold calibration.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0112",
+    "fraud_type": "false_alarm",
+    "narrative_text": "Case AEG-CASE-0112 entered the review queue on an automated flag. Recorded signals: initial trigger: Every form field populated by paste; verification finding: applicant used a password manager with autofill enabled; pointer movement, dwell time and correction rate all within normal human range; review duration minutes: 86; risk score at flag: 0.67. On review, each flagged signal had a documented, innocent explanation, and supporting evidence was obtained directly from the applicant and third-party records. No indicators of misrepresentation, automation, or identity misuse were substantiated. Cleared after verification. No fraud indicators substantiated; approved on standard terms. Retained as a tuning reference for threshold calibration.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0113",
+    "fraud_type": "false_alarm",
+    "narrative_text": "Case AEG-CASE-0113 entered the review queue on an automated flag. Recorded signals: initial trigger: Device seen on a prior declined application; verification finding: applicant borrowed a relative's laptop after their own device failed; the earlier decline was unrelated and credit-driven; review duration minutes: 88; risk score at flag: 0.58. On review, each flagged signal had a documented, innocent explanation, and supporting evidence was obtained directly from the applicant and third-party records. No indicators of misrepresentation, automation, or identity misuse were substantiated. Cleared after verification. No fraud indicators substantiated; approved on standard terms. Retained as a tuning reference for threshold calibration.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0114",
+    "fraud_type": "false_alarm",
+    "narrative_text": "Case AEG-CASE-0114 entered the review queue on an automated flag. Recorded signals: initial trigger: Identity consistency score in the bottom decile; verification finding: applicant recently changed their legal name; the mismatch is between the pre- and post-change records, both of which were verified; review duration minutes: 57; risk score at flag: 0.62. On review, each flagged signal had a documented, innocent explanation, and supporting evidence was obtained directly from the applicant and third-party records. No indicators of misrepresentation, automation, or identity misuse were substantiated. Cleared. Review closed as a false positive and the case retained as a tuning example. Retained as a tuning reference for threshold calibration.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0115",
+    "fraud_type": "false_alarm",
+    "narrative_text": "Case AEG-CASE-0115 entered the review queue on an automated flag. Recorded signals: initial trigger: Three applications from one household device inside 30 hours; verification finding: shared home computer used by three adult family members applying separately after a joint budgeting conversation; distinct verified identities, distinct employers, distinct funding needs; review duration minutes: 49; risk score at flag: 0.58. On review, each flagged signal had a documented, innocent explanation, and supporting evidence was obtained directly from the applicant and third-party records. No indicators of misrepresentation, automation, or identity misuse were substantiated. Cleared. Legitimate applicant; the flagged signals had an innocent explanation. Application returned to normal processing. Retained as a tuning reference for threshold calibration.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0116",
+    "fraud_type": "false_alarm",
+    "narrative_text": "Case AEG-CASE-0116 entered the review queue on an automated flag. Recorded signals: initial trigger: Address and phone mismatch against bureau records; verification finding: applicant relocated for work six weeks ago and the bureau file had not yet refreshed; lease agreement and updated carrier record confirmed the new details; review duration minutes: 46; risk score at flag: 0.79. On review, each flagged signal had a documented, innocent explanation, and supporting evidence was obtained directly from the applicant and third-party records. No indicators of misrepresentation, automation, or identity misuse were substantiated. Cleared. Review closed as a false positive and the case retained as a tuning example. Retained as a tuning reference for threshold calibration.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0117",
+    "fraud_type": "false_alarm",
+    "narrative_text": "Case AEG-CASE-0117 entered the review queue on an automated flag. Recorded signals: initial trigger: Near-zero pointer movement across the full session; verification finding: applicant uses switch-access assistive technology, which generates almost no mouse-movement telemetry; session lasted over eight minutes with entirely manual keyboard entry; review duration minutes: 75; risk score at flag: 0.74. On review, each flagged signal had a documented, innocent explanation, and supporting evidence was obtained directly from the applicant and third-party records. No indicators of misrepresentation, automation, or identity misuse were substantiated. Cleared after verification. No fraud indicators substantiated; approved on standard terms. Retained as a tuning reference for threshold calibration.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0118",
+    "fraud_type": "false_alarm",
+    "narrative_text": "Case AEG-CASE-0118 entered the review queue on an automated flag. Recorded signals: initial trigger: Burst of three submissions from one account in twenty minutes; verification finding: applicant submitted, spotted a typo in the requested amount, and resubmitted twice; identical verified identity on all three, only the amount field differed; review duration minutes: 57; risk score at flag: 0.68. On review, each flagged signal had a documented, innocent explanation, and supporting evidence was obtained directly from the applicant and third-party records. No indicators of misrepresentation, automation, or identity misuse were substantiated. Cleared. Legitimate applicant; the flagged signals had an innocent explanation. Application returned to normal processing. Retained as a tuning reference for threshold calibration.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0119",
+    "fraud_type": "false_alarm",
+    "narrative_text": "Case AEG-CASE-0119 entered the review queue on an automated flag. Recorded signals: initial trigger: Two applications from the same IP within an hour; verification finding: small shared-office network with a single egress IP; the two applicants are unrelated tenants of the same co-working floor; review duration minutes: 22; risk score at flag: 0.79. On review, each flagged signal had a documented, innocent explanation, and supporting evidence was obtained directly from the applicant and third-party records. No indicators of misrepresentation, automation, or identity misuse were substantiated. Cleared. Legitimate applicant; the flagged signals had an innocent explanation. Application returned to normal processing. Retained as a tuning reference for threshold calibration.",
+    "generated_by": "template_fallback"
+  },
+  {
+    "case_id": "AEG-CASE-0120",
+    "fraud_type": "false_alarm",
+    "narrative_text": "Case AEG-CASE-0120 entered the review queue on an automated flag. Recorded signals: initial trigger: Very short session with high completion speed; verification finding: returning customer whose details were pre-filled from a prior approved application; the short session reflects a resumed draft, not automation; review duration minutes: 76; risk score at flag: 0.69. On review, each flagged signal had a documented, innocent explanation, and supporting evidence was obtained directly from the applicant and third-party records. No indicators of misrepresentation, automation, or identity misuse were substantiated. Cleared. Review closed as a false positive and the case retained as a tuning example. Retained as a tuning reference for threshold calibration.",
+    "generated_by": "template_fallback"
+  }
+]

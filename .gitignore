@@ -29,14 +29,31 @@ build/
 *.pkl
 *.joblib
 
+# EXCEPTION: these two are loaded at startup by app/ml/scoring_service.py, so a
+# deployment that does not contain them crashes on boot with FileNotFoundError.
+# They are small (~7MB together) and are part of the deployable unit, not
+# regenerable build output — the trained model IS the artifact.
+!ml/artifacts/calibrator.joblib
+!ml/artifacts/isolation_forest.joblib
+
 # Data
-data/*.csv
 data/*.parquet
 !data/.gitkeep
 
-# Synthetic ID document images (regenerate with ml/generate_id_documents.py)
-data/id_documents/
+# EXCEPTION: the generated datasets are inputs the running service needs —
+# /demo reads applications_train.csv to build bot profiles, seeding loads
+# case_narratives.json into the RAG corpus, and both CSVs are the source
+# ml/generate_id_documents.py replays to recreate the ID card images.
+data/*.csv
+!data/applications_train.csv
+!data/applications_holdout.csv
 data/*.json
+!data/case_narratives.json
+
+# Synthetic ID document images: 1,838 PNGs / 44MB, deterministic from the CSVs
+# above (id_document_plan is a pure function of application_id), so they are
+# regenerated in the Docker build rather than committed.
+data/id_documents/
 
 # Applicant-uploaded documents (demo runtime data)
 data/uploads/

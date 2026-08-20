@@ -1,10 +1,18 @@
-#  BUILD CONTEXT IS THE REPOSITORY ROOT, not backend/.
+#  Backend image. THIS FILE LIVES AT THE REPOSITORY ROOT ON PURPOSE.
 #
 #  Build locally exactly the way Render does:
-#      docker build -f backend/Dockerfile -t aegis-backend .
+#      docker build -t aegis-backend .
 #
-#  On Render: leave the service's Root Directory BLANK and set the Dockerfile
-#  path to `backend/Dockerfile`.
+#  On Render, every path setting can stay at its default: Root Directory blank,
+#  Dockerfile Path ./Dockerfile, Build Context Directory `.`. It was previously
+#  at backend/Dockerfile, which required overriding both the Dockerfile path AND
+#  the build context directory; getting only the first one right produced a
+#  context rooted at backend/ where none of the COPY sources resolved:
+#
+#      transferring context: 2B
+#      COPY backend/requirements.txt . -> "/backend/requirements.txt": not found
+#
+#  A root Dockerfile removes that failure mode: the context can only be the repo.
 #
 #  Why the root: the serving path imports the training code directly —
 #  app/ml/scoring_service.py does `from explain import ...` and
@@ -64,6 +72,13 @@ COPY data/ ./data/
 
 # ---- Seeding and maintenance scripts (small; needed to populate a fresh DB)
 COPY scripts/ ./scripts/
+
+# ---- Synthetic ID cards for the OCR / identity-mismatch demo paths.
+# 1,838 PNGs, ~44MB, and every one of them is a pure function of its
+# application_id — so they are replayed here from the two CSVs above instead of
+# being committed. Keeps the repository small without the deployed image
+# missing the images /demo/id-image serves.
+RUN python ml/generate_id_documents.py | tail -4
 
 # Pin the ML directory explicitly rather than leaning on relative resolution.
 # scoring_service.py can find it either way, but an image should not depend on
