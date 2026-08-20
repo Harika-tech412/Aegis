@@ -462,12 +462,15 @@ export function Apply() {
     setIdPreview(null);
     setIdVerify(null);
     velocityOverride.current = null;
-    // The two honest-outcome Layer 5 presets only. "Identity theft (stolen
-    // details)" keeps its measured values: like the other two fraud presets it
-    // is convicted by something other than behaviour — here, failing the
-    // step-up challenge — so it is out of scope for this override.
-    behaviourOverride.current =
-      kind === "returning" || kind === "newid" ? humanBehaviour() : null;
+    // ALL THREE Layer 5 presets get human behaviour, including "Identity theft
+    // (stolen details)". That preset is a patient, informed impersonator — the
+    // whole reason Layer 5 exists is that such an attacker evades the
+    // behavioural layer precisely BY behaving normally. Leaving an instant
+    // fill's bot-like values in place would list bot behaviour as a
+    // contributing factor beside the step-up failure, and the case would appear
+    // to be caught by the layer it was designed to slip past. It must be
+    // convicted by the wrong code and nothing else.
+    behaviourOverride.current = humanBehaviour();
     deviceRef.current = randomId("web_device");
     ipRef.current = randomId("web_ip");
 
