@@ -1,6 +1,6 @@
 """Seed Layer 5: three known identities with history and a contact on file.
 
-    docker compose exec backend python /scripts/seed_identity_history.py
+    docker compose exec backend python /app/scripts/seed_identity_history.py
 
 MUST run inside the backend container (same DATABASE_URL as the API).
 

@@ -1,0 +1,34 @@
+# Build context for backend/Dockerfile is the repository ROOT, so this file is
+# what keeps the context small and reproducible. Without it the daemon would
+# receive the frontend's node_modules, the local virtualenv and the git history.
+
+.git
+.gitignore
+.venv
+venv
+**/__pycache__
+**/*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+
+# Secrets never enter an image layer; Render injects them as env vars.
+.env
+
+# The frontend is deployed separately (Vercel) and has its own Dockerfile.
+frontend
+
+# Tests run against the working tree, not the deployed image.
+backend/tests
+
+# Training/eval-only data. applications_train.csv and id_documents/ ARE needed
+# at runtime by the /demo endpoints, so they are deliberately not listed here.
+data/applications_holdout.csv
+
+# Applicant uploads are runtime state, written into the container at /app/data/
+# uploads; baking a local copy in would ship one machine's submissions.
+data/uploads
+
+# Local scratch
+docs/_build
+*.log

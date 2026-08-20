@@ -4,7 +4,7 @@ Both engines feed the SAME downstream parser (label matching, father's-name
 skip, ISO date normalisation), so this isolates the text-acquisition step —
 the only thing that changed. Run inside the backend container:
 
-    docker compose exec backend python /scripts/compare_ocr_engines.py
+    docker compose exec backend python /app/scripts/compare_ocr_engines.py
 """
 
 from __future__ import annotations

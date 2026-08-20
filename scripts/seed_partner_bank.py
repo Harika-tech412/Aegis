@@ -1,6 +1,6 @@
 """Seed Partner Bank A as a genuine second institution on the Aegis Network.
 
-    docker compose exec backend python /scripts/seed_partner_bank.py
+    docker compose exec backend python /app/scripts/seed_partner_bank.py
 
 What this creates:
   1. ~200 applications owned by PARTNER_A, each scored through the real

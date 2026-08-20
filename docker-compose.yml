@@ -16,7 +16,12 @@ services:
       retries: 10
 
   backend:
-    build: ./backend
+    # Same context and Dockerfile Render uses, so a local build proves the
+    # deployed one. The bind mounts below are development conveniences layered
+    # on top of an image that is already self-contained without them.
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     depends_on:
       db:
         condition: service_healthy
@@ -26,11 +31,12 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
-      # ML artifacts + shared feature/explanation code, seed data, and scripts.
-      # The backend resolves these at /ml, /data, /scripts (see scoring_service).
-      - ./ml:/ml
-      - ./data:/data
-      - ./scripts:/scripts
+      # Nested over the /app mount above so live edits to the shared ML code,
+      # seed data and scripts are picked up, at the same paths the image bakes
+      # them to (/app/ml, /app/data, /app/scripts).
+      - ./ml:/app/ml
+      - ./data:/app/data
+      - ./scripts:/app/scripts
       # Persist the sentence-transformers model download across container
       # recreations (seeding and similar-cases both use it).
       - aegis_hf_cache:/root/.cache/huggingface

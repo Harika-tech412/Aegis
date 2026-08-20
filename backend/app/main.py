@@ -1,6 +1,7 @@
 """Aegis API — FastAPI application entrypoint."""
 
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -126,14 +127,34 @@ def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse
         },
     )
 
-ALLOWED_ORIGINS = [
+# Browser origins allowed to call this API.
+#
+# Set CORS_ALLOWED_ORIGINS to a comma-separated list to override — required if
+# the frontend is ever deployed to a different host, because a browser
+# preflight that is not on this list fails before the request is ever handled,
+# and the failure looks like a network error rather than a CORS one.
+#
+# The defaults cover local development plus the deployed Vercel frontend.
+_DEFAULT_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://aegis-ten-nu.vercel.app",
 ]
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", ",".join(_DEFAULT_ORIGINS)).split(",")
+    if origin.strip()
+]
+# Vercel preview deployments get a generated subdomain per branch, so match
+# them by pattern rather than enumerating them.
+ALLOWED_ORIGIN_REGEX = os.getenv(
+    "CORS_ALLOWED_ORIGIN_REGEX", r"https://.*\.vercel\.app"
+)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -4,7 +4,7 @@ Prerequisite: the dockerized Postgres must be up (`docker compose up -d db`).
 This script is designed to run INSIDE the backend container, where the `db`
 hostname resolves and all ML dependencies are installed:
 
-    docker compose exec backend python /scripts/seed_database.py
+    docker compose exec backend python /app/scripts/seed_database.py
 
 Idempotent-ish: if the applications table already has rows, seeding is skipped
 (same for narratives and the investigator user), so re-running is safe.

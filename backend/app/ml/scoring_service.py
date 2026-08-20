@@ -4,10 +4,11 @@ Reuses the exact feature-building and explanation code from the ml/ package
 (ml/features.py, ml/explain.py) rather than duplicating it — training and
 serving share one implementation, so they cannot drift apart.
 
-Path contract: the ml/ package sits at <project_root>/ml. Locally that is
-resolved relative to this file; in the container, docker-compose mounts
-./ml at /ml, which is exactly what the same relative resolution yields.
-Override with the AEGIS_ML_DIR env var if the layout ever changes.
+Path contract: this module needs the ml/ package on sys.path, wherever it
+lives. `_resolve_ml_dir` tries the candidates in order and takes the first that
+actually contains the trained artifacts, so the same code works from a source
+checkout, from the deployed image (ml/ copied to /app/ml), and under
+docker-compose. Set AEGIS_ML_DIR to override.
 """
 
 from __future__ import annotations
@@ -24,8 +25,42 @@ import numpy as np
 import pandas as pd
 from xgboost import XGBClassifier
 
-# <project_root>/ml — see path contract in the module docstring.
-ML_DIR = Path(os.getenv("AEGIS_ML_DIR", Path(__file__).resolve().parents[3] / "ml"))
+def _resolve_ml_dir() -> Path:
+    """First candidate directory that holds the trained artifacts.
+
+    Ordered most-specific first. Nothing here is machine-specific: every
+    candidate is derived either from an env var or from this file's own
+    location.
+
+      AEGIS_ML_DIR   explicit override; the deployed image sets it
+      parents[3]/ml  source checkout (<repo>/backend/app/ml/.. -> <repo>/ml)
+      parents[2]/ml  ml/ copied next to app/ inside the image (/app/ml)
+      /ml            legacy docker-compose bind mount
+
+    A missing directory is not silently tolerated: if none of the candidates
+    has artifacts we raise here, at import, naming every path tried — far
+    easier to act on than `ModuleNotFoundError: No module named 'explain'`
+    three frames later.
+    """
+    here = Path(__file__).resolve()
+    override = os.getenv("AEGIS_ML_DIR")
+    candidates = [
+        *( [Path(override)] if override else [] ),
+        here.parents[3] / "ml",
+        here.parents[2] / "ml",
+        Path("/ml"),
+    ]
+    for candidate in candidates:
+        if (candidate / "artifacts" / "feature_spec.json").is_file():
+            return candidate
+    raise RuntimeError(
+        "Could not locate the ml/ package (needs artifacts/feature_spec.json). "
+        "Tried: " + ", ".join(str(c) for c in candidates) + ". "
+        "Set AEGIS_ML_DIR to the directory containing features.py and artifacts/."
+    )
+
+
+ML_DIR = _resolve_ml_dir()
 ARTIFACTS_DIR = ML_DIR / "artifacts"
 
 if str(ML_DIR) not in sys.path:

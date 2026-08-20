@@ -1,6 +1,6 @@
 """Backfill institutional memory so the agent has precedent on day one.
 
-    docker compose exec backend python /scripts/backfill_case_memory.py
+    docker compose exec backend python /app/scripts/backfill_case_memory.py
 
 MUST run inside the backend container. It embeds with the same
 sentence-transformers singleton the API uses, and reads the same DATABASE_URL
