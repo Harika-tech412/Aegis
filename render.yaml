@@ -1,0 +1,55 @@
+# Render Blueprint — pins the settings that have twice been the deploy blocker.
+#
+# Using this file means the three path settings come from source control instead
+# of dashboard fields:
+#
+#   rootDir        .              the repository root, NOT backend/
+#   dockerfilePath ./Dockerfile
+#   dockerContext  .
+#
+# rootDir MUST be the repository root. The backend image copies ml/ (the shared
+# feature-building and SHAP code, plus the trained artifacts) and data/, both of
+# which live beside backend/ rather than inside it. Docker cannot COPY from
+# outside the build context, so a context scoped to backend/ fails no matter
+# which Dockerfile it reads — that is the "transferring context: 2B" failure.
+#
+# To adopt: Render Dashboard -> New -> Blueprint, point it at this repo. To keep
+# the existing service instead, set those three fields on it by hand to the
+# values above.
+
+services:
+  - type: web
+    name: aegis-backend
+    runtime: docker
+    plan: starter
+    rootDir: .
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      # Supplied by Render; the container binds ${PORT} on 0.0.0.0. Do not set
+      # this by hand.
+      #
+      # Required, no usable default:
+      - key: DATABASE_URL
+        sync: false # paste the Render Postgres internal connection string
+      - key: JWT_SECRET
+        sync: false # any long random string; the app refuses to boot on the
+        # placeholder value in config.py
+      # Optional. Without these the LLM explanation layer falls back to its
+      # deterministic template, which never fails.
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      # Must match across any institutions sharing network signals: hashes
+      # published under a different salt can never match.
+      - key: NETWORK_HASH_SALT
+        sync: false
+      # Browser origins allowed to call this API. The code defaults already
+      # include the Vercel production URL and localhost, so this is only needed
+      # to override them.
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: ENVIRONMENT
+        value: production
