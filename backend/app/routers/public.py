@@ -25,10 +25,12 @@ from app.rate_limit import limiter
 from app.routers.applications import (
     _derived_velocity,
     apply_id_rules,
+    apply_network_rules,
     persist_scored_application,
 )
 from app.routers.demo import UPLOADS_DIR
 from app.schemas import EmploymentType, LoanPurpose
+from app.services import network_service
 from app.services.id_hash_service import check_id_reuse, record_id_hash
 from app.services.llm_explainer import explain_result
 from app.services.ocr_service import extract_id_fields, names_match
@@ -196,6 +198,13 @@ async def submit_application(
         ),
     )
 
+    # ---- Aegis Network: cross-institution signal check ---------------------
+    own = network_service.get_institution(db, network_service.SYNC_DEMO)
+    network_hits = network_service.check_network(
+        db, body.device_id, body.ip_hash, own.id if own else None
+    )
+    apply_network_rules(service, result, network_hits)
+
     explanation_text, explanation_source = explain_result(result)
     application, _decision = persist_scored_application(
         db,
@@ -205,6 +214,8 @@ async def submit_application(
         explanation_source,
         requested_by="public_portal",
         id_document_filename=stored_filename,
+        institution_id=own.id if own else None,
+        network_hits=network_hits,
     )
     if id_document is not None and id_bytes:
         record_id_hash(db, id_bytes, application.id, ocr_result["name"] if ocr_result else None)

@@ -9,6 +9,7 @@ import { FeedbackPanel } from "@/components/FeedbackPanel";
 import { IdentityPanel } from "@/components/IdentityPanel";
 import { InvestigationPanel } from "@/components/InvestigationPanel";
 import { Navbar } from "@/components/Navbar";
+import { NetworkHitCallout } from "@/components/NetworkHitCallout";
 import { RingPanel } from "@/components/RingPanel";
 import { ShapChart } from "@/components/ShapChart";
 import { SimilarCasesPanel } from "@/components/SimilarCasesPanel";
@@ -331,6 +332,14 @@ export function ApplicationDetail() {
             identityCheck={detail.identity_check}
             idDocumentFilename={detail.id_document_filename}
           />
+          </div>
+        )}
+
+        {/* ---- Cross-institution network hit (above the ring: external evidence
+             frames the internal ring finding) ---- */}
+        {detail?.decision?.network_hits && detail.decision.network_hits.length > 0 && (
+          <div className="aegis-enter" style={stagger(4)}>
+            <NetworkHitCallout hits={detail.decision.network_hits} />
           </div>
         )}
 

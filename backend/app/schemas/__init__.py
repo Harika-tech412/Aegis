@@ -95,6 +95,8 @@ class DecisionOut(BaseModel):
     explanation_source: str | None = None
     ring_size: int
     ring_risk_score: float
+    # Cross-institution Aegis Network matches that influenced this decision.
+    network_hits: list[dict] | None = None
     latency_ms: float
     created_at: datetime
 

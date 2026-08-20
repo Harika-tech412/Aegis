@@ -7,10 +7,12 @@ import { ModelHealthCard } from "@/components/ModelHealthCard";
 import { Navbar } from "@/components/Navbar";
 import { ScoreDialog } from "@/components/ScoreDialog";
 import { StatCards, type Stats } from "@/components/StatCards";
+import { useInstitution } from "@/context/InstitutionContext";
 import { api } from "@/lib/api";
 import { stagger } from "@/lib/motion";
 
 export function Dashboard() {
+  const { code: institutionCode, displayName: institutionName } = useInstitution();
   const [stats, setStats] = useState<Stats | null>(null);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   // Inside the split-screen demo (?demo=1) the feed polls faster so a
@@ -23,10 +25,10 @@ export function Dashboard() {
   const loadStats = useCallback(async () => {
     try {
       const [all, approve, review, flag] = await Promise.all([
-        api.listApplications({ limit: 1 }),
-        api.listApplications({ limit: 1, decision_band: "AUTO_APPROVE" }),
-        api.listApplications({ limit: 1, decision_band: "HUMAN_REVIEW" }),
-        api.listApplications({ limit: 1, decision_band: "AUTO_FLAG" }),
+        api.listApplications({ limit: 1, institution_code: institutionCode }),
+        api.listApplications({ limit: 1, decision_band: "AUTO_APPROVE", institution_code: institutionCode }),
+        api.listApplications({ limit: 1, decision_band: "HUMAN_REVIEW", institution_code: institutionCode }),
+        api.listApplications({ limit: 1, decision_band: "AUTO_FLAG", institution_code: institutionCode }),
       ]);
       setStats({
         total: all.total,
@@ -38,7 +40,7 @@ export function Dashboard() {
     } catch {
       /* stat cards keep their skeletons; the feed shows the real error */
     }
-  }, []);
+  }, [institutionCode]);
 
   useEffect(() => {
     loadStats();
@@ -85,7 +87,7 @@ export function Dashboard() {
 
         <div className="aegis-enter flex flex-wrap items-end justify-between gap-3" style={stagger(1)}>
           <div>
-            <p className="aegis-overline">Overview · {today}</p>
+            <p className="aegis-overline">{institutionName} · {today}</p>
             <h1 className="aegis-title mt-1">Fraud operations</h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
               Live scoring across the application pipeline
@@ -98,7 +100,7 @@ export function Dashboard() {
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
           <div className="aegis-enter xl:col-span-2" style={stagger(6)}>
-            <LiveFeed pollMs={demoMode ? 2000 : 3500} />
+            <LiveFeed pollMs={demoMode ? 2000 : 3500} institutionCode={institutionCode} />
           </div>
           <div className="aegis-enter space-y-4" style={stagger(7)}>
             <ModelHealthCard />

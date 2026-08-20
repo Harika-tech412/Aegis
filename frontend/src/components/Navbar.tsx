@@ -1,9 +1,10 @@
-import { ChevronDown, LayoutDashboard, LogOut, MonitorPlay, ShieldCheck } from "lucide-react";
+import { Building2, ChevronDown, LayoutDashboard, LogOut, MonitorPlay, Share2, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { ArchitectureDialog } from "@/components/ArchitectureDialog";
 import { useAuth } from "@/context/AuthContext";
+import { useInstitution } from "@/context/InstitutionContext";
 
 function initials(name: string | null): string {
   if (!name) return "??";
@@ -15,12 +16,15 @@ function initials(name: string | null): string {
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/demo", label: "Live Demo", icon: MonitorPlay },
+  { to: "/network", label: "Network", icon: Share2 },
 ];
 
 export function Navbar() {
   const { username, logout } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { code, displayName, options, setCode } = useInstitution();
+  const [instOpen, setInstOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -74,6 +78,46 @@ export function Navbar() {
         </nav>
 
         {/* Investigator */}
+        {/* Institution switcher — re-scopes the whole investigator surface. */}
+        <div className="relative shrink-0">
+          <button
+            onClick={() => setInstOpen((v) => !v)}
+            className="flex items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-border-emphasis"
+            aria-haspopup="menu"
+            aria-expanded={instOpen}
+          >
+            <Building2 className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2} />
+            <span className="hidden sm:inline">{displayName}</span>
+            <ChevronDown
+              className={`h-3 w-3 text-muted-foreground transition-transform ${
+                instOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {instOpen && (
+            <div role="menu" className="aegis-surface absolute right-0 z-50 mt-1.5 w-56 p-1">
+              <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-subtle">
+                Viewing as institution
+              </p>
+              {options.map((option) => (
+                <button
+                  key={option.code}
+                  onClick={() => {
+                    setCode(option.code);
+                    setInstOpen(false);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-secondary/70 ${
+                    option.code === code ? "text-brand" : "text-foreground"
+                  }`}
+                >
+                  {option.display_name}
+                  {option.code === code && <span className="text-xs">active</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="relative shrink-0" ref={menuRef}>
           <button
             onClick={() => setMenuOpen((v) => !v)}

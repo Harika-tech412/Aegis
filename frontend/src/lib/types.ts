@@ -48,6 +48,7 @@ export interface Decision {
   explanation_source?: string | null;
   ring_size: number;
   ring_risk_score: number;
+  network_hits?: NetworkHit[] | null;
   latency_ms: number;
   created_at: string;
 }
@@ -262,4 +263,43 @@ export interface ApplicantReport {
   contact_note: string;
   report_generated_at: string;
   data_disclosure: string;
+}
+
+// ---- Aegis Network ----------------------------------------------------------
+
+export interface NetworkHit {
+  signal_type: string;
+  matched_hash_prefix: string;
+  reported_by: string;
+  reported_by_code: string;
+  fraud_confirmed_at: string;
+  notes: string | null;
+}
+
+export interface NetworkStats {
+  member_institutions: number;
+  total_signals: number;
+  signals_last_24h: number;
+  prevented_attacks: number;
+  by_institution: { code: string; display_name: string; signals_published: number }[];
+}
+
+export interface NetworkSignalRow {
+  signal_type: string;
+  hash_prefix: string;
+  reported_by: string;
+  reported_by_code: string;
+  fraud_confirmed_at: string;
+  created_at: string;
+  notes: string | null;
+}
+
+export interface NetworkSignalsResponse {
+  privacy_note: string;
+  signals: NetworkSignalRow[];
+}
+
+export interface NetworkGraph {
+  nodes: { id: string; label: string; signals_published: number }[];
+  links: { source: string; target: string; shared_signal_hits: number }[];
 }

@@ -24,9 +24,11 @@ const POLL_MS = 3500;
 export function LiveFeed({
   onData,
   pollMs = POLL_MS,
+  institutionCode = "SYNC_DEMO",
 }: {
   onData?: (total: number) => void;
   pollMs?: number;
+  institutionCode?: string;
 }) {
   const [rows, setRows] = useState<ApplicationSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,9 +41,18 @@ export function LiveFeed({
   useEffect(() => {
     let cancelled = false;
 
+    // Switching institution is a context change, not new activity: forget the
+    // previous book so its rows are not re-announced as "new".
+    knownIds.current = null;
+    setNewIds(new Set());
+    setRows(null);
+
     async function poll() {
       try {
-        const data = await api.listApplications({ limit: 14 });
+        const data = await api.listApplications({
+          limit: 14,
+          institution_code: institutionCode,
+        });
         if (cancelled) return;
         setError(null);
         onData?.(data.total);
@@ -68,7 +79,7 @@ export function LiveFeed({
       cancelled = true;
       clearInterval(timer);
     };
-  }, [onData, pollMs]);
+  }, [onData, pollMs, institutionCode]);
 
   return (
     <Card>

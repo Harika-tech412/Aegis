@@ -7,7 +7,19 @@ import uuid
 from datetime import datetime, timezone
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import JSON, DateTime, Enum, Float, ForeignKey, Integer, String, Text, Uuid
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    Uuid,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -21,6 +33,12 @@ class DecisionBand(str, enum.Enum):
     AUTO_APPROVE = "AUTO_APPROVE"
     HUMAN_REVIEW = "HUMAN_REVIEW"
     AUTO_FLAG = "AUTO_FLAG"
+
+
+class SignalType(str, enum.Enum):
+    DEVICE_HASH = "DEVICE_HASH"
+    IP_HASH = "IP_HASH"
+    ID_DOCUMENT_HASH = "ID_DOCUMENT_HASH"
 
 
 class Verdict(str, enum.Enum):
@@ -47,6 +65,11 @@ class Application(Base):
     mouse_movement_events: Mapped[int] = mapped_column(Integer)
     form_paste_count: Mapped[int] = mapped_column(Integer)
     id_document_filename: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    # Owning institution. Nullable so existing rows migrate cleanly; startup
+    # backfills every legacy row to SYNC_DEMO.
+    institution_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("institutions.id"), nullable=True, index=True
+    )
     # Full original submission (including signal fields that are not first-class
     # columns, e.g. consistency scores and velocity counts) kept for audit.
     raw_payload: Mapped[dict] = mapped_column(JSON, default=dict)
@@ -71,6 +94,8 @@ class Decision(Base):
     counterfactual: Mapped[list | None] = mapped_column(JSON, nullable=True)
     ring_size: Mapped[int] = mapped_column(Integer, default=0)
     ring_risk_score: Mapped[float] = mapped_column(Float, default=0.0)
+    # Cross-institution network signal matches that influenced this decision.
+    network_hits: Mapped[list | None] = mapped_column(JSON, nullable=True)
     latency_ms: Mapped[float] = mapped_column(Float, default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
@@ -141,6 +166,50 @@ class AgentInvestigation(Base):
     confidence: Mapped[str] = mapped_column(String(16), default="MEDIUM")
     reasoning_summary: Mapped[str] = mapped_column(Text, default="")
     synthesis_source: Mapped[str] = mapped_column(String(24), default="template")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class Institution(Base):
+    """A member institution of the Aegis Network.
+
+    Two are seeded: SYNC_DEMO and PARTNER_A. They are genuinely separate —
+    each owns its own applications and publishes its own signals.
+    """
+
+    __tablename__ = "institutions"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    code: Mapped[str] = mapped_column(String(32), unique=True, index=True)
+    display_name: Mapped[str] = mapped_column(String(120))
+    joined_network_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class NetworkFraudSignal(Base):
+    """A confirmed-fraud signal shared across the network.
+
+    PRIVACY CONTRACT: `signal_hash` is SHA-256(salt + raw_value). The raw
+    device fingerprint / IP / document is NEVER stored here and cannot be
+    recovered from the hash. A partner institution can only ever answer
+    "have I seen this exact value before?" — never "what was the value?".
+    """
+
+    __tablename__ = "network_fraud_signals"
+    __table_args__ = (Index("ix_network_signal_lookup", "signal_type", "signal_hash"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    signal_type: Mapped[SignalType] = mapped_column(
+        Enum(SignalType, native_enum=False, length=24), index=True
+    )
+    signal_hash: Mapped[str] = mapped_column(String(64), index=True)
+    reported_by_institution_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("institutions.id"), index=True
+    )
+    original_application_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("applications.id"), nullable=True
+    )
+    fraud_confirmed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    notes: Mapped[str | None] = mapped_column(String(200), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 

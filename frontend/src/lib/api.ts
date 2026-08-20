@@ -13,6 +13,9 @@ import type {
   DriftResponse,
   FeedbackResponse,
   InvestigationResponse,
+  NetworkGraph,
+  NetworkSignalsResponse,
+  NetworkStats,
   RegulatorReport,
   RingInfo,
   SampleId,
@@ -74,13 +77,26 @@ export const api = {
       body: JSON.stringify({ username, password }),
     }),
 
-  listApplications: (params: { limit?: number; offset?: number; decision_band?: string } = {}) => {
+  listApplications: (
+    params: {
+      limit?: number;
+      offset?: number;
+      decision_band?: string;
+      institution_code?: string;
+    } = {}
+  ) => {
     const q = new URLSearchParams();
     if (params.limit) q.set("limit", String(params.limit));
     if (params.offset) q.set("offset", String(params.offset));
     if (params.decision_band) q.set("decision_band", params.decision_band);
+    if (params.institution_code) q.set("institution_code", params.institution_code);
     return request<ApplicationList>(`/applications?${q}`);
   },
+
+  getNetworkStats: () => request<NetworkStats>("/network/stats"),
+  getNetworkSignals: (limit = 25) =>
+    request<NetworkSignalsResponse>(`/network/signals?limit=${limit}`),
+  getNetworkGraph: () => request<NetworkGraph>("/network/graph"),
 
   getApplication: (id: string) => request<ApplicationDetail>(`/applications/${id}`),
   getRing: (id: string) => request<RingInfo>(`/applications/${id}/ring`),

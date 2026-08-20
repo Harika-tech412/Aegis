@@ -19,6 +19,7 @@ from app.models import (
     AgentInvestigation,
     Application,
     Decision,
+    Institution,
     Investigator,
     InvestigatorFeedback,
 )
@@ -37,6 +38,7 @@ from app.schemas import (
 )
 from app.services import audit
 from app.services.auth import get_current_investigator
+from app.services import network_service
 from app.services.investigation_agent import run_investigation
 from app.services.llm_explainer import explain_result
 from app.services.ocr_service import names_match
@@ -53,12 +55,59 @@ from app.services.similar_cases import find_similar_cases
 # panel says. Disclosed as pseudo-features in top_shap_features.
 # ---------------------------------------------------------------------------
 ID_NAME_MISMATCH_BOOST = 0.35
+# A confirmed-fraud signal published by ANOTHER institution is strong external
+# evidence, so it carries a weight comparable to the ID-mismatch rule. Applied
+# per matched signal and clamped, exactly like the other disclosed rules.
+NETWORK_SIGNAL_BOOST = 0.30
 ID_REUSE_BOOST = 0.45
 # A document whose OCR-extracted name MATCHES the declared applicant is
 # affirmative identity evidence and reduces risk. (Also offsets the mild
 # has_id_document fraud prior the model learned from training data, where
 # identity fraudsters upload documents 4x more often than others.)
 ID_VERIFIED_CREDIT = -0.05
+
+
+def apply_network_rules(service, result, hits: list[dict]) -> None:
+    """Rules layer for cross-institution network signals.
+
+    Lives here, alongside apply_id_rules, for the same reason: the ML scoring
+    service is deliberately database-free, and every rule adjustment in Aegis
+    is applied and disclosed at this layer rather than hidden inside the model.
+    """
+    if not hits:
+        return
+
+    rules = []
+    boost = 0.0
+    for hit in hits:
+        boost += NETWORK_SIGNAL_BOOST
+        feature = (
+            "NETWORK_SIGNAL_DEVICE_HIT"
+            if hit["signal_type"] == "DEVICE_HASH"
+            else "NETWORK_SIGNAL_IP_HIT"
+        )
+        subject = (
+            "device fingerprint" if hit["signal_type"] == "DEVICE_HASH" else "network address"
+        )
+        rules.append(
+            {
+                "feature": feature,
+                "label": "Aegis Network signal (rule)",
+                "value": 1.0,
+                "shap_value": NETWORK_SIGNAL_BOOST,  # rule weight, NOT a SHAP value
+                "direction": "increases_risk",
+                "explanation": (
+                    f"This {subject} matches a confirmed-fraud signal published to the Aegis "
+                    f"Network by {hit['reported_by']} on "
+                    f"{hit['fraud_confirmed_at'][:10]} — cross-institution cryptographic match, "
+                    f"+{NETWORK_SIGNAL_BOOST:.2f} risk. No identity data was shared."
+                ),
+            }
+        )
+
+    result.calibrated_risk_score = min(1.0, max(0.0, result.calibrated_risk_score + boost))
+    result.decision_band = service.band_of(result.calibrated_risk_score)
+    result.top_shap_features = [*rules, *result.top_shap_features]
 
 
 def apply_id_rules(
@@ -139,6 +188,8 @@ def persist_scored_application(
     *,
     requested_by: str,
     id_document_filename: str | None,
+    institution_id=None,
+    network_hits: list[dict] | None = None,
 ) -> tuple[Application, Decision]:
     """One write path for scored applications (investigator /score and public intake)."""
     application = Application(
@@ -155,6 +206,7 @@ def persist_scored_application(
         mouse_movement_events=payload["mouse_movement_events"],
         form_paste_count=payload["form_paste_count"],
         id_document_filename=id_document_filename,
+        institution_id=institution_id,
         raw_payload=payload,
     )
     db.add(application)
@@ -172,6 +224,9 @@ def persist_scored_application(
         counterfactual=result.counterfactual,
         ring_size=result.ring_size,
         ring_risk_score=result.ring_risk_score,
+        # Only set when there ARE hits; assigning None to a JSON column
+        # stores the JSON value `null`, which is not SQL NULL.
+        network_hits=network_hits if network_hits else None,
         latency_ms=result.latency_ms,
     )
     db.add(decision)
@@ -238,6 +293,13 @@ def score_application(
         prior_names=[],
     )
 
+    # ---- Aegis Network: cross-institution signal check ---------------------
+    own = network_service.get_institution(db, network_service.SYNC_DEMO)
+    network_hits = network_service.check_network(
+        db, body.device_id, body.ip_hash, own.id if own else None
+    )
+    apply_network_rules(service, result, network_hits)
+
     explanation_text, explanation_source = explain_result(result)
     application, decision = persist_scored_application(
         db,
@@ -247,6 +309,8 @@ def score_application(
         explanation_source,
         requested_by=investigator.username,
         id_document_filename=body.id_document_filename,
+        institution_id=own.id if own else None,
+        network_hits=network_hits,
     )
     db.commit()
 
@@ -266,6 +330,7 @@ def list_applications(
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     decision_band: str | None = Query(default=None, pattern="^(AUTO_APPROVE|HUMAN_REVIEW|AUTO_FLAG)$"),
+    institution_code: str = Query(default=network_service.SYNC_DEMO),
     db: Session = Depends(get_db),
     _: Investigator = Depends(get_current_investigator),
 ) -> ApplicationListOut:
@@ -277,6 +342,13 @@ def list_applications(
     count_query = select(func.count()).select_from(Application).join(
         Decision, Decision.application_id == Application.id
     )
+
+    # Institution scoping: each member sees only its own book of business.
+    institution = network_service.get_institution(db, institution_code)
+    if institution is not None:
+        query = query.where(Application.institution_id == institution.id)
+        count_query = count_query.where(Application.institution_id == institution.id)
+
     if decision_band:
         query = query.where(Decision.decision_band == decision_band)
         count_query = count_query.where(Decision.decision_band == decision_band)
@@ -400,6 +472,39 @@ def submit_feedback(
     )
     db.add(feedback)
     db.flush()
+
+    # ---- Publish to the Aegis Network on confirmed fraud -------------------
+    # Only hashes leave this institution; see network_service for the contract.
+    if body.verdict == "CONFIRMED_FRAUD":
+        application = db.get(Application, application_id)
+        reporter_id = application.institution_id
+        if reporter_id is None:
+            fallback = network_service.get_institution(db, network_service.SYNC_DEMO)
+            reporter_id = fallback.id if fallback else None
+        if reporter_id is not None:
+            published = network_service.publish_signals(
+                db,
+                application,
+                reporter_id,
+                notes=(body.notes or "Confirmed fraud by investigator review")[:200],
+            )
+            if published:
+                audit.log_event(
+                    db,
+                    event_type="network_signals_published",
+                    actor=investigator.username,
+                    target_type="application",
+                    target_id=str(application_id),
+                    details={
+                        "signal_count": len(published),
+                        "signal_types": [
+                            s.signal_type.value if hasattr(s.signal_type, "value") else str(s.signal_type)
+                            for s in published
+                        ],
+                        "privacy_note": "Only salted SHA-256 digests were published; no identifiers.",
+                    },
+                )
+
     audit.log_event(
         db,
         event_type="feedback_submitted",

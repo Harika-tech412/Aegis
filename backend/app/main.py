@@ -11,7 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from app.database import init_db
 from app.ml.scoring_service import get_scoring_service
 from app.rate_limit import limiter
-from app.routers import applications, auth, demo, monitoring, public, reports
+from app.routers import applications, auth, demo, monitoring, network, public, reports
 from app.services.auth import assert_jwt_secret_configured
 from app.services.drift_service import load_reference
 
@@ -25,6 +25,41 @@ async def lifespan(app: FastAPI):
     init_db()
     get_scoring_service()  # load ML artifacts once, fail fast if missing
     load_reference()  # drift reference distributions, loaded once
+
+    # Aegis Network bootstrap: seed member institutions and backfill legacy
+    # applications to SYNC_DEMO. Idempotent; replaces an Alembic migration.
+    try:
+        from app.database import SessionLocal
+        from app.services.network_service import ensure_institutions
+
+        _session = SessionLocal()
+        try:
+            _members = ensure_institutions(_session)
+            # Log a fingerprint of the hashing salt, never the salt itself.
+            # Signals published under a different salt can never match, so a
+            # mismatch between seeding and serving must be visible, not silent.
+            import hashlib
+
+            from sqlalchemy import func, select
+
+            from app.config import settings as _settings
+            from app.models import NetworkFraudSignal as _Signal
+
+            _fingerprint = hashlib.sha256(
+                _settings.NETWORK_HASH_SALT.encode("utf-8")
+            ).hexdigest()[:8]
+            _stored = int(_session.scalar(select(func.count()).select_from(_Signal)) or 0)
+            logger.info(
+                "Aegis Network: %d member institutions active, %d signals stored, "
+                "salt fingerprint %s",
+                len(_members),
+                _stored,
+                _fingerprint,
+            )
+        finally:
+            _session.close()
+    except Exception as exc:  # noqa: BLE001 - never block startup on this
+        logger.warning("Aegis Network bootstrap skipped: %s", exc)
 
     # Prove the EasyOCR weights are cached in the image: download_enabled is
     # False, so this raises if anything is missing rather than reaching for
@@ -75,6 +110,7 @@ app.include_router(monitoring.router)
 app.include_router(demo.router)
 app.include_router(public.router)
 app.include_router(reports.router)
+app.include_router(network.router)
 
 
 @app.get("/health")
