@@ -1,4 +1,5 @@
 import { Radio } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -31,6 +32,8 @@ export function LiveFeed({
   const [error, setError] = useState<string | null>(null);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
   const knownIds = useRef<Set<string> | null>(null);
+  // Stagger the opening render only; later polls should not re-cascade.
+  const firstPaint = useRef(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,6 +56,7 @@ export function LiveFeed({
         }
         knownIds.current = new Set(data.items.map((r) => r.id));
         setRows(data.items);
+        if (firstPaint.current) setTimeout(() => (firstPaint.current = false), 600);
       } catch (e) {
         if (!cancelled) setError((e as Error).message);
       }
@@ -106,11 +110,22 @@ export function LiveFeed({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow
+                <AnimatePresence initial={false}>
+                {rows.map((row, index) => (
+                  <motion.tr
                     key={row.id}
+                    layout
                     onClick={() => navigate(`/applications/${row.id}`)}
-                    className={`cursor-pointer transition-colors odd:bg-secondary/20 hover:bg-secondary/50 ${
+                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{
+                      duration: 0.22,
+                      ease: [0.22, 1, 0.36, 1],
+                      // Stagger only the initial batch; live arrivals land at once.
+                      delay: firstPaint.current ? Math.min(index, 10) * 0.035 : 0,
+                    }}
+                    className={`cursor-pointer border-b border-border/60 transition-colors odd:bg-secondary/20 hover:bg-secondary/50 ${
                       newIds.has(row.id) ? "animate-feed-in" : ""
                     }`}
                   >
@@ -133,8 +148,9 @@ export function LiveFeed({
                     <TableCell>
                       <BandBadge band={row.decision_band} />
                     </TableCell>
-                  </TableRow>
+                  </motion.tr>
                 ))}
+                </AnimatePresence>
               </TableBody>
             </Table>
           </div>

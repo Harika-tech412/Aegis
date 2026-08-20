@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { BandBadge } from "@/components/BandBadge";
+import BorderGlow from "@/components/reactbits/BorderGlow";
+import SpotlightCard from "@/components/reactbits/SpotlightCard";
 import { FeedbackPanel } from "@/components/FeedbackPanel";
 import { IdentityPanel } from "@/components/IdentityPanel";
 import { InvestigationPanel } from "@/components/InvestigationPanel";
@@ -21,6 +23,44 @@ import type {
 } from "@/lib/types";
 import { stagger } from "@/lib/motion";
 import { formatMoney, formatTime } from "@/lib/utils";
+
+/**
+ * Decision-summary frame. SpotlightCard always; BorderGlow layered only for
+ * AUTO_FLAG so the glow itself is the signal, not ornament.
+ */
+function DecisionSummaryFrame({
+  band,
+  children,
+}: {
+  band: string | null;
+  children: React.ReactNode;
+}) {
+  const spotlight = (
+    <SpotlightCard
+      className="aegis-surface overflow-hidden rounded-xl"
+      spotlightColor="rgba(219, 234, 254, 0.10)"
+    >
+      {children}
+    </SpotlightCard>
+  );
+
+  if (band !== "AUTO_FLAG") return spotlight;
+
+  return (
+    <BorderGlow
+      glowColor="0 84 60"
+      glowIntensity={0.7}
+      fillOpacity={0.22}
+      borderRadius={14}
+      glowRadius={30}
+      animated={false}
+      colors={["#EF4444", "#F87171", "#B91C1C"]}
+      backgroundColor="hsl(218 49% 10%)"
+    >
+      {spotlight}
+    </BorderGlow>
+  );
+}
 
 export function ApplicationDetail() {
   const { id } = useParams<{ id: string }>();
@@ -71,11 +111,16 @@ export function ApplicationDetail() {
           <ArrowLeft className="h-4 w-4" /> Back to dashboard
         </Link>
 
-        {/* ---- Header ---- */}
+        {/* ---- (1) Decision summary ----
+             The ONLY card in the app with the SpotlightCard treatment, and the
+             ONLY place BorderGlow appears — and only when the band is
+             AUTO_FLAG, so the red glow carries meaning ("this case is high
+             risk") rather than decorating. */}
         {!detail ? (
           <Skeleton className="h-40 w-full" />
         ) : (
-          <Card className="aegis-enter">
+          <DecisionSummaryFrame band={decision?.decision_band ?? null}>
+            <Card className="aegis-enter !border-0 !bg-transparent !shadow-none">
             <CardContent className="p-5 sm:p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
@@ -124,10 +169,11 @@ export function ApplicationDetail() {
                 </p>
               )}
             </CardContent>
-          </Card>
+            </Card>
+          </DecisionSummaryFrame>
         )}
 
-        {/* ---- Explanation + SHAP ---- */}
+        {/* ---- (2) Why flagged: SHAP explanation ---- */}
         {!detail ? (
           <Skeleton className="h-72 w-full" />
         ) : (

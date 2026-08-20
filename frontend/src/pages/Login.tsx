@@ -1,5 +1,7 @@
 import { AlertCircle, Gauge, Layers, Network, ShieldCheck, Target } from "lucide-react";
 import { useState, type FormEvent } from "react";
+
+import GradientWaves from "@/components/reactbits/GradientWaves";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -43,13 +45,19 @@ export function Login() {
   return (
     <div className="flex min-h-screen bg-background">
       {/* ---- Left brand panel (hidden under 768px) ---- */}
-      <div className="relative hidden w-3/5 flex-col justify-center overflow-hidden border-r border-border bg-gradient-to-br from-[#070E1A] via-[#0B1424] to-[#101C31] p-10 lg:p-14 md:flex">
-        <div className="flex items-center gap-2.5">
+      <div className="relative hidden w-3/5 flex-col justify-center overflow-hidden border-r border-border bg-[#070E1A] p-10 lg:p-14 md:flex">
+        {/* Animated background, hero panel only — never the form panel, never
+            full-page. Falls back to a CSS gradient if WebGL is unavailable. */}
+        <div className="absolute inset-0 z-0">
+          <GradientWaves />
+        </div>
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-[#070E1A]/70 via-[#070E1A]/40 to-[#070E1A]/75" />
+        <div className="relative z-10 flex items-center gap-2.5">
           <ShieldCheck className="h-6 w-6 text-brand" />
           <span className="text-lg font-semibold tracking-tight text-slate-100">Aegis</span>
         </div>
 
-        <div className="max-w-xl">
+        <div className="relative z-10 max-w-xl">
           <h1 className="text-[2.5rem] font-bold leading-[1.12] tracking-tight text-foreground">
             Every application has a story.
             <br />
@@ -79,7 +87,7 @@ export function Login() {
           </div>
         </div>
 
-        <p className="absolute bottom-8 left-10 text-[11px] text-subtle lg:left-14">
+        <p className="absolute bottom-8 left-10 z-10 text-[11px] text-slate-400/80 lg:left-14">
           Demonstration environment · all data is synthetic · Synchrony Hackathon 2026
         </p>
       </div>
