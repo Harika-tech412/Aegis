@@ -39,7 +39,7 @@ from app.schemas import (
 )
 from app.services import audit
 from app.services.auth import get_current_investigator
-from app.services import case_memory, network_service
+from app.services import case_memory, identity_continuity, network_service
 from app.services.investigation_agent import run_investigation
 from app.services.llm_explainer import explain_result
 from app.services.ocr_service import names_match
@@ -234,6 +234,34 @@ def persist_scored_application(
     )
     db.add(decision)
     db.flush()
+
+    # ---- Layer 5: every scored application leaves one identity observation ---
+    # Recorded here so both intake paths (investigator /score and public
+    # /apply) contribute to the same history without either knowing about it.
+    try:
+        key = identity_continuity.key_for_payload(payload, fallback=str(application.id))
+        identity_continuity.record_observation(
+            db,
+            key,
+            application.id,
+            city=payload.get("city"),
+            device_type=payload.get("device_type"),
+            income=payload.get("continuity_income") or payload.get("annual_income"),
+        )
+        continuity = identity_continuity.check_continuity(
+            db,
+            key,
+            city=payload.get("city"),
+            device_type=payload.get("device_type"),
+            income=payload.get("continuity_income") or payload.get("annual_income"),
+            exclude_application_id=application.id,
+        )
+        contact = identity_continuity.get_contact(db, key)
+        continuity["step_up_available"] = contact is not None
+        continuity["registered_contact"] = contact.masked_contact if contact else None
+        decision.identity_continuity = continuity
+    except Exception as exc:  # noqa: BLE001 - continuity must not fail intake
+        logger.warning("identity continuity skipped for %s: %s", application.id, exc)
 
     audit.log_event(
         db,

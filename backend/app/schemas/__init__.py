@@ -97,6 +97,9 @@ class DecisionOut(BaseModel):
     ring_risk_score: float
     # Cross-institution Aegis Network matches that influenced this decision.
     network_hits: list[dict] | None = None
+    # Layer 5: identity-continuity verdict and step-up outcome.
+    identity_continuity: dict | None = None
+    step_up_result: dict | None = None
     latency_ms: float
     created_at: datetime
 

@@ -77,6 +77,9 @@ class PublicApplyRequest(BaseModel):
     # assert its own counts. Documented demo affordance.
     applications_from_device_last_24h: int | None = Field(default=None, ge=1, le=10_000)
     applications_from_ip_last_24h: int | None = Field(default=None, ge=1, le=10_000)
+    # Layer 5 continuity inputs. device_type is what the form can observe about
+    # the client; city already comes from the address block above.
+    device_type: str = Field(default="", max_length=32)
 
 
 def _age_from_dob(dob: str) -> int:
@@ -138,6 +141,13 @@ async def submit_application(
         "identity_consistency_score": body.identity_consistency_score,
         "applicant_name": body.full_name,
         "date_of_birth": body.date_of_birth,
+        # Layer 5: compared against this identity's own prior observations.
+        "city": body.city or None,
+        "device_type": body.device_type or None,
+        # Declared monthly income, kept in its ORIGINAL unit. annual_income is
+        # rescaled into model units, which would not compare against the
+        # identity's stored history.
+        "continuity_income": body.monthly_income_inr,
     }
 
     # ---- ID document: OCR + perceptual-hash reuse check ----------------------
@@ -222,10 +232,18 @@ async def submit_application(
     db.commit()
 
     # The applicant sees ONLY a reference — never the decision.
+    latest = _decision
+    continuity = (latest.identity_continuity or {}) if latest else {}
     return {
         "status": "received",
         "reference": f"QL-{str(application.id)[:8].upper()}",
         "message": "Application received. You will hear back within 24 hours.",
+        # Returned so the portal can run its own step-up challenge. The decision
+        # itself is still withheld — only the continuity status and whether a
+        # challenge is possible.
+        "application_id": str(application.id),
+        "identity_status": continuity.get("status"),
+        "step_up_available": bool(continuity.get("step_up_available")),
         # OCR echo so the form can show its 'Verify ID' box post-submit if needed
         "id_verification": {"extracted_name": ocr_result["name"]} if ocr_result else None,
     }

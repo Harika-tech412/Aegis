@@ -49,6 +49,8 @@ export interface Decision {
   ring_size: number;
   ring_risk_score: number;
   network_hits?: NetworkHit[] | null;
+  identity_continuity?: IdentityContinuity | null;
+  step_up_result?: StepUpResult | null;
   latency_ms: number;
   created_at: string;
 }
@@ -187,6 +189,27 @@ export interface InvestigationStep {
   step: string;
   description: string;
   timestamp: string;
+}
+
+/** Layer 5 — identity continuity verdict stored on the decision. */
+export interface IdentityContinuity {
+  status: "NO_HISTORY" | "CONSISTENT" | "INCONSISTENT";
+  prior_observations: number;
+  baseline_observations?: number;
+  changed_signals: string[];
+  detail: string;
+  step_up_available?: boolean;
+  registered_contact?: string | null;
+}
+
+export interface StepUpResult {
+  outcome: "CORRECT" | "INCORRECT";
+  masked_contact: string;
+  risk_delta: number;
+  risk_before: number;
+  risk_after: number;
+  band_before: string;
+  band_after: string;
 }
 
 /** Institutional-memory agreement verdict attached to an investigation. */

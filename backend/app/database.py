@@ -42,6 +42,8 @@ _ADDITIVE_COLUMNS = [
     "REFERENCES institutions(id)",
     "ALTER TABLE decisions ADD COLUMN IF NOT EXISTS network_hits JSON",
     "ALTER TABLE agent_investigations ADD COLUMN IF NOT EXISTS memory_alignment JSON",
+    "ALTER TABLE decisions ADD COLUMN IF NOT EXISTS identity_continuity JSON",
+    "ALTER TABLE decisions ADD COLUMN IF NOT EXISTS step_up_result JSON",
 ]
 
 

@@ -94,6 +94,9 @@ class Decision(Base):
     counterfactual: Mapped[list | None] = mapped_column(JSON, nullable=True)
     ring_size: Mapped[int] = mapped_column(Integer, default=0)
     ring_risk_score: Mapped[float] = mapped_column(Float, default=0.0)
+    # Layer 5: identity-continuity verdict, and the step-up outcome if one ran.
+    identity_continuity: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    step_up_result: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     # Cross-institution network signal matches that influenced this decision.
     network_hits: Mapped[list | None] = mapped_column(JSON, nullable=True)
     latency_ms: Mapped[float] = mapped_column(Float, default=0.0)
@@ -165,6 +168,44 @@ class CaseMemory(Base):
     # this system; "backfilled_simulation" rows came from the retraining
     # experiment's simulated verdicts. Never conflate the two when reporting.
     source: Mapped[str] = mapped_column(String(32), default="live_feedback", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class IdentityHistory(Base):
+    """One row per scored application, keyed by a hashed identity.
+
+    Layer 5's raw material: what this identity looked like the last time we saw
+    it. The identity_key is a salt-free SHA-256 of the ID document number when
+    one is available, else name+DOB — enough to recognise a returning applicant
+    without storing the identity itself.
+    """
+
+    __tablename__ = "identity_history"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    identity_key: Mapped[str] = mapped_column(String(64), index=True)
+    city: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    device_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    income: Mapped[float | None] = mapped_column(Float, nullable=True)
+    application_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("applications.id"), nullable=True
+    )
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class RegisteredContact(Base):
+    """The contact an institution already holds for an identity.
+
+    Deliberately NOT whatever was typed on the current form — that is the whole
+    point of an out-of-band step-up. Only a masked display string is stored.
+    """
+
+    __tablename__ = "registered_contacts"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    identity_key: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    masked_contact: Mapped[str] = mapped_column(String(40))
+    demo_code_seed: Mapped[str] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 

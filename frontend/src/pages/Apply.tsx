@@ -61,6 +61,43 @@ const EMPTY: FormState = {
   purpose_text: "",
 };
 
+// ---------------------------------------------------------------------------
+// Layer 5 identity-continuity scenarios.
+//
+// SEEDED_IDENTITY must match scripts/seed_identity_history.py exactly — the
+// identity key is SHA-256(name+DOB), so a single character off and the history
+// will not be found.
+// ---------------------------------------------------------------------------
+const SEEDED_IDENTITY = { full_name: "Rohan Mehta", date_of_birth: "1989-03-14" };
+
+// "Brand new identity" has to be genuinely new on every click — the identity
+// key is name+DOB, so a fixed persona would accumulate a history after the
+// first run and stop reporting NO_HISTORY.
+const NEW_FIRST = ["Priya", "Arjun", "Meera", "Kabir", "Divya", "Nikhil", "Sneha", "Aditya"];
+const NEW_LAST = ["Nandakumar", "Deshpande", "Chatterjee", "Pillai", "Grewal", "Bhatt"];
+
+function freshIdentity(): { full_name: string; date_of_birth: string } {
+  const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+  const year = 1985 + Math.floor(Math.random() * 15);
+  const month = 1 + Math.floor(Math.random() * 12);
+  const day = 1 + Math.floor(Math.random() * 28);
+  return {
+    full_name: `${pick(NEW_FIRST)} ${pick(NEW_LAST)}`,
+    date_of_birth: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+  };
+}
+
+// The changed side: new city, new device type, income up ~40%. Three signals
+// moving at once is what makes the identity check ask for a step-up.
+const LIFE_CHANGE: Partial<FormState> = {
+  city: "Bengaluru",
+  state: "Karnataka",
+  pin_code: "560038",
+  monthly_income_inr: "96000",
+  employer_name: "Northline Freight",
+  purpose_text: "Relocated for a new role; consolidating two cards.",
+};
+
 const LEGIT_BASE: Partial<FormState> = {
   date_of_birth: "1988-06-14",
   pan_number: "ABCDE1234F",
@@ -100,6 +137,13 @@ export function Apply() {
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [helperOpen, setHelperOpen] = useState(true);
   const [scenario, setScenario] = useState<string | null>(null);
+  // Layer 5: what the identity check said, and how the challenge went.
+  const [stepUp, setStepUp] = useState<{
+    identity_status: string | null;
+    outcome: string | null;
+    masked_contact?: string | null;
+    reason?: string | null;
+  } | null>(null);
 
   // ---- Real behavioral instrumentation ----
   const sessionStart = useRef(Date.now());
@@ -108,6 +152,11 @@ export function Apply() {
   const deviceRef = useRef(randomId("web_device"));
   const ipRef = useRef(randomId("web_ip"));
   const velocityOverride = useRef<number | null>(null);
+  const lastSubmission = useRef<{
+    application_id: string | null;
+    identity_status: string | null;
+    step_up_available: boolean;
+  } | null>(null);
 
   useEffect(() => {
     let last = 0;
@@ -333,7 +382,94 @@ export function Apply() {
     }
     const body = await response.json();
     setConfirmation(body.reference);
+    lastSubmission.current = {
+      application_id: body.application_id ?? null,
+      identity_status: body.identity_status ?? null,
+      step_up_available: Boolean(body.step_up_available),
+    };
     return body.reference as string;
+  }
+
+  /**
+   * Layer 5 demo presets. Each one fills the form, submits through the SAME
+   * public endpoint a real applicant uses, then drives the out-of-band
+   * challenge from the applicant's side.
+   *
+   * The only scripted part is which code gets submitted: the correct one for a
+   * genuine returning customer, a wrong one for a thief holding stolen details.
+   * Everything downstream — the continuity comparison, the code check, the risk
+   * adjustment — is the real backend.
+   */
+  async function layer5Preset(kind: "returning" | "theft" | "newid") {
+    setBusy(true);
+    setError(null);
+    setStepUp(null);
+    setScenario(kind);
+    setIdFile(null);
+    setIdPreview(null);
+    setIdVerify(null);
+    velocityOverride.current = null;
+    deviceRef.current = randomId("web_device");
+    ipRef.current = randomId("web_ip");
+
+    const filled: FormState =
+      kind === "newid"
+        ? ({
+            ...EMPTY,
+            ...LEGIT_BASE,
+            ...freshIdentity(),
+            city: "Kochi",
+            state: "Kerala",
+            pin_code: "682024",
+            monthly_income_inr: "47000",
+          } as FormState)
+        : ({ ...EMPTY, ...LEGIT_BASE, ...SEEDED_IDENTITY, ...LIFE_CHANGE } as FormState);
+    setForm(filled);
+
+    try {
+      // device_type is a Layer 5 continuity input: the seeded identity has
+      // always applied from android, so "desktop" is one of the changed signals.
+      await submitApplication(
+        { ...filled, device_type: kind === "newid" ? "android" : "desktop" },
+        null
+      );
+      const submission = lastSubmission.current;
+      if (!submission?.application_id) return;
+
+      const sent = await fetch(
+        `${API}/applications/${submission.application_id}/step-up/send`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }
+      ).then((r) => r.json());
+
+      if (!sent.eligible) {
+        setStepUp({
+          identity_status: submission.identity_status,
+          outcome: null,
+          reason: sent.reason,
+        });
+        return;
+      }
+
+      const answer = kind === "returning" ? sent.demo_code : "000000";
+      const verified = await fetch(
+        `${API}/applications/${submission.application_id}/step-up/verify`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: answer }),
+        }
+      ).then((r) => r.json());
+
+      setStepUp({
+        identity_status: verified.identity_status,
+        outcome: verified.outcome,
+        masked_contact: verified.masked_contact,
+      });
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function submit(e: FormEvent) {
@@ -363,6 +499,36 @@ export function Apply() {
             Thank you for choosing QuickLend. Our team will review your application and you will
             hear back within 24 hours.
           </p>
+
+          {stepUp && (
+            <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-left">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Identity verification
+              </p>
+              {stepUp.outcome === "CORRECT" && (
+                <p className="mt-1 text-sm text-emerald-700">
+                  Verification code confirmed{" "}
+                  {stepUp.masked_contact ? `(${stepUp.masked_contact})` : ""} — thank you for
+                  confirming your identity.
+                </p>
+              )}
+              {stepUp.outcome === "INCORRECT" && (
+                <p className="mt-1 text-sm text-red-700">
+                  The code entered did not match the one sent to the contact on file
+                  {stepUp.masked_contact ? ` (${stepUp.masked_contact})` : ""}. Your application
+                  needs manual review.
+                </p>
+              )}
+              {!stepUp.outcome && (
+                <p className="mt-1 text-sm text-slate-600">
+                  {stepUp.reason ?? "No additional verification was required."}
+                </p>
+              )}
+              <p className="mt-1 text-xs text-slate-400">
+                identity history: {stepUp.identity_status ?? "unknown"}
+              </p>
+            </div>
+          )}
           <button
             onClick={() => {
               setConfirmation(null);
@@ -371,6 +537,7 @@ export function Apply() {
               setIdPreview(null);
               setIdVerify(null);
               setScenario(null);
+              setStepUp(null);
               sessionStart.current = Date.now();
               mouseEvents.current = 0;
               pasteEvents.current = 0;
@@ -433,10 +600,29 @@ export function Apply() {
               >
                 Fraud ring member
               </button>
+              <button
+                onClick={() => layer5Preset("returning")}
+                disabled={busy}
+                className="rounded-md border border-blue-300 bg-white px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+              >
+                Returning customer (life change)
+              </button>
+              <button
+                onClick={() => layer5Preset("theft")}
+                disabled={busy}
+                className="rounded-md border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+              >
+                Identity theft (stolen details)
+              </button>
+              <button
+                onClick={() => layer5Preset("newid")}
+                disabled={busy}
+                className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Brand new identity
+              </button>
               {scenario && (
-                <span className="self-center text-xs text-violet-600">
-                  loaded: {scenario === "legit" ? "legitimate" : scenario === "idfraud" ? "identity fraud" : "ring member"}
-                </span>
+                <span className="self-center text-xs text-violet-600">loaded: {scenario}</span>
               )}
             </div>
           </div>

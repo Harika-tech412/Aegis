@@ -6,6 +6,7 @@ import { BandBadge } from "@/components/BandBadge";
 import BorderGlow from "@/components/reactbits/BorderGlow";
 import SpotlightCard from "@/components/reactbits/SpotlightCard";
 import { FeedbackPanel } from "@/components/FeedbackPanel";
+import { IdentityContinuityPanel } from "@/components/IdentityContinuityPanel";
 import { IdentityPanel } from "@/components/IdentityPanel";
 import { InvestigationPanel } from "@/components/InvestigationPanel";
 import { Navbar } from "@/components/Navbar";
@@ -332,6 +333,16 @@ export function ApplicationDetail() {
             identityCheck={detail.identity_check}
             idDocumentFilename={detail.id_document_filename}
           />
+          </div>
+        )}
+
+        {/* ---- Layer 5: identity continuity + step-up outcome ---- */}
+        {detail?.decision?.identity_continuity && (
+          <div className="aegis-enter" style={stagger(3)}>
+            <IdentityContinuityPanel
+              continuity={detail.decision.identity_continuity}
+              stepUp={detail.decision.step_up_result}
+            />
           </div>
         )}
 
