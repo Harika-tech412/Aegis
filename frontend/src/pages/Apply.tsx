@@ -76,6 +76,45 @@ const SEEDED_IDENTITY = { full_name: "Rohan Mehta", date_of_birth: "1989-03-14" 
 const NEW_FIRST = ["Priya", "Arjun", "Meera", "Kabir", "Divya", "Nikhil", "Sneha", "Aditya"];
 const NEW_LAST = ["Nandakumar", "Deshpande", "Chatterjee", "Pillai", "Grewal", "Bhatt"];
 
+/**
+ * Human-realistic behavioural values for the presets whose whole narrative
+ * purpose is an HONEST applicant — "Legitimate applicant", "Returning customer
+ * (life change)", "Brand new identity".
+ *
+ * WHY THIS OVERRIDE EXISTS. This page measures behaviour for real: session
+ * duration from first paint, mouse events from actual pointer movement, paste
+ * count from actual paste events. A preset fills every field programmatically
+ * in one tick, so if the presenter clicks a preset and submits a second later,
+ * the live instrumentation truthfully records ~1-second session, ~0 mouse
+ * movement and 0 typing — which is EXACTLY the signature of the bot_filler
+ * attack. The model would then flag an applicant who is supposed to be the
+ * proof that honest people are not wrongly punished, and the demo would argue
+ * against itself.
+ *
+ * So for these three presets only, the behavioural fields are set to values a
+ * real person would produce. This mirrors the discipline already used by the
+ * Fraud Bot Console, which replaces measured values with its intended attack
+ * fingerprint for the same reason: a scripted fill cannot produce the
+ * behaviour the scenario is about.
+ *
+ * Deliberately NOT applied to "Identity fraud attempt" or "Fraud ring member".
+ * Their fraud signal is the ID mismatch and the shared device — behaviour is
+ * not what convicts them, so leaving their measured values alone costs nothing
+ * and keeps more of the page's real instrumentation in play.
+ */
+function humanBehaviour(): {
+  session_duration_seconds: number;
+  mouse_movement_events: number;
+  form_paste_count: number;
+} {
+  const between = (lo: number, hi: number) => lo + Math.floor(Math.random() * (hi - lo + 1));
+  return {
+    session_duration_seconds: between(120, 300), // a few unhurried minutes
+    mouse_movement_events: between(80, 200), // reading, scrolling, correcting
+    form_paste_count: between(0, 1), // maybe pasted their own PAN
+  };
+}
+
 function freshIdentity(): { full_name: string; date_of_birth: string } {
   const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
   const year = 1985 + Math.floor(Math.random() * 15);
@@ -152,6 +191,9 @@ export function Apply() {
   const deviceRef = useRef(randomId("web_device"));
   const ipRef = useRef(randomId("web_ip"));
   const velocityOverride = useRef<number | null>(null);
+  // Set by the honest-outcome presets, consumed by submitApplication. Null for
+  // manual fills and for the two fraud presets, which keep measured values.
+  const behaviourOverride = useRef<ReturnType<typeof humanBehaviour> | null>(null);
   const lastSubmission = useRef<{
     application_id: string | null;
     identity_status: string | null;
@@ -196,6 +238,9 @@ export function Apply() {
         setError(null);
         setHelperOpen(false);
         setScenario(profile.scenario);
+        // The bot supplies its own behavioural fingerprint; never overlay a
+        // human one on an attack.
+        behaviourOverride.current = null;
         deviceRef.current = profile.device_id;
         ipRef.current = profile.ip_hash;
         velocityOverride.current = profile.applications_from_device_last_24h ?? null;
@@ -278,6 +323,10 @@ export function Apply() {
     setError(null);
     setScenario(kind);
     velocityOverride.current = null;
+    // Only the honest-outcome preset gets human behavioural values. The two
+    // fraud presets are convicted by their document and their device, so they
+    // keep whatever this page actually measured.
+    behaviourOverride.current = kind === "legit" ? humanBehaviour() : null;
     deviceRef.current = randomId("web_device");
     ipRef.current = randomId("web_ip");
 
@@ -359,6 +408,10 @@ export function Apply() {
       ),
       mouse_movement_events: mouseEvents.current,
       form_paste_count: pasteEvents.current,
+      // Honest-outcome presets substitute human values for the instant fill's
+      // measurements; see humanBehaviour(). Explicit `overrides` still win, so
+      // the fraud bot's own fingerprint is unaffected.
+      ...(behaviourOverride.current ?? {}),
       ...(velocityOverride.current
         ? {
             applications_from_device_last_24h: velocityOverride.current,
@@ -409,6 +462,12 @@ export function Apply() {
     setIdPreview(null);
     setIdVerify(null);
     velocityOverride.current = null;
+    // The two honest-outcome Layer 5 presets only. "Identity theft (stolen
+    // details)" keeps its measured values: like the other two fraud presets it
+    // is convicted by something other than behaviour — here, failing the
+    // step-up challenge — so it is out of scope for this override.
+    behaviourOverride.current =
+      kind === "returning" || kind === "newid" ? humanBehaviour() : null;
     deviceRef.current = randomId("web_device");
     ipRef.current = randomId("web_ip");
 
@@ -544,6 +603,7 @@ export function Apply() {
               deviceRef.current = randomId("web_device");
               ipRef.current = randomId("web_ip");
               velocityOverride.current = null;
+              behaviourOverride.current = null;
             }}
             className="mt-6 text-sm font-medium text-blue-700 hover:underline"
           >
