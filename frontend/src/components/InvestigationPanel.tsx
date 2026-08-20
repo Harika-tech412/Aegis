@@ -1,4 +1,4 @@
-import { Bot, CheckCircle2, Loader2, RefreshCw, Sparkles } from "lucide-react";
+import { Bot, CheckCircle2, Loader2, RefreshCw, Sparkles, TriangleAlert } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,9 +21,21 @@ const STEP_LABELS: Record<string, string> = {
   quick_exit: "Triage — early exit",
   check_ring: "Fraud-ring lookup",
   check_ring_feedback: "Ring feedback history",
+  check_investigator_memory: "Institutional memory",
   check_similar_cases: "Similar past cases",
   check_drift: "Model drift check",
   synthesize: "Synthesis",
+};
+
+// Shown on the pending line while the next step is being revealed, so the
+// reader sees WHICH check is coming rather than a generic spinner.
+const STEP_PENDING: Record<string, string> = {
+  check_ring: "Checking device and IP links",
+  check_ring_feedback: "Checking prior verdicts on this ring",
+  check_investigator_memory: "Checking institutional memory",
+  check_similar_cases: "Searching similar past cases",
+  check_drift: "Checking model drift",
+  synthesize: "Synthesising findings",
 };
 
 /** Stagger between revealed steps (ms). */
@@ -92,7 +104,8 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
               Run a multi-step agent that decides for itself which checks this case warrants —
-              ring links, prior verdicts on connected applications, similar cases, and drift.
+              ring links, prior verdicts on connected applications, this institution&rsquo;s
+              memory of similar past decisions, similar cases, and drift.
             </p>
             <Button onClick={() => run(false)} disabled={busy}>
               {busy ? (
@@ -137,7 +150,10 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
               ))}
               {!allRevealed && (
                 <li className="flex items-center gap-2 px-3 text-xs text-muted-foreground">
-                  <Loader2 className="h-3 w-3 animate-spin" /> reasoning…
+                  <Loader2 className="h-3 w-3 animate-spin" />{" "}
+                  {STEP_PENDING[data.investigation_log[visibleSteps]?.step ?? ""] ??
+                    "reasoning"}
+                  …
                 </li>
               )}
             </ol>
@@ -159,6 +175,43 @@ export function InvestigationPanel({ applicationId }: { applicationId: string })
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {data.reasoning_summary}
                 </p>
+
+                {/* Institutional memory disagreeing with the model is a
+                    reviewer-facing warning, so it gets amber — the colour this
+                    system reserves for "a human needs to look at this". */}
+                {data.memory_alignment?.stance === "conflicts" && (
+                  <div className="mt-3 flex gap-2 rounded-md border border-warning/40 bg-warning/10 p-2.5">
+                    <TriangleAlert
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning"
+                      strokeWidth={2}
+                    />
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-warning">
+                        Historical signal conflict
+                      </p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                        {data.memory_alignment.note ??
+                          "Institutional memory shows conflicting outcomes for similar patterns."}
+                      </p>
+                      <p className="mt-1 text-xs text-subtle">
+                        {data.memory_alignment.confirmed_fraud} confirmed fraud ·{" "}
+                        {data.memory_alignment.confirmed_legitimate} confirmed legitimate ·{" "}
+                        {data.memory_alignment.confidence_effect === "capped_at_medium"
+                          ? "confidence held at MEDIUM"
+                          : "confidence unchanged — direct ring evidence outranks pattern precedent"}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {data.memory_alignment?.stance === "supports" &&
+                  data.memory_alignment.matched > 0 && (
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Institutional memory agrees: {data.memory_alignment.matched} similar past
+                      verdict(s) point the same way.
+                    </p>
+                  )}
+
                 <p className="mt-3 text-xs text-muted-foreground">
                   {data.investigation_log.length} step
                   {data.investigation_log.length === 1 ? "" : "s"} ·{" "}

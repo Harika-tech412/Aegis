@@ -6,6 +6,7 @@ annotations (ScoreRequest would be undefined in the wrapper's namespace).
 Python 3.11 handles the `X | None` unions natively without it.
 """
 
+import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -38,11 +39,13 @@ from app.schemas import (
 )
 from app.services import audit
 from app.services.auth import get_current_investigator
-from app.services import network_service
+from app.services import case_memory, network_service
 from app.services.investigation_agent import run_investigation
 from app.services.llm_explainer import explain_result
 from app.services.ocr_service import names_match
 from app.services.similar_cases import find_similar_cases
+
+logger = logging.getLogger("aegis.applications")
 
 # ---------------------------------------------------------------------------
 # Rules layer for the ID (image) modality.
@@ -505,13 +508,37 @@ def submit_feedback(
                     },
                 )
 
+    # ---- Record the verdict in institutional memory -------------------------
+    # The verdict is the point of this endpoint; remembering it is a secondary
+    # effect, so a memory failure (e.g. embedding model unavailable) must never
+    # cost the investigator their adjudication. Audited either way, so an empty
+    # memory is traceable rather than mysterious.
+    memory_recorded = False
+    try:
+        application = db.get(Application, application_id)
+        case_memory.remember_case(
+            db,
+            application,
+            decision,
+            body.verdict,
+            feedback=feedback,
+            source=case_memory.SOURCE_LIVE,
+        )
+        memory_recorded = True
+    except Exception as exc:  # noqa: BLE001 - never fail the verdict write
+        logger.warning("institutional memory write failed for %s: %s", application_id, exc)
+
     audit.log_event(
         db,
         event_type="feedback_submitted",
         actor=investigator.username,
         target_type="decision",
         target_id=str(decision.id),
-        details={"verdict": body.verdict, "application_id": str(application_id)},
+        details={
+            "verdict": body.verdict,
+            "application_id": str(application_id),
+            "case_memory_recorded": memory_recorded,
+        },
     )
     db.commit()
     return FeedbackOut.model_validate(feedback)
@@ -545,6 +572,7 @@ def investigate_application(
                 "confidence": cached.confidence,
                 "reasoning_summary": cached.reasoning_summary,
                 "synthesis_source": cached.synthesis_source,
+                "memory_alignment": cached.memory_alignment,
                 "cached": True,
                 "created_at": cached.created_at.isoformat(),
             }
@@ -558,6 +586,7 @@ def investigate_application(
         confidence=result["confidence"],
         reasoning_summary=result["reasoning_summary"],
         synthesis_source=result["synthesis_source"],
+        memory_alignment=result.get("memory_alignment"),
     )
     db.add(record)
     db.flush()
@@ -579,6 +608,7 @@ def investigate_application(
         **{k: v for k, v in result.items() if k in {
             "application_id", "investigation_log", "recommended_action",
             "confidence", "reasoning_summary", "synthesis_source",
+            "memory_alignment",
         }},
         "cached": False,
         "created_at": record.created_at.isoformat(),

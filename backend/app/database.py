@@ -41,6 +41,7 @@ _ADDITIVE_COLUMNS = [
     "ALTER TABLE applications ADD COLUMN IF NOT EXISTS institution_id UUID "
     "REFERENCES institutions(id)",
     "ALTER TABLE decisions ADD COLUMN IF NOT EXISTS network_hits JSON",
+    "ALTER TABLE agent_investigations ADD COLUMN IF NOT EXISTS memory_alignment JSON",
 ]
 
 

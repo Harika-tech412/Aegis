@@ -189,6 +189,17 @@ export interface InvestigationStep {
   timestamp: string;
 }
 
+/** Institutional-memory agreement verdict attached to an investigation. */
+export interface MemoryAlignment {
+  stance: "supports" | "conflicts" | "neutral";
+  matched: number;
+  confirmed_fraud: number;
+  confirmed_legitimate: number;
+  case_leaning: string;
+  note: string | null;
+  confidence_effect: string;
+}
+
 export interface InvestigationResponse {
   application_id: string;
   investigation_log: InvestigationStep[];
@@ -196,6 +207,7 @@ export interface InvestigationResponse {
   confidence: "HIGH" | "MEDIUM" | "LOW";
   reasoning_summary: string;
   synthesis_source: string;
+  memory_alignment?: MemoryAlignment | null;
   cached: boolean;
   created_at: string;
 }

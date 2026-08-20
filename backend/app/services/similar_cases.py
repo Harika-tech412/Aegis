@@ -38,6 +38,15 @@ def _get_model():
     return _model
 
 
+def get_embedding_model():
+    """The shared all-MiniLM-L6-v2 instance.
+
+    Public accessor so other services (institutional memory) embed with the
+    SAME loaded model rather than paying for a second copy in the process.
+    """
+    return _get_model()
+
+
 def build_query_text(application: Application, decision: Decision | None) -> str:
     """Investigator-style description of the case, for semantic matching."""
     parts: list[str] = []

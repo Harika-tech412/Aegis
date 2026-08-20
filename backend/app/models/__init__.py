@@ -128,6 +128,46 @@ class CaseNarrative(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class CaseMemory(Base):
+    """Episodic memory of one investigator verdict — the institution remembering.
+
+    One row per adjudicated case: the risk SIGNATURE of the case (not the case
+    itself) paired with the verdict a human reached on it. The agent recalls
+    these by semantic similarity, so the institution's accumulated judgement
+    becomes evidence for new cases.
+
+    PRIVACY: `signature_text` is built by case_memory.build_signature_text(),
+    which reuses the similar-cases query builder and therefore contains ONLY
+    risk-pattern descriptors — SHAP explanations, income/employment/loan
+    context, session behaviour, velocity counts. It deliberately carries no
+    applicant name, no raw device_id, no raw ip_hash, and no other direct
+    identifier. This mirrors the discipline established for
+    network_fraud_signals: memory is about patterns, never about people.
+    """
+
+    __tablename__ = "case_memory"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    application_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("applications.id"), index=True
+    )
+    # Null for backfilled simulation rows, which have a verdict but no
+    # investigator_feedback row behind them.
+    feedback_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("investigator_feedback.id"), nullable=True
+    )
+    decision_band: Mapped[str] = mapped_column(String(24), index=True)
+    calibrated_risk_score: Mapped[float] = mapped_column(Float)
+    signature_text: Mapped[str] = mapped_column(Text)
+    verdict: Mapped[Verdict] = mapped_column(Enum(Verdict, native_enum=False, length=24))
+    embedding = mapped_column(Vector(384))
+    # Honesty column: "live_feedback" rows came from a real investigator using
+    # this system; "backfilled_simulation" rows came from the retraining
+    # experiment's simulated verdicts. Never conflate the two when reporting.
+    source: Mapped[str] = mapped_column(String(32), default="live_feedback", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class AuditLog(Base):
     __tablename__ = "audit_log"
 
@@ -166,6 +206,9 @@ class AgentInvestigation(Base):
     confidence: Mapped[str] = mapped_column(String(16), default="MEDIUM")
     reasoning_summary: Mapped[str] = mapped_column(Text, default="")
     synthesis_source: Mapped[str] = mapped_column(String(24), default="template")
+    # Institutional-memory agreement/conflict verdict for this run, so a cached
+    # response surfaces the same tension flag a fresh one does.
+    memory_alignment: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 

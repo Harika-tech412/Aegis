@@ -61,6 +61,32 @@ async def lifespan(app: FastAPI):
     except Exception as exc:  # noqa: BLE001 - never block startup on this
         logger.warning("Aegis Network bootstrap skipped: %s", exc)
 
+    # Institutional memory: report size and composition, never silently empty.
+    # Deliberately a report and not a backfill — embedding hundreds of
+    # signatures belongs in scripts/backfill_case_memory.py, not in every boot.
+    try:
+        from app.database import SessionLocal
+        from app.services.case_memory import memory_stats
+
+        _session = SessionLocal()
+        try:
+            _stats = memory_stats(_session)
+            if _stats["total"] == 0:
+                logger.warning(
+                    "Institutional memory is EMPTY — run "
+                    "scripts/backfill_case_memory.py inside this container"
+                )
+            else:
+                logger.info(
+                    "Institutional memory: %d recorded verdicts %s",
+                    _stats["total"],
+                    _stats["by_source"],
+                )
+        finally:
+            _session.close()
+    except Exception as exc:  # noqa: BLE001 - never block startup on this
+        logger.warning("Institutional memory check skipped: %s", exc)
+
     # Prove the EasyOCR weights are cached in the image: download_enabled is
     # False, so this raises if anything is missing rather than reaching for
     # the network mid-demo.
