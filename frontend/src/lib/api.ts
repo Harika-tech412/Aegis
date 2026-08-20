@@ -7,14 +7,16 @@
  */
 
 import type {
+  ApplicantReport,
   ApplicationDetail,
   ApplicationList,
   DriftResponse,
   FeedbackResponse,
+  InvestigationResponse,
+  RegulatorReport,
   RingInfo,
   SampleId,
   ScoreRequest,
-  InvestigationResponse,
   ScoreResponse,
   SimilarCasesResponse,
 } from "./types";
@@ -86,6 +88,12 @@ export const api = {
     request<InvestigationResponse>(
       `/applications/${id}/investigate${refresh ? "?refresh=true" : ""}`
     ),
+
+  getRegulatorReport: (id: string) =>
+    request<RegulatorReport>(`/applications/${id}/regulator-report`),
+
+  getApplicantReport: (id: string) =>
+    request<ApplicantReport>(`/applications/${id}/applicant-report`),
 
   getSimilarCases: (id: string) =>
     request<SimilarCasesResponse>(`/applications/${id}/similar-cases`),

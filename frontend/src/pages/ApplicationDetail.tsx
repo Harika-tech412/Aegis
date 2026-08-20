@@ -1,4 +1,4 @@
-import { ArrowLeft, GitBranch, Lightbulb } from "lucide-react";
+import { ArrowLeft, FileText, GitBranch, Lightbulb, Scale, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -12,17 +12,30 @@ import { Navbar } from "@/components/Navbar";
 import { RingPanel } from "@/components/RingPanel";
 import { ShapChart } from "@/components/ShapChart";
 import { SimilarCasesPanel } from "@/components/SimilarCasesPanel";
+import { ApplicantView } from "@/components/reports/ApplicantView";
+import { RegulatorView } from "@/components/reports/RegulatorView";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TitleIcon } from "@/components/ui/title-icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import type {
+  ApplicantReport,
   ApplicationDetail as AppDetail,
+  RegulatorReport,
   RingInfo,
   SimilarCasesResponse,
 } from "@/lib/types";
 import { stagger } from "@/lib/motion";
 import { formatMoney, formatTime } from "@/lib/utils";
+
+type Audience = "investigator" | "regulator" | "applicant";
+type LoadState = "idle" | "loading" | "done";
+
+const AUDIENCES: { key: Audience; label: string; icon: typeof FileText }[] = [
+  { key: "investigator", label: "Investigator View", icon: FileText },
+  { key: "regulator", label: "Regulator View", icon: Scale },
+  { key: "applicant", label: "Applicant Notice", icon: UserRound },
+];
 
 /**
  * Decision-summary frame. SpotlightCard always; BorderGlow layered only for
@@ -72,6 +85,47 @@ export function ApplicationDetail() {
   const [similar, setSimilar] = useState<SimilarCasesResponse | null>(null);
   const [similarError, setSimilarError] = useState<string | null>(null);
 
+  // Audience lens. Switching tabs never refetches the application itself —
+  // it is one decision viewed three ways. Each report is fetched on first
+  // open only and cached in state for the session.
+  const [audience, setAudience] = useState<Audience>("investigator");
+  const [regulator, setRegulator] = useState<RegulatorReport | null>(null);
+  const [regulatorState, setRegulatorState] = useState<LoadState>("idle");
+  const [regulatorError, setRegulatorError] = useState<string | null>(null);
+  const [applicant, setApplicant] = useState<ApplicantReport | null>(null);
+  const [applicantState, setApplicantState] = useState<LoadState>("idle");
+  const [applicantError, setApplicantError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    if (audience === "regulator" && regulatorState === "idle") {
+      setRegulatorState("loading");
+      api
+        .getRegulatorReport(id)
+        .then((r) => {
+          setRegulator(r);
+          setRegulatorState("done");
+        })
+        .catch((e) => {
+          setRegulatorError(e.message);
+          setRegulatorState("done");
+        });
+    }
+    if (audience === "applicant" && applicantState === "idle") {
+      setApplicantState("loading");
+      api
+        .getApplicantReport(id)
+        .then((r) => {
+          setApplicant(r);
+          setApplicantState("done");
+        })
+        .catch((e) => {
+          setApplicantError(e.message);
+          setApplicantState("done");
+        });
+    }
+  }, [audience, id, regulatorState, applicantState]);
+
   // Three independent fetches — each panel loads (or fails) on its own; the
   // similar-cases search is the slowest and must never block the header.
   useEffect(() => {
@@ -106,10 +160,48 @@ export function ApplicationDetail() {
       <main className="mx-auto max-w-5xl space-y-4 px-4 py-5 sm:px-6">
         <Link
           to="/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          className="report-noprint inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" /> Back to dashboard
         </Link>
+
+        {/* ---- Audience switcher: same decision, three lenses ---- */}
+        <div className="report-tabs report-noprint flex flex-wrap items-center gap-1 rounded-xl border border-border bg-card p-1">
+          {AUDIENCES.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setAudience(key)}
+              aria-current={audience === key ? "page" : undefined}
+              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                audience === key
+                  ? "bg-brand/10 text-brand"
+                  : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+              }`}
+            >
+              <Icon className="h-4 w-4" strokeWidth={2} />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {audience === "regulator" && (
+          <RegulatorView
+            report={regulator}
+            loading={regulatorState !== "done"}
+            error={regulatorError}
+          />
+        )}
+
+        {audience === "applicant" && (
+          <ApplicantView
+            report={applicant}
+            loading={applicantState !== "done"}
+            error={applicantError}
+          />
+        )}
+
+        {audience === "investigator" && (
+        <>
 
         {/* ---- (1) Decision summary ----
              The ONLY card in the app with the SpotlightCard treatment, and the
@@ -263,11 +355,13 @@ export function ApplicationDetail() {
           </div>
         )}
 
-        {/* ---- Feedback ---- */}
+        {/* ---- (7) Investigator action ---- */}
         {id && (
           <div className="aegis-enter" style={stagger(7)}>
             <FeedbackPanel applicationId={id} />
           </div>
+        )}
+        </>
         )}
       </main>
     </div>

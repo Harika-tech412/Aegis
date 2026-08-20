@@ -1,0 +1,66 @@
+/* ---------------------------------------------------------------------------
+   Report print styles.
+   Scoped to the report views (.report-document) and to @media print, so the
+   dark theme and every other component are untouched when not printing.
+   --------------------------------------------------------------------------- */
+
+@media print {
+  /* Only the report itself should print. */
+  .report-noprint,
+  header.sticky,
+  nav,
+  footer.border-t.border-border,
+  .report-tabs {
+    display: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 18mm 16mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Neutralise the app's dark chrome around the document. */
+  body * {
+    box-shadow: none !important;
+  }
+
+  .report-document {
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  /* Never split a section across a page boundary. */
+  .report-section,
+  .report-document section,
+  .report-document footer,
+  .report-document table,
+  .report-document li {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .report-document h1,
+  .report-document h2 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* Keep table rules visible in print. */
+  .report-document table,
+  .report-document th,
+  .report-document td {
+    border-color: #999999 !important;
+  }
+}

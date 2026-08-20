@@ -198,3 +198,68 @@ export interface InvestigationResponse {
   cached: boolean;
   created_at: string;
 }
+
+// ---- Multi-audience reports -------------------------------------------------
+
+export interface ProvenanceStep {
+  step: number;
+  stage: string;
+  detail: string;
+}
+
+export interface ContributingFactor {
+  factor: string;
+  label: string;
+  direction: string;
+  contribution: number;
+  description: string;
+  basis: string;
+}
+
+export interface RegulatorReport {
+  report_version: string;
+  report_generated_at: string;
+  decision_summary: {
+    application_id: string;
+    timestamp: string;
+    decision_band: string;
+    calibrated_risk_score: number;
+    model_version: string;
+    scoring_latency_ms: number;
+  };
+  fair_lending_disclosure: {
+    prohibited_bases_excluded: string[];
+    attestation: string;
+    feature_specification_reference: string;
+  };
+  decision_provenance: ProvenanceStep[];
+  top_contributing_factors: ContributingFactor[];
+  model_governance: Record<string, string>;
+  human_review_status: {
+    reviewed: boolean;
+    status: string;
+    verdict: string | null;
+    reviewed_at: string | null;
+    reviewer: string | null;
+    notes: string | null;
+  };
+  audit_trail_reference: {
+    application_id: string;
+    audit_log_entry_count: number;
+    cross_reference_note: string;
+  };
+  data_disclosure: string;
+}
+
+export interface ApplicantReport {
+  reference_number: string;
+  decision_date: string;
+  decision_outcome: string;
+  primary_reasons: string[];
+  what_you_can_do: string[];
+  your_rights: string[];
+  appeal_reference_code: string;
+  contact_note: string;
+  report_generated_at: string;
+  data_disclosure: string;
+}
